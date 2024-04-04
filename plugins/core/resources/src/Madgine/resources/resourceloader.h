@@ -224,7 +224,7 @@ namespace Resources {
             Threading::TaskFuture<void> task = info.unloadingTask();
 
             if (!task.valid()) {
-                task = info.setUnloadingTask(Threading::make_task(&T::unloadImpl, loader, *getDataPtr(handle, loader, false)), loader->loadingTaskQueue());
+                task = info.setUnloadingTask(Threading::make_task(&T::unloadImpl, std::move(loader), *getDataPtr(handle, loader, false)), loader->loadingTaskQueue());
             }
 
             return task;
@@ -235,7 +235,7 @@ namespace Resources {
             if (!ptr)
                 return;
 
-            Threading::TaskFuture<void> task = queueUnload(Threading::make_task(&T::unloadImpl, loader, *ptr), loader->loadingTaskQueue());
+            Threading::TaskFuture<void> task = queueUnload(Threading::make_task(&T::unloadImpl, std::move(loader), *ptr), loader->loadingTaskQueue());
 
             task.then([ptr { std::move(ptr) }]() mutable { ptr.reset(); }, loader->loadingTaskQueue());
         }
@@ -296,7 +296,7 @@ namespace Resources {
         static Threading::Task<bool> loadUnnamedTask(Ptr &ptr, C &&ctor, T *loader)
         {
             ptr = createUnnamed();
-            return Threading::make_task(std::forward<C>(ctor), loader, *ptr);
+            return Threading::make_task(std::forward<C>(ctor), std::move(loader), *ptr);
         }
 
         template <typename C>

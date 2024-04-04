@@ -21,7 +21,7 @@ namespace Threading {
         {
             assert(mHandle);
 #if MODULES_ENABLE_TASK_TRACKING
-            Debug::Threading::onReturn(self, mHandle.queue());
+            Debug::Tasks::onReturn(self, mHandle.queue());
 #endif
             return mHandle.release();
         }

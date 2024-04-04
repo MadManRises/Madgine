@@ -58,7 +58,7 @@ namespace Tools {
             bool isHovered = false;
             float mouseRatio;
 
-            Debug::Threading::TaskTracker *hoveredTracker = nullptr;
+            Debug::Tasks::TaskTracker *hoveredTracker = nullptr;
             void *hoveredId = nullptr;
 
             std::chrono::high_resolution_clock::time_point timeAreaBegin = mStart + std::chrono::nanoseconds { mScroll };
@@ -66,7 +66,7 @@ namespace Tools {
 
             ImGui::Columns(2);
 
-            std::vector<std::pair<const char *, Debug::Threading::TaskTracker *>> trackers; 
+            std::vector<std::pair<const char *, Debug::Tasks::TaskTracker *>> trackers; 
             for (Threading::TaskQueue *queue : Threading::WorkGroup::self().taskQueues()) {
                 trackers.emplace_back(queue->name().c_str(), &queue->mTracker);
             }
@@ -96,9 +96,9 @@ namespace Tools {
                 std::lock_guard guard { tracker->mMutex };
                 auto begin = tracker->events().begin();
                 auto end = tracker->events().end();
-                auto cmp1 = [](const Debug::Threading::TaskTracker::Event &event, const std::chrono::high_resolution_clock::time_point &t) { return event.mTimePoint < t; };
+                auto cmp1 = [](const Debug::Tasks::TaskTracker::Event &event, const std::chrono::high_resolution_clock::time_point &t) { return event.mTimePoint < t; };
                 auto start = std::lower_bound(begin, end, timeAreaBegin - 50ms, cmp1);
-                auto cmp2 = [](const std::chrono::high_resolution_clock::time_point &t, const Debug::Threading::TaskTracker::Event &event) { return t < event.mTimePoint; };
+                auto cmp2 = [](const std::chrono::high_resolution_clock::time_point &t, const Debug::Tasks::TaskTracker::Event &event) { return t < event.mTimePoint; };
                 end = std::upper_bound(start, end, timeAreaEnd + 50ms, cmp2);
 
                 auto it = start;
@@ -137,9 +137,9 @@ namespace Tools {
                 std::stack<std::pair<float, void *>> xs;
 
                 for (; it != end; ++it) {
-                    const Debug::Threading::TaskTracker::Event &ev = *it;
+                    const Debug::Tasks::TaskTracker::Event &ev = *it;
                     switch (ev.mType) {
-                    case Debug::Threading::TaskTracker::Event::RESUME:
+                    case Debug::Tasks::TaskTracker::Event::RESUME:
                         if (callDepth == 0) {
                             p.x = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
                             p.id = ev.mIdentifier;
@@ -148,7 +148,7 @@ namespace Tools {
                         }
                         ++callDepth;
                         break;
-                    case Debug::Threading::TaskTracker::Event::SUSPEND:
+                    case Debug::Tasks::TaskTracker::Event::SUSPEND:
                         if (callDepth == 0) {
                             assert(p.x == 0.0f && p.x_end == plotRect.mSize.x);
                             plots.push({ 0.0f, getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier, xs.size() });
@@ -176,10 +176,10 @@ namespace Tools {
                         }
                         --callDepth;
                         break;
-                    case Debug::Threading::TaskTracker::Event::ENTER:
+                    case Debug::Tasks::TaskTracker::Event::ENTER:
                         xs.push({ getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier });
                         break;
-                    case Debug::Threading::TaskTracker::Event::RETURN: {
+                    case Debug::Tasks::TaskTracker::Event::RETURN: {
                         float x = 0.0f;
                         if (!xs.empty()) {
                             assert(xs.top().second == ev.mIdentifier);
@@ -263,7 +263,7 @@ namespace Tools {
         return "TaskTracker";
     }
 
-    void TaskTracker::registerCustomTracker(const char *name, Debug::Threading::TaskTracker *tracker)
+    void TaskTracker::registerCustomTracker(const char *name, Debug::Tasks::TaskTracker *tracker)
     {
         mCustomTrackers.emplace_back(name, tracker);
     }

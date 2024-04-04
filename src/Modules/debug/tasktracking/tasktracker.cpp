@@ -8,7 +8,7 @@
 namespace Engine {
 namespace Debug {
 
-    namespace Threading {
+    namespace Tasks {
 
         void TaskTracker::onAssign(void *ident, StackTrace<1> stacktrace)
         {

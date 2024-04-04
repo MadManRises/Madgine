@@ -385,6 +385,9 @@ namespace Tools {
 
     void ClientImRoot::shutdown(Render::RenderTarget *target)
     {
+        if (mWindow.getRenderWindow() == target) {
+            mPipeline.reset();
+        }
     }
 
     void ClientImRoot::renderViewport(Render::RenderTarget *target, ImGuiViewport *vp)

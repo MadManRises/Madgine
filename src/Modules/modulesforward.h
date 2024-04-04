@@ -43,6 +43,10 @@ namespace Debug {
         struct ProfilerThread;
     }
 
+    namespace Tasks {
+        struct TaskTracker;
+    }
+
     template <typename T, size_t S>
     struct History;
     template <typename T>

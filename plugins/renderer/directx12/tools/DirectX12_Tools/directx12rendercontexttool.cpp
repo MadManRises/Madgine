@@ -17,8 +17,8 @@
 
 #include "imgui/imgui.h"
 
-#include "Madgine/imageloaderlib.h"
 #include "Madgine/imageloader/imageloader.h"
+#include "Madgine/imageloaderlib.h"
 
 #include "Madgine/fontloader/fontloader.h"
 
@@ -55,7 +55,9 @@ namespace Tools {
             return false;
         });
 
+#if ENABLE_TASK_TRACKING
         getTool<TaskTracker>().registerCustomTracker("Graphics Queue", &static_cast<Render::DirectX12RenderContext *>(static_cast<ClientImRoot &>(mRoot).window().getRenderer())->mGraphicsQueue.mTracker);
+#endif
 
         co_return co_await RenderContextTool::init();
     }

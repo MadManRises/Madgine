@@ -35,7 +35,7 @@ namespace Threading {
     void TaskHandle::operator()()
     {
 #if MODULES_ENABLE_TASK_TRACKING
-        Debug::Threading::onResume(*this);
+        Debug::Tasks::onResume(*this);
         TaskQueue *q = queue();
 #endif
         //Reset mHandle to allow exception handling
@@ -43,7 +43,7 @@ namespace Threading {
         mHandle = {};
         handle.resume();
 #if MODULES_ENABLE_TASK_TRACKING
-        Debug::Threading::onSuspend(q);
+        Debug::Tasks::onSuspend(q);
 #endif        
     }
 

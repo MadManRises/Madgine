@@ -18,7 +18,7 @@ namespace Tools {
 
         std::string_view key() const override;
 
-        void registerCustomTracker(const char *name, Debug::Threading::TaskTracker *tracker);
+        void registerCustomTracker(const char *name, Debug::Tasks::TaskTracker *tracker);
 
     protected:
         Rect2 beginPlot();
@@ -32,10 +32,10 @@ namespace Tools {
         bool mLocked = false;
         float mZoom = 10.0f;
 
-        std::vector<std::pair<const char *, Debug::Threading::TaskTracker *>> mCustomTrackers;
+        std::vector<std::pair<const char *, Debug::Tasks::TaskTracker *>> mCustomTrackers;
 
         std::chrono::high_resolution_clock::time_point mHoveredAssignTimepoint;
-        Debug::Threading::TaskTracker *mHoveredTracker = nullptr;
+        Debug::Tasks::TaskTracker *mHoveredTracker = nullptr;
         void *mHoveredId = nullptr;
     };
 

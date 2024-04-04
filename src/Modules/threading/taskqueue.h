@@ -87,7 +87,7 @@ namespace Threading {
         }
 
 #if ENABLE_TASK_TRACKING
-        Debug::Threading::TaskTracker mTracker;
+        Debug::Tasks::TaskTracker mTracker;
 #endif
 
     protected:

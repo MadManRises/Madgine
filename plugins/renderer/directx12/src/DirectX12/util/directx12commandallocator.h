@@ -32,7 +32,7 @@ namespace Render {
         ID3D12CommandQueue *queue();
 
 #if ENABLE_TASK_TRACKING
-        Debug::Threading::TaskTracker mTracker;
+        Debug::Tasks::TaskTracker mTracker;
 #endif
 
     private:

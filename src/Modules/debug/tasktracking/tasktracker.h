@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Debug {
 
-    namespace Threading {
+    namespace Tasks {
 
         MODULES_EXPORT void onAssign(const std::coroutine_handle<> &handle, Engine::Threading::TaskQueue *queue, StackTrace<1> stacktrace);
         MODULES_EXPORT void onDestroy(Engine::Threading::TaskSuspendablePromiseTypeBase &promise);
