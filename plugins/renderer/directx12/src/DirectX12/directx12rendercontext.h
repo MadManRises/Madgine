@@ -91,6 +91,8 @@ namespace Render {
         DWORD mCallbackCookie;
 
         RenderFuture mFrameFences[2];
+
+        D3D12_FEATURE_DATA_D3D12_OPTIONS mOptions;
     };
 
 }

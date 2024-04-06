@@ -140,6 +140,9 @@ namespace Render {
             }
         }
 
+        hr = GetDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &mOptions, sizeof(mOptions));
+        DX12_CHECK(hr);
+
         mDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         mRenderTargetDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         mDepthStencilDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;

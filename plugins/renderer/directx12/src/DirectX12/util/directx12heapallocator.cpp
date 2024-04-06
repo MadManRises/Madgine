@@ -29,8 +29,14 @@ namespace Render {
 
         GPUPtr<void> ptr;
 
-        CD3DX12_HEAP_DESC heapDesc = CD3DX12_HEAP_DESC { size, D3D12_HEAP_TYPE_DEFAULT, 0, D3D12_HEAP_FLAG_DENY_RT_DS_TEXTURES | D3D12_HEAP_FLAG_DENY_NON_RT_DS_TEXTURES };
-        
+        D3D12_HEAP_FLAGS flags = D3D12_HEAP_FLAG_NONE;
+
+        if (DirectX12RenderContext::getSingleton().mOptions.ResourceHeapTier == D3D12_RESOURCE_HEAP_TIER_1) {
+            flags = D3D12_HEAP_FLAG_DENY_RT_DS_TEXTURES | D3D12_HEAP_FLAG_DENY_NON_RT_DS_TEXTURES;
+        }
+
+        CD3DX12_HEAP_DESC heapDesc = CD3DX12_HEAP_DESC { size, D3D12_HEAP_TYPE_DEFAULT, 0, flags };
+
         Heap &heap = mHeaps.emplace_back();
 
         HRESULT hr = GetDevice()->CreateHeap(
@@ -44,7 +50,7 @@ namespace Render {
         hr = GetDevice()->CreateCommittedResource(
             &heapProps,
             D3D12_HEAP_FLAG_NONE,
-            &resourceDesc, 
+            &resourceDesc,
             D3D12_RESOURCE_STATE_COMMON,
             nullptr,
             IID_PPV_ARGS(&heap.mReservedResource));
@@ -75,7 +81,7 @@ namespace Render {
         size_t index = ptr.mBuffer - 1;
         assert(mHeaps[index].mHeap->GetDesc().SizeInBytes == block.mSize);
         mHeaps[index].mReservedResource.reset();
-        mHeaps[index].mHeap.reset();        
+        mHeaps[index].mHeap.reset();
     }
 
     ID3D12Heap *DirectX12HeapAllocator::heap(size_t index)
@@ -83,9 +89,9 @@ namespace Render {
         return mHeaps[index - 1].mHeap;
     }
 
-    std::pair<ID3D12Resource*, size_t> DirectX12HeapAllocator::resolve(void *ptr)
+    std::pair<ID3D12Resource *, size_t> DirectX12HeapAllocator::resolve(void *ptr)
     {
-        GPUPtr<void> &gpuPtr = reinterpret_cast<GPUPtr<void>&>(ptr);
+        GPUPtr<void> &gpuPtr = reinterpret_cast<GPUPtr<void> &>(ptr);
         return { mHeaps[gpuPtr.mBuffer - 1].mReservedResource, gpuPtr.mOffset };
     }
 
