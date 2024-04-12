@@ -96,13 +96,25 @@ static ReleasePtr<IDXGIAdapter1> GetHardwareAdapter(IDXGIFactory4 *pFactory)
     return {};
 }
 
+void logProperties(ID3D12Device* device) {
+    D3D12_FEATURE_DATA_D3D12_OPTIONS options;
+
+    HRESULT hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options));
+    DX12_CHECK(hr);
+
+    log("Device Properties:");
+    log("    ResourceHeapTier: " + std::to_string(options.ResourceHeapTier));
+    log("");
+}
 
 void testCreateHeap(ID3D12Device* device) {
     log("Testing CreateHeap");
 
-    for (size_t s = 1; s <= 8388608; s *= 2) {
+    for (size_t s = 8388608; s <= 8388608; s *= 2) {
         std::stringstream ss;
-        ss << "Size: " << s << "... ";
+        ss << "Size: " << s << "...\n";
+
+        ss << "  Flags: None... ";
 
         CD3DX12_HEAP_DESC heapDesc = CD3DX12_HEAP_DESC { s, D3D12_HEAP_TYPE_DEFAULT };
 
@@ -118,6 +130,26 @@ void testCreateHeap(ID3D12Device* device) {
         } else {
             ss << "Success!";
         }
+        heap.reset();
+
+        ss << "\n  Flags: Deny Textures... ";
+
+        heapDesc.Flags = D3D12_HEAP_FLAG_DENY_RT_DS_TEXTURES | D3D12_HEAP_FLAG_DENY_NON_RT_DS_TEXTURES;
+
+        hr = device->CreateHeap(
+            &heapDesc,
+            IID_PPV_ARGS(&heap));
+        if (FAILED(hr)) {
+            ss << "Failed (" << std::hex << hr << "): \n";
+            _com_error error { hr };
+            ss << error.ErrorMessage();
+        } else {
+            ss << "Success!";
+        }
+        heap.reset();
+
+
+
         log(ss.str());
     }
 }
@@ -139,6 +171,7 @@ int main() {
     DX12_CHECK(hr);
     log("Success\n");
 
+    logProperties(device);
 
     testCreateHeap(device);
 }
