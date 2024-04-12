@@ -30,7 +30,7 @@ namespace Widgets {
     {
     }
 
-    Threading::SignalStub<uint32_t> &TabBar::selectedTabChangedEvent()
+    Execution::SignalStub<uint32_t> &TabBar::selectedTabChangedEvent()
     {
         return mSelectedTabChanged;
     }

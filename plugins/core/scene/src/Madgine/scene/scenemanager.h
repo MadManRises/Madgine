@@ -12,7 +12,7 @@
 
 #include "Modules/threading/datamutex.h"
 
-#include "Modules/threading/signalfunctor.h"
+#include "Generic/execution/signalfunctor.h"
 
 #include "scenecomponentbase.h"
 
@@ -32,6 +32,8 @@
 #include "Meta/math/vector3.h"
 
 #include "Generic/intervalclock.h"
+
+#include "Modules/threading/customclock.h"
 
 namespace Engine {
 namespace Scene {
@@ -128,7 +130,7 @@ namespace Scene {
 
         Threading::DataMutex &mutex();
 
-        Threading::SignalStub<const EntityContainer::iterator &, int> &entitiesSignal();
+        Execution::SignalStub<const EntityContainer::iterator &, int> &entitiesSignal();
 
         template <typename T>
         Entity::EntityComponentList<T> &entityComponentList()
@@ -181,7 +183,7 @@ namespace Scene {
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
-        SYNCABLE_CONTAINER(mEntities, EntityContainer, Threading::SignalFunctor<const EntityContainer::iterator &, int>);
+        SYNCABLE_CONTAINER(mEntities, EntityContainer, Execution::SignalFunctor<const EntityContainer::iterator &, int>);
         container_api<RefcountedContainer<std::deque<Serialize::NoParent<Entity::Entity>>>> mLocalEntities;
 
         struct EntityHelper {

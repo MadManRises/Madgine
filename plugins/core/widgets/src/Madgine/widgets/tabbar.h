@@ -15,7 +15,7 @@ namespace Widgets {
 
         virtual ~TabBar() = default;
 
-        Threading::SignalStub<uint32_t> &selectedTabChangedEvent();
+        Execution::SignalStub<uint32_t> &selectedTabChangedEvent();
 
         void vertices(WidgetsRenderData &renderData, size_t layer) override;
 
@@ -42,7 +42,7 @@ namespace Widgets {
         void injectPointerClick(const Input::PointerEventArgs &arg) override;      
 
     private:
-        Threading::Signal<uint32_t> mSelectedTabChanged;
+        Execution::Signal<uint32_t> mSelectedTabChanged;
 
         uint32_t mSelectedTab = 0;
         IndexType<uint32_t> mHoveredTab;

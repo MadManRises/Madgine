@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Generic/execution/virtualstate.h"
-#include "Generic/genericresult.h"
+#include "virtualstate.h"
+#include "../genericresult.h"
 
 namespace Engine {
-namespace Threading {
+namespace Execution {
 
     template <typename... Ty>
-    struct Connection : protected Execution::VirtualReceiverBase<GenericResult, Ty...> {
+    struct Connection : protected VirtualReceiverBase<GenericResult, Ty...> {
 
         Connection(SignalStub<Ty...> *stub)
             : mStub(stub)
@@ -57,7 +57,7 @@ namespace Threading {
     };
 
     template <typename Rec, typename... Ty>
-    struct StoppableConnection : Execution::VirtualStateEx<Rec, Connection<Ty...>, type_pack<GenericResult>, Ty...> {
+    struct StoppableConnection : VirtualStateEx<Rec, Connection<Ty...>, type_pack<GenericResult>, Ty...> {
 
         struct callback {
             callback(StoppableConnection<Rec, Ty...> *con)

@@ -35,7 +35,7 @@ namespace Widgets {
     {
     }
 
-    Threading::SignalStub<> &Button::clickEvent()
+    Execution::SignalStub<> &Button::clickEvent()
     {
         return mClicked;
     }

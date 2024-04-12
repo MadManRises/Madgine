@@ -5,7 +5,7 @@
 
 #include "Interfaces/filesystem/path.h"
 
-#include "Modules/threading/signal.h"
+#include "Generic/execution/signal.h"
 
 #include "Modules/ini/inifile.h"
 

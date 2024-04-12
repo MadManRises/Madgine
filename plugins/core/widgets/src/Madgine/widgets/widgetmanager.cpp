@@ -669,7 +669,7 @@ namespace Widgets {
         }
     }
 
-    Threading::SignalStub<> &WidgetManager::updatedSignal()
+    Execution::SignalStub<> &WidgetManager::updatedSignal()
     {
         return mUpdatedSignal;
     }

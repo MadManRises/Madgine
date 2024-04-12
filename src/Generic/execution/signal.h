@@ -3,7 +3,7 @@
 #include "signalstub.h"
 
 namespace Engine {
-namespace Threading {
+namespace Execution {
 
     template <typename... _Ty>
     struct Signal : SignalStub<_Ty...> {

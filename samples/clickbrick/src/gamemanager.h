@@ -12,6 +12,8 @@
 
 #include "Madgine/nativebehaviorcollector.h"
 
+#include "Modules/threading/customclock.h"
+
 namespace ClickBrick {
 
     struct GameManager : Engine::Input::Handler<GameManager> {

@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Generic/execution/algorithm.h"
-#include "Generic/execution/execution.h"
-#include "Generic/execution/virtualsender.h"
+#include "algorithm.h"
+#include "execution.h"
+#include "virtualsender.h"
 #include "connection.h"
-#include "taskqueue.h"
 
 namespace Engine {
-namespace Threading {
+namespace Execution {
 
     template <typename... Ty>
     struct SignalStub {
@@ -35,22 +34,10 @@ namespace Threading {
             return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); });
         }
 
-        template <typename T, typename R, typename... Args>
-        auto connect(R (T::*f)(Args...), T *t, TaskQueue *queue)
-        {
-            return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, queue);
-        }
-
         template <typename T>
         auto connect(T &&slot)
         {
             return sender() | Execution::then(TupleUnpacker::wrap(std::forward<T>(slot))) | Execution::repeat;
-        }
-
-        template <typename T>
-        auto connect(T &&slot, TaskQueue *queue)
-        {
-            return sender() | Execution::then([queue, slot { std::forward<T>(slot) }]() mutable { queue->queue(slot); }) | Execution::repeat;
         }
 
         ConnectionSender<Ty...> sender()

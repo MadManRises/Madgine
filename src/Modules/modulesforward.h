@@ -62,8 +62,6 @@ namespace Plugins {
 }
 
 namespace Threading {
-    template <typename T, typename... _Ty>
-    struct ConnectionInstance;
     struct TaskQueue;
     struct TaskHandle;
     template <typename T, bool Immediate = false>
@@ -76,10 +74,6 @@ namespace Threading {
     struct Scheduler;
 
     struct DataMutex;
-
-    template <typename... _Ty>
-    struct SignalStub;
-    struct ConnectionStore;
 
     struct CustomClock;
     struct CustomTimepoint;

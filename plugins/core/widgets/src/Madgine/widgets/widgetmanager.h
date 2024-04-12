@@ -5,7 +5,7 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "Modules/threading/signal.h"
+#include "Generic/execution/signal.h"
 
 #include "Generic/coroutines/generator.h"
 
@@ -77,7 +77,7 @@ namespace Widgets {
         virtual void onResize(const Rect2i &space) override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
-        Threading::SignalStub<> &updatedSignal();
+        Execution::SignalStub<> &updatedSignal();
 
         Resources::ImageLoader::Resource *getImage(std::string_view name);
 
@@ -126,7 +126,7 @@ namespace Widgets {
 
         std::vector<WidgetBase *> mModalWidgetList;
 
-        Threading::Signal<> mUpdatedSignal;
+        Execution::Signal<> mUpdatedSignal;
 
         Execution::Lifetime mLifetime;
 

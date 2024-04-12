@@ -336,52 +336,52 @@ namespace Widgets {
         return true;
     }
 
-    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerMoveEvent()
+    Execution::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerMoveEvent()
     {
         return mPointerMoveSignal;
     }
 
-    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerClickEvent()
+    Execution::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerClickEvent()
     {
         return mPointerClickSignal;
     }
 
-    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerEnterEvent()
+    Execution::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerEnterEvent()
     {
         return mPointerEnterSignal;
     }
 
-    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerLeaveEvent()
+    Execution::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerLeaveEvent()
     {
         return mPointerLeaveSignal;
     }
 
-    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::dragBeginEvent()
+    Execution::SignalStub<const Input::PointerEventArgs &> &WidgetBase::dragBeginEvent()
     {
         return mDragBeginSignal;
     }
 
-    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::dragMoveEvent()
+    Execution::SignalStub<const Input::PointerEventArgs &> &WidgetBase::dragMoveEvent()
     {
         return mDragMoveSignal;
     }
 
-    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::dragEndEvent()
+    Execution::SignalStub<const Input::PointerEventArgs &> &WidgetBase::dragEndEvent()
     {
         return mDragEndSignal;
     }
 
-    Threading::SignalStub<> &WidgetBase::dragAbortEvent()
+    Execution::SignalStub<> &WidgetBase::dragAbortEvent()
     {
         return mDragAbortSignal;
     }
 
-    Threading::SignalStub<const Input::AxisEventArgs &> &WidgetBase::axisEvent()
+    Execution::SignalStub<const Input::AxisEventArgs &> &WidgetBase::axisEvent()
     {
         return mAxisEventSignal;
     }
 
-    Threading::SignalStub<const Input::KeyEventArgs &> &WidgetBase::keyEvent()
+    Execution::SignalStub<const Input::KeyEventArgs &> &WidgetBase::keyEvent()
     {
         return mKeyPressSignal;
     }

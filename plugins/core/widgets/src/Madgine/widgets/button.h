@@ -2,7 +2,7 @@
 
 #include "widget.h"
 
-#include "Modules/threading/signal.h"
+#include "Generic/execution/signal.h"
 
 #include "util/textrenderdata.h"
 #include "util/scalableimagerenderdata.h"
@@ -16,7 +16,7 @@ namespace Widgets {
 
         virtual ~Button() = default;
 
-        Threading::SignalStub<> &clickEvent();
+        Execution::SignalStub<> &clickEvent();
 
         void vertices(WidgetsRenderData &renderData, size_t layer) override;
 
@@ -37,7 +37,7 @@ namespace Widgets {
         void emitClicked();
 
     private:
-        Threading::Signal<> mClicked;
+        Execution::Signal<> mClicked;
 
         bool mHovered = false;
     };

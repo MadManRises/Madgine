@@ -265,7 +265,7 @@ namespace Scene {
         return &*TupleUnpacker::invokeFlatten(emplace, mLocalEntities, mLocalEntities.end(), createEntityData(name, true));
     }
 
-    Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &SceneManager::entitiesSignal()
+    Execution::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &SceneManager::entitiesSignal()
     {
         return mEntities.observer().signal();
     }

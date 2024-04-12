@@ -2,7 +2,7 @@
 
 #include "Meta/math/matrix3.h"
 
-#include "Modules/threading/signal.h"
+#include "Generic/execution/signal.h"
 #include "widgetclass.h"
 
 #include "Meta/serialize/hierarchy/virtualserializableunit.h"
@@ -106,28 +106,28 @@ namespace Widgets {
         virtual bool injectAxisEvent(const Input::AxisEventArgs &arg);
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg);
 
-        Threading::SignalStub<const Input::PointerEventArgs &> &pointerMoveEvent();
-        Threading::SignalStub<const Input::PointerEventArgs &> &pointerClickEvent();
-        Threading::SignalStub<const Input::PointerEventArgs &> &pointerEnterEvent();
+        Execution::SignalStub<const Input::PointerEventArgs &> &pointerMoveEvent();
+        Execution::SignalStub<const Input::PointerEventArgs &> &pointerClickEvent();
+        Execution::SignalStub<const Input::PointerEventArgs &> &pointerEnterEvent();
         auto pointerEnterSender()
         {
             return mPointerEnterSignal.sender() | Execution::then([](const Input::PointerEventArgs &args) {
                 return 3;
             });
         }
-        Threading::SignalStub<const Input::PointerEventArgs &> &pointerLeaveEvent();
+        Execution::SignalStub<const Input::PointerEventArgs &> &pointerLeaveEvent();
         auto pointerLeaveSender()
         {
             return mPointerLeaveSignal.sender() | Execution::then([](const Input::PointerEventArgs &args) {
                 return 3;
             });
         }
-        Threading::SignalStub<const Input::PointerEventArgs &> &dragBeginEvent();
-        Threading::SignalStub<const Input::PointerEventArgs &> &dragMoveEvent();
-        Threading::SignalStub<const Input::PointerEventArgs &> &dragEndEvent();
-        Threading::SignalStub<> &dragAbortEvent();
-        Threading::SignalStub<const Input::AxisEventArgs &> &axisEvent();
-        Threading::SignalStub<const Input::KeyEventArgs &> &keyEvent();
+        Execution::SignalStub<const Input::PointerEventArgs &> &dragBeginEvent();
+        Execution::SignalStub<const Input::PointerEventArgs &> &dragMoveEvent();
+        Execution::SignalStub<const Input::PointerEventArgs &> &dragEndEvent();
+        Execution::SignalStub<> &dragAbortEvent();
+        Execution::SignalStub<const Input::AxisEventArgs &> &axisEvent();
+        Execution::SignalStub<const Input::KeyEventArgs &> &keyEvent();
 
         bool containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend = 0.0f) const;
 
@@ -217,11 +217,11 @@ namespace Widgets {
     protected:
         void destroyChild(WidgetBase *w);
 
-        Threading::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerClickSignal, mPointerEnterSignal, mPointerLeaveSignal;
-        Threading::Signal<const Input::PointerEventArgs &> mDragBeginSignal, mDragMoveSignal, mDragEndSignal;
-        Threading::Signal<> mDragAbortSignal;
-        Threading::Signal<const Input::AxisEventArgs &> mAxisEventSignal;
-        Threading::Signal<const Input::KeyEventArgs &> mKeyPressSignal;
+        Execution::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerClickSignal, mPointerEnterSignal, mPointerLeaveSignal;
+        Execution::Signal<const Input::PointerEventArgs &> mDragBeginSignal, mDragMoveSignal, mDragEndSignal;
+        Execution::Signal<> mDragAbortSignal;
+        Execution::Signal<const Input::AxisEventArgs &> mAxisEventSignal;
+        Execution::Signal<const Input::KeyEventArgs &> mKeyPressSignal;
 
     private:
         WidgetManager &mManager;

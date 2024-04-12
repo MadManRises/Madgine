@@ -3,7 +3,7 @@
 #include "signal.h"
 
 namespace Engine {
-namespace Threading {
+namespace Execution {
 
 	template <typename... Args>
     struct SignalFunctor {
@@ -12,13 +12,13 @@ namespace Threading {
             mSignal.emit(args...);
         }
 
-        Threading::SignalStub<Args...> &signal()
+        SignalStub<Args...> &signal()
         {
             return mSignal;
         }
 
     private:
-        Threading::Signal<Args...> mSignal;
+        Signal<Args...> mSignal;
     };
 
 }
