@@ -125,6 +125,11 @@ namespace Serialize {
             Serialize::setParent(synced.mData, parent);
         }
 
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
+        {
+            return Serialize::visitStream<T>(in, name, visitor);
+        }
+
     };
 
 }

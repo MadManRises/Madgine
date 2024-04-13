@@ -1313,7 +1313,7 @@ namespace Execution {
         template <typename Sender>
         friend auto tag_invoke(to_result_t, Sender &&inner, R onValue, R onDone)
         {
-            return sender<Sender> { {}, std::forward<Sender>(inner), onValue, onDone };
+            return sender<Sender> { { {}, std::forward<Sender>(inner) }, onValue, onDone };
         }
 
         template <typename Sender>

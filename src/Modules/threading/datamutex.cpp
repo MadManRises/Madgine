@@ -14,7 +14,7 @@ namespace Threading {
     {
         if (!mutex.lockImpl(this)) {
             std::unique_lock lock { mCvMutex };
-            mCv.wait(lock, [this]() { return !mWasTriggered; });
+            mCv.wait(lock, [this]() { return mWasTriggered; });
         }
     }
 

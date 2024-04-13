@@ -20,6 +20,7 @@ struct KeyValueWorkGroupLocal : T {
     using decay_t = T;
 
     template <typename... Args>
+    requires std::constructible_from<T, Args...>
     KeyValueWorkGroupLocal(const char *name, Args &&... args)
         : T(std::forward<Args>(args)...)
     {

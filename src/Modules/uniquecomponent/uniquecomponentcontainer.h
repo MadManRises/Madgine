@@ -15,6 +15,9 @@ namespace UniqueComponent {
         typedef typename Registry::Base Base;
 
         template <typename... Args>
+        requires requires(Registry::Annotations &a, Args&&... args) {
+            a.construct(args...);
+        }
         Container(Args&&... arg)
         {
             size_t count = Registry::sComponents().size();
@@ -25,7 +28,7 @@ namespace UniqueComponent {
             for (const auto &annotations : Registry::sComponents()) {
                 auto p = annotations.construct(arg...);
                 mSortedComponents.push_back(p.get());
-                Engine::emplace(static_cast<typename base_container<C>::type &>(*this), C::end(), std::move(p));
+                Engine::emplace(static_cast<C &>(*this), C::end(), std::move(p));
             }
         }
 

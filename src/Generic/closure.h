@@ -30,7 +30,7 @@ namespace __generic_impl__ {
 
         ClosureImpl() = default;
 
-        template <typename F>
+        template <DecayedNoneOf<ClosureImpl> F>
         ClosureImpl(F &&f)
             : mWrapper(std::make_unique<ClosureWrapperImpl<std::remove_reference_t<F>, R, Args...>>(std::forward<F>(f)))
         {
@@ -42,6 +42,7 @@ namespace __generic_impl__ {
         {
         }
 
+        ClosureImpl(const ClosureImpl &) = delete;
         ClosureImpl(ClosureImpl &&) = default;
 
         ClosureImpl &operator=(ClosureImpl &&) = default;
