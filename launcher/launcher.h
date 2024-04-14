@@ -2,8 +2,15 @@
 
 #include <functional>
 
-namespace Engine::Window {
-struct MainWindow;
+#include "Generic/closure.h"
+
+namespace Engine {
+namespace Window {
+    struct MainWindow;
+}
+namespace App {
+    struct Application;
+}
 }
 
-int launch(std::function<void(Engine::Window::MainWindow &)> callback = {});
+int launch(Engine::Closure<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback = {});

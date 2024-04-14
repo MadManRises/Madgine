@@ -86,7 +86,7 @@ void SetSplashImage(HWND hwndSplash, HBITMAP hbmpSplash)
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nCmdShow)
 {
-    std::function<void(Engine::Window::MainWindow &)> callback;
+    std::function<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback;
 
 #ifdef MADGINE_LAUNCHER_SPLASH_IMAGE
     const char *className = CreateWindowClass(hInstance);
@@ -99,7 +99,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
     DeleteObject(bitmap);
 
-    callback = [=](Engine::Window::MainWindow &window) {
+    callback = [=](Engine::App::Application &app, Engine::Window::MainWindow &window) {
         window.taskQueue()->queue([=]() {
             DestroyWindow(GetParent(splashWindow));
         });

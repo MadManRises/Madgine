@@ -8,11 +8,14 @@
 #include "Madgine/root/root.h"
 #include "Modules/threading/scheduler.h"
 
+#include "launcherconfig.h"
+
 #include "launcher.h"
+#include "server.h"
 
 #include "main.h"
 
-int desktopMain(int argc, char **argv, std::function<void(Engine::Window::MainWindow &)> callback)
+int desktopMain(int argc, char **argv, std::function<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback)
 {
     Engine::Filesystem::setup();
     Engine::Threading::WorkGroup workGroup { "Launcher" };
@@ -28,7 +31,11 @@ int desktopMain(int argc, char **argv, std::function<void(Engine::Window::MainWi
             return result;
         return root.errorCode();
     } else {
+#if MADGINE_SERVER
+        return server();
+#else
         return launch(callback);
+#endif
     }
 }
 

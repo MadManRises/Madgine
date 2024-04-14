@@ -24,7 +24,7 @@
 #    define MADGINE_LAUNCHER_WINDOW_TITLE "Maditor"
 #endif
 
-int launch(std::function<void(Engine::Window::MainWindow &)> callback)
+int launch(Engine::Closure<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback)
 {
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::App::Application> app { "Application" };
 
@@ -34,7 +34,7 @@ int launch(std::function<void(Engine::Window::MainWindow &)> callback)
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Window::MainWindow> window { "MainWindow", windowSettings };
 
     if (callback)
-        callback(window);
+        callback(app, window);
 
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Input::UIManager> ui { "UI", app, window };
 

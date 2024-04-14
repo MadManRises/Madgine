@@ -6,5 +6,3 @@ add_subdirectory(render)
 add_subdirectory(serialize)
 
 add_subdirectory(cli)
-
-add_subdirectory(server)

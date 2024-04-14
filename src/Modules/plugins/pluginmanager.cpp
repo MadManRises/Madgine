@@ -80,7 +80,7 @@ namespace Plugins {
         }
 
         if (!programName.empty()) {
-            Plugin exe { "MadgineLauncher", nullptr, {}, "" };
+            Plugin exe { programName, nullptr, {}, "" };
             exe.loadDependencies(*this, mCurrentSelection);
 
             if (strlen(exe.info()->mToolsName) > 0) {

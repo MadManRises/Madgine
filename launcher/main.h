@@ -2,8 +2,13 @@
 
 #include <functional>
 
-namespace Engine::Window {
-struct MainWindow;
+namespace Engine{
+namespace Window {
+    struct MainWindow;
+}
+namespace App {
+    struct Application;
+}
 }
 
-int desktopMain(int argc, char **argv, std::function<void(Engine::Window::MainWindow &)> callback = {});
+int desktopMain(int argc, char **argv, std::function<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback = {});
