@@ -7,6 +7,9 @@
 
 #include "../entity/components/transform.h"
 
+
+#include "Madgine/nativebehaviorcollector.h"
+
 namespace Engine {
 namespace Scene {
 
@@ -35,3 +38,8 @@ namespace Scene {
 
 }
 }
+
+NATIVE_BEHAVIOR_DECLARATION(Yield_Simulation)
+NATIVE_BEHAVIOR_DECLARATION(Wait_Simulation)
+
+NATIVE_BEHAVIOR_DECLARATION(Rotate)

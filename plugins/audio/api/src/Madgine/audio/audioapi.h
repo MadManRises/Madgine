@@ -10,6 +10,9 @@
 
 #include "Madgine/behavior.h"
 
+
+#include "Madgine/nativebehaviorcollector.h"
+
 namespace Engine {
 namespace Audio {
 
@@ -33,3 +36,5 @@ namespace Audio {
 }
 
 REGISTER_TYPE(Engine::Audio::AudioApi)
+
+NATIVE_BEHAVIOR_DECLARATION(play_sound)

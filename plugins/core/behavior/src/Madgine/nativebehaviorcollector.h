@@ -20,10 +20,12 @@ struct NativeBehaviorInfo {
     virtual std::span<const ValueTypeDesc> resultTypes() const = 0;
 };
 
+DLL_IMPORT_VARIABLE(const NativeBehaviorInfo *, nativeBehaviorInfo, typename);
+
 struct NativeBehaviorAnnotation {
     template <typename T>
     NativeBehaviorAnnotation(type_holder_t<T>)
-        : mInfo(&T::sInfo)
+        : mInfo(*nativeBehaviorInfo<T>)
     {
     }
 
@@ -59,8 +61,8 @@ struct get_type<InputParameter<T>> {
 template <typename T>
 using get_type_t = typename get_type<T>::type;
 
-template <auto Factory, typename... Arguments>
-struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<Factory, Arguments...>, NativeBehaviorInfo> {
+template <typename T, auto Factory, typename... Arguments>
+struct NativeBehavior : NativeBehaviorComponent<T, NativeBehaviorInfo> {
 
     using argument_types = type_pack<Arguments...>;
     using parameter_arguments = typename argument_types::template filter<is_parameter>;
@@ -157,8 +159,6 @@ struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<Factory, Argument
         return sResultTypes;
     }
 
-    static const NativeBehavior sInfo;
-
     std::string_view mName;
 };
 
@@ -175,19 +175,32 @@ struct NativeBehaviorFactory : BehaviorFactory<NativeBehaviorFactory> {
 DECLARE_BEHAVIOR_FACTORY(Engine::NativeBehaviorFactory)
 REGISTER_TYPE(Engine::NativeBehaviorInfo)
 
-#define NATIVE_BEHAVIOR(Name, Sender, ...)                                         \
-    struct Name##Linkage {                                                                        \
-        template <typename... Args>                                                               \
-        auto operator()(Args &&...args) const                                                     \
-        {                                                                                         \
-            return Sender(std::forward<Args>(args)...);                                           \
-        }                                                                                         \
-    };                                                                                            \
-                                                                                                  \
-    using Name##NativeBehavior = Engine::NativeBehavior<Name##Linkage {} __VA_OPT__(,) __VA_ARGS__>; \
-                                                                                                  \
-    template <>                                                                                   \
-    const Name##NativeBehavior Name##NativeBehavior::sInfo { #Name };                             \
-                                                                                                  \
-    REGISTER_TYPE(Name##NativeBehavior)                                                           \
-    NAMED_UNIQUECOMPONENT(Name, Name##NativeBehavior)
+#define NATIVE_BEHAVIOR_DECLARATION(Name) \
+    struct Name##NativeBehavior;          \
+    REGISTER_TYPE(Name##NativeBehavior)
+
+#define NATIVE_BEHAVIOR(Name, Sender, ...)                                                                             \
+    struct Name##Linkage {                                                                                             \
+        template <typename... Args>                                                                                    \
+        auto operator()(Args &&...args) const                                                                          \
+        {                                                                                                              \
+            return Sender(std::forward<Args>(args)...);                                                                \
+        }                                                                                                              \
+    };                                                                                                                 \
+                                                                                                                       \
+    using Name##NativeBehaviorType = Engine::NativeBehavior < Name##NativeBehavior, Name##Linkage                      \
+    {                                                                                                                  \
+    }                                                                                                                  \
+    __VA_OPT__(, )                                                                                                     \
+    __VA_ARGS__                                                                                                        \
+        > ;                                                                                                            \
+                                                                                                                       \
+    struct Name##NativeBehavior : Name##NativeBehaviorType {                                                           \
+        using Name##NativeBehaviorType::Name##NativeBehaviorType;                                                      \
+    };                                                                                                                 \
+                                                                                                                       \
+    static const Name##NativeBehavior Name##Info { #Name };                                                   \
+                                                                                                                       \
+    DLL_EXPORT_VARIABLE(, const Engine::NativeBehaviorInfo *, Engine::, nativeBehaviorInfo, &Name##Info, Name##NativeBehavior) \
+                                                                                                                       \
+        NAMED_UNIQUECOMPONENT(Name, Name##NativeBehavior)
