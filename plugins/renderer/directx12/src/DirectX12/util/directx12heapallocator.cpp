@@ -103,6 +103,7 @@ namespace Render {
     DirectX12MappedHeapAllocator::DirectX12MappedHeapAllocator(D3D12_HEAP_TYPE type)
         : mType(type)
     {
+        assert(type == D3D12_HEAP_TYPE_UPLOAD || type == D3D12_HEAP_TYPE_READBACK);
     }
 
     void DirectX12MappedHeapAllocator::reset()
@@ -112,6 +113,8 @@ namespace Render {
 
     Block DirectX12MappedHeapAllocator::allocate(size_t size, size_t alignment)
     {
+        DX12_LOG("Allocating DX12 mapped memory: (size: " << size << ", " << alignment << ")");
+
         auto heapDesc = CD3DX12_HEAP_PROPERTIES(mType);
         auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
 
@@ -121,7 +124,7 @@ namespace Render {
             &heapDesc,
             D3D12_HEAP_FLAG_NONE,
             &resourceDesc,
-            D3D12_RESOURCE_STATE_COMMON,
+            mType == D3D12_HEAP_TYPE_READBACK ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
             IID_PPV_ARGS(&page.mResource));
         DX12_CHECK(hr);

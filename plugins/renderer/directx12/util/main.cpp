@@ -1,13 +1,15 @@
 
 #include <assert.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
+#include <array>
+
+#include <comdef.h>
 #include <d3d12.h>
 #include <dxgi1_6.h>
-#include <comdef.h>
 
 #include "../src/DirectX12/d3dx12.h"
 
@@ -18,7 +20,6 @@ static void log(std::string_view s)
     std::cout << s << std::endl;
     fOut << s << std::endl;
 }
-
 
 inline void dx12Check(const char *file, size_t line, HRESULT result = 0)
 {
@@ -32,8 +33,17 @@ inline void dx12Check(const char *file, size_t line, HRESULT result = 0)
     }
 }
 
-#define DX12_CHECK(...) dx12Check(__FILE__, __LINE__, __VA_ARGS__)
+void check(HRESULT hr, std::stringstream& ss) {
+    if (FAILED(hr)) {
+        ss << "Failed (" << std::hex << hr << "): \n";
+        _com_error error { hr };
+        ss << error.ErrorMessage();
+    } else {
+        ss << "Success!";
+    }
+}
 
+#define DX12_CHECK(...) dx12Check(__FILE__, __LINE__, __VA_ARGS__)
 
 struct ReleaseDeleter {
     template <typename T>
@@ -77,7 +87,6 @@ struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
     }
 };
 
-
 static ReleasePtr<IDXGIAdapter1> GetHardwareAdapter(IDXGIFactory4 *pFactory)
 {
     for (UINT adapterIndex = 0;; ++adapterIndex) {
@@ -96,7 +105,8 @@ static ReleasePtr<IDXGIAdapter1> GetHardwareAdapter(IDXGIFactory4 *pFactory)
     return {};
 }
 
-void logProperties(ID3D12Device* device) {
+void logProperties(ID3D12Device *device)
+{
     D3D12_FEATURE_DATA_D3D12_OPTIONS options;
 
     HRESULT hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options));
@@ -107,55 +117,71 @@ void logProperties(ID3D12Device* device) {
     log("");
 }
 
-void testCreateHeap(ID3D12Device* device) {
+void testCreateHeap(ID3D12Device *device)
+{
     log("Testing CreateHeap");
 
+    std::stringstream ss;
+
     for (size_t s = 8388608; s <= 8388608; s *= 2) {
-        std::stringstream ss;
+
         ss << "Size: " << s << "...\n";
 
-        ss << "  Flags: None... ";
+        for (auto [flags, name] : std::array<std::pair<D3D12_HEAP_FLAGS, const char *>, 2> { { { D3D12_HEAP_FLAG_NONE, "None" },
+                 { D3D12_HEAP_FLAG_DENY_RT_DS_TEXTURES | D3D12_HEAP_FLAG_DENY_NON_RT_DS_TEXTURES, "Deny Textures" } } }) {
+            ss << "  Flags: " << name << "... ";
 
-        CD3DX12_HEAP_DESC heapDesc = CD3DX12_HEAP_DESC { s, D3D12_HEAP_TYPE_DEFAULT };
+            CD3DX12_HEAP_DESC heapDesc = CD3DX12_HEAP_DESC { s, D3D12_HEAP_TYPE_DEFAULT, 0, flags };
 
-        ReleasePtr<ID3D12Heap> heap;
+            ReleasePtr<ID3D12Heap> heap;
 
-        HRESULT hr = device->CreateHeap(
-            &heapDesc,
-            IID_PPV_ARGS(&heap));
-        if (FAILED(hr)) {
-            ss << "Failed (" << std::hex << hr << "): \n";
-            _com_error error { hr };
-            ss << error.ErrorMessage();
-        } else {
-            ss << "Success!";
+            HRESULT hr = device->CreateHeap(
+                &heapDesc,
+                IID_PPV_ARGS(&heap));
+            check(hr, ss);
+            ss << "\n";
         }
-        heap.reset();
-
-        ss << "\n  Flags: Deny Textures... ";
-
-        heapDesc.Flags = D3D12_HEAP_FLAG_DENY_RT_DS_TEXTURES | D3D12_HEAP_FLAG_DENY_NON_RT_DS_TEXTURES;
-
-        hr = device->CreateHeap(
-            &heapDesc,
-            IID_PPV_ARGS(&heap));
-        if (FAILED(hr)) {
-            ss << "Failed (" << std::hex << hr << "): \n";
-            _com_error error { hr };
-            ss << error.ErrorMessage();
-        } else {
-            ss << "Success!";
-        }
-        heap.reset();
-
-
-
-        log(ss.str());
     }
+
+    log(ss.str());
 }
 
+void testCreateCommitedResource(ID3D12Device *device)
+{
+    log("Testing CreateCommitedResource");
 
-int main() {
+    std::stringstream ss;
+    for (size_t s = 8388608; s <= 8388608; s *= 2) {
+
+        ss << "Size: " << s << "...\n";
+
+        auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(s);
+
+        for (auto [type, name] : std::array<std::pair<D3D12_HEAP_TYPE, const char *>, 3> { { { D3D12_HEAP_TYPE_DEFAULT, "Default" },
+                 { D3D12_HEAP_TYPE_UPLOAD, "Upload" },
+                 { D3D12_HEAP_TYPE_READBACK, "Readback" } } }) {
+            ss << "  Type: " << name << "... ";
+            auto heapDesc = CD3DX12_HEAP_PROPERTIES(type);
+
+            ReleasePtr<ID3D12Resource> res;
+
+            HRESULT hr = device->CreateCommittedResource(
+                &heapDesc,
+                D3D12_HEAP_FLAG_NONE,
+                &resourceDesc,
+                D3D12_RESOURCE_STATE_COMMON,
+                nullptr,
+                IID_PPV_ARGS(&res));
+            check(hr, ss);
+            ss << "\n";
+        }
+    }
+
+    log(ss.str());
+}
+
+int main()
+{
 
     ReleasePtr<IDXGIFactory4> factory;
 
@@ -174,4 +200,5 @@ int main() {
     logProperties(device);
 
     testCreateHeap(device);
+    testCreateCommitedResource(device);
 }
