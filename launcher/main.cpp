@@ -15,7 +15,7 @@
 
 #include "main.h"
 
-int desktopMain(int argc, char **argv, std::function<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback)
+int desktopMain(int argc, char **argv, Engine::Closure<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback)
 {
     Engine::Filesystem::setup();
     Engine::Threading::WorkGroup workGroup { "Launcher" };
@@ -34,7 +34,7 @@ int desktopMain(int argc, char **argv, std::function<void(Engine::App::Applicati
 #if MADGINE_SERVER
         return server();
 #else
-        return launch(callback);
+        return launch(std::move(callback));
 #endif
     }
 }

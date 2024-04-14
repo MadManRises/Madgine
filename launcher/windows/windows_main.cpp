@@ -86,7 +86,7 @@ void SetSplashImage(HWND hwndSplash, HBITMAP hbmpSplash)
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nCmdShow)
 {
-    std::function<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback;
+    Engine::Closure<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback;
 
 #ifdef MADGINE_LAUNCHER_SPLASH_IMAGE
     const char *className = CreateWindowClass(hInstance);
@@ -106,5 +106,5 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
     };
 #endif
 
-    return desktopMain(__argc, __argv, callback);
+    return desktopMain(__argc, __argv, std::move(callback));
 }
