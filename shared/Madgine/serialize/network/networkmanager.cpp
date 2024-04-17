@@ -71,7 +71,7 @@ namespace Network {
             return;
         }
 
-        setSlaveStreamImpl(receiver, Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(socket))), createStreamData() }, true, timeout);        
+        setSlaveStreamImpl(receiver, Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(socket))), createStreamData() }, timeout);        
     }
 
     void NetworkManager::close()

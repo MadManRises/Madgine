@@ -63,17 +63,17 @@ SYNCFUNCTION(bar)
 
 SERIALIZETABLE_END(TestUnit)
 
-void TestUnit::call_void(int i, TestReceiver<void, Engine::Serialize::MessageResult> &rec)
+void TestUnit::call_void(int i, TestReceiver<Engine::Serialize::MessageResult> &rec)
 {
     Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::call<&TestUnit::bar>(i), rec));
 }
 
-void TestUnit::call(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec)
+void TestUnit::call(int i, TestReceiver<Engine::Serialize::MessageResult, int> &rec)
 {
     Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::call<&TestUnit::foo>(i), rec));
 }
 
-void TestUnit::query(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec)
+void TestUnit::query(int i, TestReceiver<Engine::Serialize::MessageResult, int> &rec)
 {
     Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::query<&TestUnit::foo>(i), rec));
 }

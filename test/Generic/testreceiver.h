@@ -1,7 +1,9 @@
 #pragma once
 
-template <typename T, typename R>
-struct TestReceiver {
+using namespace Engine::Execution;
+
+template <typename R, typename T = void>
+struct TestReceiver : VirtualReceiverBase<R, T> {
 
     void set_value(T value)
     {
@@ -33,7 +35,7 @@ struct TestReceiver {
 };
 
 template <typename R>
-struct TestReceiver<void, R> {
+struct TestReceiver<R, void> : VirtualReceiverBase<R> {
 
     void set_value()
     {

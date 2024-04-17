@@ -1278,7 +1278,7 @@ namespace Execution {
             template <typename... R2>
             void set_error(R fixedResult, R2 &&...result)
             {
-                this->mRec.set_error(fixedResult, std::forward<R>(result)...);
+                this->mRec.set_value(std::forward<R>(fixedResult), std::forward<R2>(result)...);
             }
 
             R mOnValue;

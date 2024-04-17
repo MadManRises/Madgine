@@ -291,7 +291,7 @@ namespace Serialize {
 
         while (!tables.empty()) {
             table = tables.top();
-            for (const SyncFunction *it = table->mFunctions; true; ++it) {
+            for (const SyncFunction *it = table->mFunctions; it; ++it) {
                 if (index == 0) {
                     return *it;
                 }

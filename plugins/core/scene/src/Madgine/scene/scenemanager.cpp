@@ -57,8 +57,7 @@ namespace Engine {
 namespace Scene {
 
     SceneManager::SceneManager(App::Application &app)
-        : SyncableUnitEx(Serialize::SCENE_MANAGER)
-        , VirtualScope(app)
+        : VirtualScope(app)
         , mSceneComponents(*this)
         , mMutex("SceneData")
         , mFrameClock(std::chrono::steady_clock::now())
@@ -262,7 +261,14 @@ namespace Scene {
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &name)
     {
-        return &*TupleUnpacker::invokeFlatten(emplace, mLocalEntities, mLocalEntities.end(), createEntityData(name, true));
+        auto it = TupleUnpacker::invokeFlatten(emplace, mLocalEntities, mLocalEntities.end(), createEntityData(name, true));
+        Entity::Entity *entity = &*it;
+
+        mLifetime.attach(Execution::sequence(it->mLifetime.ended(), mMutex.locked(AccessMode::WRITE, [this, entity]() {
+            remove(entity);
+        })));
+
+        return entity;
     }
 
     Execution::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &SceneManager::entitiesSignal()

@@ -40,8 +40,8 @@ TEST(Serialize_Container, SyncedUnit)
     unit1.set1 = { 1, 2, 3 };
     unit2.set1 = { 4, 5, 6 };
 
-    ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
-    ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
+    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1));
+    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2));
 
     Buffer buffer;
     HANDLE_MGR_RESULT(mgr1, mgr1.setMasterBuffer(buffer));

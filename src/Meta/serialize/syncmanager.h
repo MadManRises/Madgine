@@ -37,7 +37,8 @@ namespace Serialize {
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets();
 
         void clearTopLevelItems();
-        bool addTopLevelItem(TopLevelUnitBase *unit, bool sendStateFlag = true);
+        void addTopLevelItemImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, TopLevelUnitBase *unit, UnitId slaveId = 0);
+        ASYNC_STUB(addTopLevelItem, addTopLevelItemImpl, Execution::make_simple_virtual_sender<SyncManagerResult>);
         void removeTopLevelItem(TopLevelUnitBase *unit);
         void moveTopLevelItem(TopLevelUnitBase *oldUnit, TopLevelUnitBase *newUnit);
 
@@ -67,11 +68,12 @@ namespace Serialize {
         FormattedBufferedStream &getMasterStream(ParticipantId id);
 
         void removeAllStreams();
-        void setSlaveStreamImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, FormattedBufferedStream &&stream, bool receiveState = true, TimeOut timeout = {});
+        void setSlaveStreamImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, FormattedBufferedStream &&stream, TimeOut timeout = {});
         ASYNC_STUB(setSlaveStream, setSlaveStreamImpl, Execution::make_simple_virtual_sender<SyncManagerResult>);
+        void decreaseReceivingCounter();
 
         void removeSlaveStream(SyncManagerResult reason = SyncManagerResult::UNKNOWN_ERROR);
-        SyncManagerResult addMasterStream(FormattedBufferedStream &&stream, bool sendState = true);
+        SyncManagerResult addMasterStream(FormattedBufferedStream &&stream);
         SyncManagerResult moveMasterStream(ParticipantId streamId, SyncManager *target);
 
         const std::set<TopLevelUnitBase *> &getTopLevelUnits() const;
@@ -84,6 +86,7 @@ namespace Serialize {
 
         Execution::VirtualReceiverBase<SyncManagerResult> *mReceivingMasterState = nullptr;
         TimeOut mReceivingMasterStateTimeout;
+        size_t mReceivingCounter;
 
     private:
         std::map<ParticipantId, FormattedBufferedStream> mMasterStreams;

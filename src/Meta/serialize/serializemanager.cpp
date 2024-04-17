@@ -60,7 +60,7 @@ namespace Serialize {
             id = ++sNextUnitId;
             sMasterMappings[id] = unit;
         } else {
-            assert(id >= BEGIN_STATIC_ID_SPACE);
+            assert(id >= BEGIN_USER_ID_SPACE);
             if (id >= RESERVED_ID_COUNT) {
                 bool b = sMasterMappings.try_emplace(id, unit).second;
                 assert(b);
@@ -77,7 +77,7 @@ namespace Serialize {
             assert(it->second != unit);
             it->second = unit;
         } else {
-            assert(id >= BEGIN_STATIC_ID_SPACE);
+            assert(id >= BEGIN_USER_ID_SPACE);
         }
         return id;
     }
@@ -90,7 +90,7 @@ namespace Serialize {
             assert(it->second == unit);
             sMasterMappings.erase(it);
         } else {
-            assert(id >= BEGIN_STATIC_ID_SPACE);
+            assert(id >= BEGIN_USER_ID_SPACE);
         }
     }
 

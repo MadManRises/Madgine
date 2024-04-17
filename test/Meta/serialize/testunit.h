@@ -64,9 +64,9 @@ struct TestUnit : TopLevelUnit<TestUnit> {
     int mData;
     int mCallCount = 0;
 
-    void call_void(int i, TestReceiver<void, Engine::Serialize::MessageResult> &rec);
-    void call(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec);
-    void query(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec);
+    void call_void(int i, TestReceiver<Engine::Serialize::MessageResult> &rec);
+    void call(int i, TestReceiver<Engine::Serialize::MessageResult, int> &rec);
+    void query(int i, TestReceiver<Engine::Serialize::MessageResult, int> &rec);
 
     SERIALIZABLE_CONTAINER(list1, std::list<int>);
     SERIALIZABLE_CONTAINER(set1, std::set<int>);

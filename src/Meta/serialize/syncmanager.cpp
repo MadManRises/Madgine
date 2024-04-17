@@ -16,6 +16,10 @@
 
 #include "Generic/projections.h"
 
+#include "hierarchy/serializetable.h"
+
+#include "Generic/execution/algorithm.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -83,15 +87,10 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(read(stream, cmd, "Command"));
             STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
             switch (cmd) {
-            case INITIAL_STATE_DONE:
+            case SET_ID:
                 assert(mSlaveStream && &stream == &*mSlaveStream);
-                assert(mReceivingMasterState);
                 STREAM_PROPAGATE_ERROR(read(stream, id, "Id"));
                 stream.setId(id);
-                for (TopLevelUnitBase *unit : mTopLevelUnits)
-                    assert(unit->slaveId());
-                mReceivingMasterState->set_value();
-                mReceivingMasterState = nullptr;
                 break;
             default:
                 return STREAM_INTEGRITY_ERROR(stream) << "Invalid command used in message header: " << cmd;
@@ -105,8 +104,6 @@ namespace Serialize {
             if (type == MessageType::ACTION || type == MessageType::ERROR || type == MessageType::FUNCTION_ACTION || type == MessageType::FUNCTION_ERROR)
                 STREAM_PROPAGATE_ERROR(read(stream, transactionId, "TransactionId"));
             STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
-
-            assert(!mReceivingMasterState || type == MessageType::STATE);
 
             switch (type) {
             case MessageType::ACTION: {
@@ -122,10 +119,13 @@ namespace Serialize {
                 STREAM_PROPAGATE_ERROR(object->readRequest(stream, id));
                 break;
             case MessageType::STATE:
+                assert(object->mType->mIsTopLevelUnit);
                 STREAM_PROPAGATE_ERROR(read(stream, *object, "State", {}, StateTransmissionFlags_ApplyMap | StateTransmissionFlags_Activation));
+                static_cast<TopLevelUnitBase *>(object)->stateReadDone();
                 for (FormattedBufferedStream &out : mMasterStreams | std::views::transform(projectionPairSecond)) {
                     sendState(out, object);
                 }
+
                 break;
             case MessageType::ERROR: {
                 PendingRequest request = stream.getRequest(transactionId);
@@ -162,7 +162,8 @@ namespace Serialize {
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> result;
 
         for (FormattedBufferedStream &stream : mMasterStreams | std::views::transform(projectionPairSecond)) {
-            result.insert(stream);
+            if (stream)
+                result.insert(stream);
         }
         return result;
     }
@@ -178,30 +179,25 @@ namespace Serialize {
         mTopLevelUnits.clear();
     }
 
-    bool SyncManager::addTopLevelItem(TopLevelUnitBase *unit,
-        bool sendStateFlag)
+    void SyncManager::addTopLevelItemImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, TopLevelUnitBase *unit, UnitId slaveId)
     {
-        if (!unit->addManager(this))
-            return false;
+        if (!unit->addManager(this)) {
+            receiver.set_error(SyncManagerResult::UNKNOWN_ERROR);
+            return;
+        }
+        unit->mStaticSlaveId = slaveId;
         mTopLevelUnits.insert(unit);
 
         if (unit->mSynced) {
             if (mSlaveStream) {
-                unit->initSlaveId(this);
-                if (sendStateFlag) {
-                    assert(!mReceivingMasterState);
-                    Execution::detach(Execution::make_simple_virtual_sender<SyncManagerResult>([this](Execution::VirtualReceiverBase<SyncManagerResult> &rec) { mReceivingMasterState = &rec; }));
-                }
+                unit->receiveState(receiver, this);
             } else {
-                if (sendStateFlag) {
-                    for (FormattedBufferedStream &stream : mMasterStreams | std::views::transform(projectionPairSecond)) {
-                        this->sendState(stream, unit);
-                    }
+                for (FormattedBufferedStream &stream : mMasterStreams | std::views::transform(projectionPairSecond)) {
+                    this->sendState(stream, unit);
                 }
             }
         }
-
-        return true;
+        receiver.set_value();
     }
 
     void SyncManager::removeTopLevelItem(TopLevelUnitBase *unit)
@@ -250,7 +246,6 @@ namespace Serialize {
     }
 
     void SyncManager::setSlaveStreamImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, FormattedBufferedStream &&stream,
-        bool receiveState,
         TimeOut timeout)
     {
         if (mSlaveStream) {
@@ -275,22 +270,30 @@ namespace Serialize {
             mSlaveStream.emplace(std::move(stream));
             setSlaveStreamData(mSlaveStream->data());
 
-            if (receiveState) {
-                for (TopLevelUnitBase *unit : mTopLevelUnits) {
-                    unit->initSlaveId(this);
-                }
-                assert(!mReceivingMasterState);
-                mReceivingMasterState = &receiver;
-                mReceivingMasterStateTimeout = timeout;
-            } else {
-                receiver.set_value();
-            }
+            assert(!mReceivingMasterState);
+
+            mReceivingCounter = 1 + mTopLevelUnits.size();
+            mReceivingMasterState = &receiver;
+            mReceivingMasterStateTimeout = timeout;
+            for (TopLevelUnitBase *unit : mTopLevelUnits) {
+                Execution::detach(unit->receiveState(this) | Execution::then([this]() { decreaseReceivingCounter(); }));
+            }            
+            decreaseReceivingCounter();
         } else {
             for (TopLevelUnitBase *unit : updatedUnits | std::views::reverse) {
                 bool result = unit->updateManagerType(this, true);
                 assert(result);
             }
             receiver.set_error(state);
+        }
+    }
+
+    void SyncManager::decreaseReceivingCounter()
+    {
+        assert(mReceivingMasterState);
+        if (--mReceivingCounter == 0) {
+            Execution::VirtualReceiverBase<SyncManagerResult> *rec = std::exchange(mReceivingMasterState, nullptr);
+            rec->set_value();
         }
     }
 
@@ -316,24 +319,21 @@ namespace Serialize {
         }
     }
 
-    SyncManagerResult SyncManager::addMasterStream(FormattedBufferedStream &&stream,
-        bool sendStateFlag)
+    SyncManagerResult SyncManager::addMasterStream(FormattedBufferedStream &&stream)
     {
-        if (sendStateFlag && stream) {
-            for (TopLevelUnitBase *unit : mTopLevelUnits) {
-                sendState(stream, unit);
-            }
-            stream.beginMessageWrite();
-            stream.beginHeaderWrite();
-            write<UnitId>(stream, SERIALIZE_MANAGER, "Object");
-            write(stream, INITIAL_STATE_DONE, "Command");
-            stream.endHeaderWrite();
-            write(stream, stream.id(), "Id");
-            stream.endMessageWrite();
-        }
-
         if (!stream)
             return SyncManagerResult::UNKNOWN_ERROR;
+
+        stream.beginMessageWrite();
+        stream.beginHeaderWrite();
+        write<UnitId>(stream, SERIALIZE_MANAGER, "Object");
+        write(stream, SET_ID, "Command");
+        stream.endHeaderWrite();
+        write(stream, stream.id(), "Id");
+        stream.endMessageWrite();
+        for (TopLevelUnitBase *unit : mTopLevelUnits) {
+            sendState(stream, unit);
+        }
 
         ParticipantId id = stream.id();
         mMasterStreams.try_emplace(id, std::move(stream));
@@ -345,12 +345,9 @@ namespace Serialize {
     {
         auto it = mMasterStreams.find(streamId);
         assert(it != mMasterStreams.end());
-        if (SyncManagerResult result = target->addMasterStream(
-                std::move(it->second), false);
-            result != SyncManagerResult::SUCCESS)
-            return result;
-        //mMasterStreams.erase(it);
-        FormattedBufferedStream &stream = target->mMasterStreams.find(streamId)->second;
+        auto pib = target->mMasterStreams.try_emplace(streamId, std::move(it->second));
+
+        FormattedBufferedStream &stream = pib.first->second;
         std::vector<TopLevelUnitBase *> newTopLevels;
         newTopLevels.reserve(16);
         set_difference(target->getTopLevelUnits().begin(),
@@ -359,13 +356,7 @@ namespace Serialize {
         for (TopLevelUnitBase *newTopLevel : newTopLevels) {
             sendState(stream, newTopLevel);
         }
-        stream.beginMessageWrite();
-        stream.beginHeaderWrite();
-        write<UnitId>(stream, SERIALIZE_MANAGER, "Object");
-        write(stream, INITIAL_STATE_DONE, "Command");
-        stream.endHeaderWrite();
-        write(stream, stream.id(), "Id");
-        stream.endMessageWrite();
+
         return SyncManagerResult::SUCCESS;
     }
 
@@ -460,7 +451,7 @@ namespace Serialize {
                 out = mSlaveMappings.at(unit);
             } else {
                 if (unit < RESERVED_ID_COUNT) {
-                    assert(unit >= BEGIN_STATIC_ID_SPACE);
+                    assert(unit >= BEGIN_USER_ID_SPACE);
                     auto it = std::ranges::find(
                         mTopLevelUnits, unit, &TopLevelUnitBase::masterId);
                     if (it == mTopLevelUnits.end()) {

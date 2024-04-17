@@ -101,7 +101,7 @@ macro(collect_data target)
 endmacro()
 
 macro(collect_data_lists)
-	if (MADGINE_CONFIGURATION)
+	if (MADGINE_CONFIGURATION AND NOT TARGET copy_data)
 		foreach (list ${MADGINE_DATA_LISTS})
 			cmake_path(IS_PREFIX CMAKE_BINARY_DIR ${list} NORMALIZE is_generated)
 			if (is_generated)

@@ -111,19 +111,19 @@ struct TestManager : SyncManager {
     {
     }
 
-    void setSlaveBuffer(TestReceiver<void, Engine::Serialize::SyncManagerResult> &receiver, Buffer &buffer, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
+    void setSlaveBuffer(TestReceiver<Engine::Serialize::SyncManagerResult> &receiver, Buffer &buffer, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
     {
         std::unique_ptr<buffered_streambuf> buf = std::make_unique<buffered_streambuf>(std::make_unique<BufferedTestBuf>(buffer, false));
         Engine::Execution::detach(
-            setSlaveStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 0) }, bool { shareState }, 1s)
+            setSlaveStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 0) }, 1s)
             | Engine::Execution::then_receiver(receiver));
         receiveMessages(-1, 1s);
     }
 
-    SyncManagerResult setMasterBuffer(Buffer &buffer, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
+    SyncManagerResult setMasterBuffer(Buffer &buffer, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
     {
         std::unique_ptr<buffered_streambuf> buf = std::make_unique<buffered_streambuf>(std::make_unique<BufferedTestBuf>(buffer, true));
-        return addMasterStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 1) }, shareState);
+        return addMasterStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 1) });
     }
 
     using SyncManager::getMasterStream;
@@ -143,7 +143,7 @@ struct TestManager : SyncManager {
     }
 #define HANDLE_MGR_RECEIVER(...)                                 \
     {                                                            \
-        TestReceiver<void, SyncManagerResult> receiver;          \
+        TestReceiver<SyncManagerResult> receiver;          \
         __VA_ARGS__;                                             \
         ASSERT_TRUE(receiver.mFinished);                         \
         ASSERT_TRUE(receiver.mHasValue);                         \

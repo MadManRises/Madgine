@@ -140,7 +140,7 @@ namespace Serialize {
     };
 
     enum Command {
-        INITIAL_STATE_DONE
+        SET_ID
     };
 
     template <typename, typename... Configs>

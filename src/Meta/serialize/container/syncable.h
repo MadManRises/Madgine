@@ -7,6 +7,12 @@
 namespace Engine {
 namespace Serialize {
 
+    META_EXPORT FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *unit, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver);
+    META_EXPORT std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *unit, ParticipantId answerTarget, MessageId answerId,
+        const std::set<ParticipantId> &targets = {});
+    void beginRequestResponseMessage(const SyncableUnitBase *unit, FormattedBufferedStream &stream, MessageId id);
+
+
     struct META_EXPORT SyncableBase {
     };
 
@@ -16,12 +22,12 @@ namespace Serialize {
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(ParticipantId answerTarget = 0, MessageId answerId = 0,
             const std::set<ParticipantId> &targets = {}) const
         {
-            return parent()->getMasterActionMessageTargets(answerTarget, answerId, targets);
+            return getMasterActionMessageTargets(parent(), answerTarget, answerId, targets);
         }
 
         FormattedBufferedStream &getSlaveRequestMessageTarget(ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {}) const
         {
-            return parent()->getSlaveRequestMessageTarget(requester, requesterTransactionId, std::move(receiver));
+            return Serialize::getSlaveRequestMessageTarget(parent(), requester, requesterTransactionId, std::move(receiver));
         }
 
         ParticipantId participantId()
@@ -55,12 +61,12 @@ namespace Serialize {
 
         void beginRequestResponseMessage(FormattedBufferedStream &stream, MessageId id) const
         {
-            parent()->beginRequestResponseMessage(stream, id);
+            Serialize::beginRequestResponseMessage(parent(), stream, id);
         }
 
         FormattedBufferedStream &getRequestResponseTarget(ParticipantId stream, MessageId id) const
         {
-            return parent()->getMasterRequestResponseTarget(stream, id);
+            return getMasterRequestResponseTarget(parent(), stream, id);
         }
 
         bool isMaster() const

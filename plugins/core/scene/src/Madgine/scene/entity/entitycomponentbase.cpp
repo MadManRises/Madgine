@@ -57,7 +57,7 @@ namespace Scene {
             payload.mComponent = this;
             payload.mData = data;
 
-            std::set<std::reference_wrapper<Serialize::FormattedBufferedStream>, Serialize::CompareStreamId> streams = mEntity->getMasterActionMessageTargets(answerTarget, answerId, targets);
+            std::set<std::reference_wrapper<Serialize::FormattedBufferedStream>, Serialize::CompareStreamId> streams = getMasterActionMessageTargets(mEntity, answerTarget, answerId, targets);
             mEntity->serializeType()->writeAction(mEntity, 1, streams, &payload);
             for (Serialize::FormattedBufferedStream &stream : streams)
                 stream.endMessageWrite();

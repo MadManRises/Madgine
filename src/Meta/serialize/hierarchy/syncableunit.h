@@ -53,6 +53,16 @@ namespace Serialize {
 
         bool isMaster() const;
 
+        
+        friend META_EXPORT FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *unit, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver);
+        friend META_EXPORT std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *unit, ParticipantId answerTarget, MessageId answerId,
+            const std::set<ParticipantId> &targets);
+        friend META_EXPORT FormattedBufferedStream &getMasterRequestResponseTarget(const SyncableUnitBase *unit, ParticipantId answerTarget, MessageId answerId);
+        friend META_EXPORT FormattedBufferedStream &getMasterRequestResponseTarget(const SyncableUnitBase *unit, ParticipantId answerTarget);
+
+        friend META_EXPORT void beginRequestResponseMessage(const SyncableUnitBase *unit, FormattedBufferedStream &stream, MessageId id);
+
+
     protected:
         void setSlaveId(UnitId id, SerializeManager *mgr);
 
@@ -74,39 +84,19 @@ namespace Serialize {
         void writeRequest(OffsetPtr offset, void *data, ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {}) const;
         void writeRequestResponse(OffsetPtr offset, void *data, ParticipantId answerTarget, MessageId answerId) const;
 
-        FormattedBufferedStream &getSlaveRequestMessageTarget(ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver) const;
-        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(ParticipantId answerTarget, MessageId answerId,
-            const std::set<ParticipantId> &targets = {}) const;
-        FormattedBufferedStream &getMasterRequestResponseTarget(ParticipantId answerTarget, MessageId answerId) const;
-
-        void beginRequestResponseMessage(FormattedBufferedStream &stream, MessageId id) const;
-
     private:
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets(const std::set<ParticipantId> &targets = {}) const;
-        FormattedBufferedStream &getMasterRequestResponseTarget(ParticipantId answerTarget) const;
         FormattedBufferedStream &getSlaveMessageTarget() const;
 
         void clearSlaveId(SerializeManager *mgr);
-
+        
         friend struct SyncManager;
-        friend struct SerializeUnitHelper;
-        friend struct SerializableUnitPtr;
-        friend struct SerializableUnitConstPtr;
-        friend struct SerializableDataPtr;
-        friend struct SerializableDataConstPtr;
-        friend struct SyncableBase;
-        friend struct SerializeTable;
-        template <typename T>
-        friend struct UnitHelper;
         template <typename T, typename Base>
         friend struct TableInitializer;
-        template <typename T>
-        friend struct Syncable;
-        template <typename T>
-        friend struct Serializable;
+        friend struct SerializableUnitConstPtr;
+        friend struct SerializableUnitPtr;
 
         DERIVE_FRIEND(customUnitPtr)
-
         SerializableUnitPtr customUnitPtr();
         SerializableUnitConstPtr customUnitPtr() const;
 

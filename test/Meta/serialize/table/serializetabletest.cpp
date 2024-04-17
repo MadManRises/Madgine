@@ -37,9 +37,10 @@ TEST(Serialize_Table, Test1)
 
 
     Buffer buffer;
-    HANDLE_MGR_RESULT(mgr1, mgr1.setMasterBuffer(buffer, false));
+    HANDLE_MGR_RESULT(mgr1, mgr1.setMasterBuffer(buffer));
     FormattedBufferedStream &stream1 = mgr1.getMasterStream(1);
-    HANDLE_MGR_RECEIVER(mgr2.setSlaveBuffer(receiver, buffer, false));
+    mgr1.sendMessages();
+    HANDLE_MGR_RECEIVER(mgr2.setSlaveBuffer(receiver, buffer));
     FormattedBufferedStream &stream2 = *mgr2.getSlaveStream();
 
     TestStruct t1;

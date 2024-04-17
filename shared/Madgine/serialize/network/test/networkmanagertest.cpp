@@ -29,7 +29,7 @@ TEST(NetworkManager, Connect)
     });
     NetworkManager client("testNetworkClient");
 
-    TestReceiver<void, NetworkManagerResult> receiver;
+    TestReceiver<NetworkManagerResult> receiver;
     Engine::Execution::detach(client.connect("127.0.0.1", 1234, formatter, 4s) | Engine::Execution::then_receiver(receiver));
     EXPECT_EQ(future.get(), NetworkManagerResult::SUCCESS);
     server.sendMessages();

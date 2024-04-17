@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Serialize {
     struct META_EXPORT TopLevelUnitBase : SyncableUnitBase {
-        TopLevelUnitBase(UnitId staticId = 0);
+        TopLevelUnitBase(UnitId masterId = 0);
         TopLevelUnitBase(const TopLevelUnitBase &other);
         TopLevelUnitBase(TopLevelUnitBase &&other) noexcept;
         ~TopLevelUnitBase();
@@ -25,15 +25,20 @@ namespace Serialize {
 
         ParticipantId participantId() const;
 
-        void setStaticSlaveId(UnitId staticId);
-        void initSlaveId(SyncManager *mgr);
+        void receiveStateImpl(Execution::VirtualReceiverBase<bool> &receiver, SyncManager *mgr);
+        ASYNC_STUB(receiveState, receiveStateImpl, Execution::make_simple_virtual_sender<bool>);
+        void stateReadDone();
 
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets() const;
 
     private:
         std::vector<SyncManager *> mManagers;
         SyncManager *mSlaveManager = nullptr;
-        UnitId mStaticSlaveId;
+        UnitId mStaticSlaveId = 0;
+
+        friend struct SyncManager;
+
+        Execution::VirtualReceiverBase<bool> *mReceivingMasterState = nullptr;
     };
 
     template <typename T>

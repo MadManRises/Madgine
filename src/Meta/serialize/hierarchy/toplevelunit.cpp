@@ -10,11 +10,9 @@
 
 namespace Engine {
 namespace Serialize {
-    TopLevelUnitBase::TopLevelUnitBase(UnitId staticId)
-        : SyncableUnitBase(staticId)
-        , mStaticSlaveId(staticId) 
+    TopLevelUnitBase::TopLevelUnitBase(UnitId masterId)
+        : SyncableUnitBase(masterId)
     {
-        assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE && staticId < RESERVED_ID_COUNT));
         mTopLevel = this;
     }
 
@@ -60,17 +58,19 @@ namespace Serialize {
         return SyncManager::getParticipantId(mSlaveManager);
     }
 
-    void TopLevelUnitBase::setStaticSlaveId(
-        UnitId staticId)
-    {
-        assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE /* && staticId < RESERVED_ID_COUNT*/));
-        mStaticSlaveId = staticId;
-    }
-
-    void TopLevelUnitBase::initSlaveId(SyncManager *mgr)
+    void TopLevelUnitBase::receiveStateImpl(Execution::VirtualReceiverBase<bool> &receiver, SyncManager *mgr)
     {
         if (mStaticSlaveId)
-            setSlaveId(mStaticSlaveId, mgr);                
+            setSlaveId(mStaticSlaveId, mgr);
+        assert(!mReceivingMasterState);
+        mReceivingMasterState = &receiver;
+    }
+
+    void TopLevelUnitBase::stateReadDone()
+    {
+        assert(mReceivingMasterState);
+        Execution::VirtualReceiverBase<bool> *rec = std::exchange(mReceivingMasterState, nullptr);
+        rec->set_value();
     }
 
     std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> TopLevelUnitBase::getMasterMessageTargets() const
@@ -128,7 +128,7 @@ namespace Serialize {
         if (isMaster) {
             assert(mSlaveManager == mgr);
             mSlaveManager = nullptr;
-        }else{
+        } else {
             if (mSlaveManager)
                 return false;
             mSlaveManager = mgr;
