@@ -200,7 +200,7 @@ void testCreateCommitedResource(ID3D12Device *device)
                 &heapDesc,
                 D3D12_HEAP_FLAG_NONE,
                 &resourceDesc,
-                D3D12_RESOURCE_STATE_COMMON,
+                type == D3D12_HEAP_TYPE_READBACK ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_GENERIC_READ,
                 nullptr,
                 IID_PPV_ARGS(&res));
             check(hr, ss);

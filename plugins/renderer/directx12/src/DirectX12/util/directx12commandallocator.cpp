@@ -48,16 +48,18 @@ namespace Render {
         DX12_CHECK(hr);
 
 #if ENABLE_PROFILER || ENABLE_TASK_TRACKING
-        UINT64 timestampFrequency;
-        hr = mCommandQueue->GetTimestampFrequency(&timestampFrequency);
-        DX12_CHECK(hr);
+        if (mType != D3D12_COMMAND_LIST_TYPE_COPY) {
+            UINT64 timestampFrequency;
+            hr = mCommandQueue->GetTimestampFrequency(&timestampFrequency);
+            DX12_CHECK(hr);
 
-        mGPUFrequency = timestampFrequency / 1000000000.0f;
+            mGPUFrequency = timestampFrequency / 1000000000.0f;
 
-        UINT64 gpuTimestamp, cpuTimestamp;
-        hr = mCommandQueue->GetClockCalibration(&gpuTimestamp, &cpuTimestamp);
-        DX12_CHECK(hr);
-        mGPUTimestampOffset = gpuTimestamp - (mGPUFrequency / getCPUFrequency()) * cpuTimestamp;
+            UINT64 gpuTimestamp, cpuTimestamp;
+            hr = mCommandQueue->GetClockCalibration(&gpuTimestamp, &cpuTimestamp);
+            DX12_CHECK(hr);
+            mGPUTimestampOffset = gpuTimestamp - (mGPUFrequency / getCPUFrequency()) * cpuTimestamp;
+        }
 #endif
 
 #if ENABLE_TASK_TRACKING
@@ -111,9 +113,11 @@ namespace Render {
         }
 
 #if ENABLE_PROFILER
-        size_t index = mTimestampHeap->allocate(2);
-        list->EndQuery(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, index);
-        mPendingStats.mIndex = index;
+        if (mType != D3D12_COMMAND_LIST_TYPE_COPY) {
+            size_t index = mTimestampHeap->allocate(2);
+            list->EndQuery(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, index);
+            mPendingStats.mIndex = index;
+        }
 #endif
 
         return { this, std::move(list), std::move(alloc) };
@@ -122,40 +126,42 @@ namespace Render {
     RenderFuture DirectX12CommandAllocator::ExecuteCommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator, std::vector<Any> discardResources)
     {
 #if ENABLE_PROFILER
-        list->EndQuery(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, mPendingStats.mIndex + 1);
-        struct ProfileHelper {
-            ProfileHelper(std::pair<uint64_t, uint64_t> *data, DirectX12CommandAllocator *allocator)
-                : mData(data)
-                , mAllocator(allocator)
-            {
-            }
-            ~ProfileHelper()
-            {
-                uint64_t diff = mData->second - mData->first;
-                std::chrono::nanoseconds time { static_cast<uint64_t>(diff / mAllocator->mGPUFrequency) };
-                mAllocator->mProfiler.mStats.updateChild(&mAllocator->mStats, mAllocator->mStats.inject(time));
+        if (mType != D3D12_COMMAND_LIST_TYPE_COPY) {
+            list->EndQuery(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, mPendingStats.mIndex + 1);
+            struct ProfileHelper {
+                ProfileHelper(std::pair<uint64_t, uint64_t> *data, DirectX12CommandAllocator *allocator)
+                    : mData(data)
+                    , mAllocator(allocator)
+                {
+                }
+                ~ProfileHelper()
+                {
+                    uint64_t diff = mData->second - mData->first;
+                    std::chrono::nanoseconds time { static_cast<uint64_t>(diff / mAllocator->mGPUFrequency) };
+                    mAllocator->mProfiler.mStats.updateChild(&mAllocator->mStats, mAllocator->mStats.inject(time));
 
 #    if ENABLE_TASK_TRACKING
-                std::chrono::high_resolution_clock::time_point startTimePoint {
-                    std::chrono::nanoseconds {
-                        static_cast<long long>((mData->first - mAllocator->mGPUTimestampOffset) / mAllocator->mGPUFrequency) }
-                };
-                std::chrono::high_resolution_clock::time_point endTimePoint {
-                    std::chrono::nanoseconds {
-                        static_cast<long long>((mData->second - mAllocator->mGPUTimestampOffset) / mAllocator->mGPUFrequency) }
-                };
-                mAllocator->mTracker.onEnter(mAllocator, startTimePoint);
-                mAllocator->mTracker.onReturn(mAllocator, endTimePoint);
+                    std::chrono::high_resolution_clock::time_point startTimePoint {
+                        std::chrono::nanoseconds {
+                            static_cast<long long>((mData->first - mAllocator->mGPUTimestampOffset) / mAllocator->mGPUFrequency) }
+                    };
+                    std::chrono::high_resolution_clock::time_point endTimePoint {
+                        std::chrono::nanoseconds {
+                            static_cast<long long>((mData->second - mAllocator->mGPUTimestampOffset) / mAllocator->mGPUFrequency) }
+                    };
+                    mAllocator->mTracker.onEnter(mAllocator, startTimePoint);
+                    mAllocator->mTracker.onReturn(mAllocator, endTimePoint);
 #    endif
-            }
-            std::pair<uint64_t, uint64_t> *mData;
-            DirectX12CommandAllocator *mAllocator;
-        };
-        void *address = DirectX12RenderContext::getSingleton().mReadbackAllocator.allocate(sizeof(std::pair<uint64_t, uint64_t>)).mAddress;
-        auto [res, offset] = DirectX12RenderContext::getSingleton().mReadbackMemoryHeap.resolve(address);
-        list->ResolveQueryData(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, mPendingStats.mIndex, 2, res, offset);
+                }
+                std::pair<uint64_t, uint64_t> *mData;
+                DirectX12CommandAllocator *mAllocator;
+            };
+            void *address = DirectX12RenderContext::getSingleton().mReadbackAllocator.allocate(sizeof(std::pair<uint64_t, uint64_t>)).mAddress;
+            auto [res, offset] = DirectX12RenderContext::getSingleton().mReadbackMemoryHeap.resolve(address);
+            list->ResolveQueryData(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, mPendingStats.mIndex, 2, res, offset);
 
-        discardResources.emplace_back(Any::inplace<ProfileHelper>, static_cast<std::pair<uint64_t, uint64_t> *>(address), this);
+            discardResources.emplace_back(Any::inplace<ProfileHelper>, static_cast<std::pair<uint64_t, uint64_t> *>(address), this);
+        }
 #endif
 
         HRESULT hr = list->Close();
