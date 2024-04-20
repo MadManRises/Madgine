@@ -87,5 +87,10 @@ namespace FirstParty {
         co_return true;
     }
 
+    Threading::Task<std::vector<Lobby>> GooglePlayServices::getLobbyListTask()
+    {
+        throw 0;
+    }
+
 }
 }

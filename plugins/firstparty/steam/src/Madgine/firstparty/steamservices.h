@@ -33,6 +33,23 @@ namespace FirstParty {
 
         virtual Threading::Task<bool> unlockAchievementTask(const char *name) override;
 
+        /////////// MATCHMAKING
+
+        virtual Threading::Task<std::vector<Lobby>> getLobbyListTask() override;
+        virtual Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb) override;
+        virtual Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb) override;
+        virtual Threading::Task<bool> startMatchTask() override;
+        virtual void leaveLobby() override;
+        virtual void setLobbyInfoCallback(LobbyInfoCallback cb) override;
+
+        void updateLobbyInfo();
+
+        CSteamID mCurrentLobby;
+        MatchmakingCallback mCurrentMatchmakingCallback;
+        LobbyInfoCallback mLobbyInfoCallback;
+
+        STEAM_CALLBACK(SteamServices, onLobbyInfoUpdate, LobbyDataUpdate_t);
+
         //////////////////
 
         bool mInitialized = false;

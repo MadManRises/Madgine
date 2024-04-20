@@ -21,6 +21,36 @@ static void log(std::string_view s)
     fOut << s << std::endl;
 }
 
+static void __stdcall dxDebugOutput(D3D12_MESSAGE_CATEGORY category,
+    D3D12_MESSAGE_SEVERITY severity,
+    D3D12_MESSAGE_ID id,
+    LPCSTR message,
+    void *context)
+{
+    std::stringstream ss;
+
+    switch (severity) {
+    case D3D12_MESSAGE_SEVERITY_CORRUPTION:
+        ss << "Fatal: ";
+        break;
+    case D3D12_MESSAGE_SEVERITY_ERROR:
+        ss << "Error: ";
+        break;
+    case D3D12_MESSAGE_SEVERITY_WARNING:
+        ss << "Warning: ";
+        break;
+    case D3D12_MESSAGE_SEVERITY_INFO:
+        ss << "Info: ";
+        break;
+    case D3D12_MESSAGE_SEVERITY_MESSAGE:
+        ss << "Message: ";
+        break;
+    }
+
+    ss << "(" << id << "): " << message;
+    log(ss.str());
+}
+
 inline void dx12Check(const char *file, size_t line, HRESULT result = 0)
 {
     if (FAILED(result)) {
@@ -33,7 +63,8 @@ inline void dx12Check(const char *file, size_t line, HRESULT result = 0)
     }
 }
 
-void check(HRESULT hr, std::stringstream& ss) {
+void check(HRESULT hr, std::stringstream &ss)
+{
     if (FAILED(hr)) {
         ss << "Failed (" << std::hex << hr << "): \n";
         _com_error error { hr };
@@ -182,6 +213,15 @@ void testCreateCommitedResource(ID3D12Device *device)
 
 int main()
 {
+    ReleasePtr<ID3D12Debug> debugController;
+    if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+        debugController->EnableDebugLayer();
+        ReleasePtr<ID3D12Debug1> debugController1;
+        if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1)))) {
+            //debugController1->SetEnableGPUBasedValidation(true);
+            log("Enabled Debug Layer");
+        }
+    }
 
     ReleasePtr<IDXGIFactory4> factory;
 
@@ -196,6 +236,19 @@ int main()
     hr = D3D12CreateDevice(hardwareAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device));
     DX12_CHECK(hr);
     log("Success\n");
+
+    {
+        ReleasePtr<ID3D12InfoQueue1> infoQueue;
+        hr = device->QueryInterface(IID_PPV_ARGS(&infoQueue));
+
+        DWORD cookie;
+        if (SUCCEEDED(hr)) {
+            hr = infoQueue->RegisterMessageCallback(
+                &dxDebugOutput,
+                D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &cookie);
+            DX12_CHECK(hr);
+        }
+    }
 
     logProperties(device);
 

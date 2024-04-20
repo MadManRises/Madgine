@@ -6,8 +6,13 @@
 
 #include "Modules/threading/taskfuture.h"
 
+#include "Meta/serialize/syncmanager.h"
+
 namespace Engine {
 namespace FirstParty {
+
+    struct FirstPartySyncManager : Serialize::SyncManager {
+    };
     
     struct Leaderboard {
 
@@ -31,6 +36,18 @@ namespace FirstParty {
         std::vector<Entry> mEntries;
     };
 
+    struct Lobby {
+        uint64_t mId;
+    };
+
+    struct PlayerInfo {
+        std::string mName;
+    };
+
+    struct LobbyInfo {
+        std::vector<PlayerInfo> mPlayers;
+    };
+
     struct MADGINE_FIRST_PARTY_EXPORT FirstPartyServices : Root::VirtualRootComponentBase<FirstPartyServices> {
 
         FirstPartyServices(Root::Root &root);
@@ -49,6 +66,27 @@ namespace FirstParty {
 
         Threading::TaskFuture<bool> unlockAchievement(const char *name);
         virtual Threading::Task<bool> unlockAchievementTask(const char *name) = 0;
+
+        ///////// MATCHMAKING
+
+        using MatchmakingCallback = Closure<void(FirstPartySyncManager&)>;
+        using LobbyInfoCallback = Closure<void(const LobbyInfo &)>;
+
+        Threading::TaskFuture<std::vector<Lobby>> getLobbyList();
+        virtual Threading::Task<std::vector<Lobby>> getLobbyListTask() = 0;
+
+        Threading::TaskFuture<std::optional<Lobby>> createLobby(MatchmakingCallback cb);
+        virtual Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb) = 0;
+
+        Threading::TaskFuture<std::optional<Lobby>> joinLobby(uint64_t id, MatchmakingCallback cb);
+        virtual Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb) = 0;
+
+        Threading::TaskFuture<bool> startMatch();
+        virtual Threading::Task<bool> startMatchTask() = 0;
+
+        virtual void setLobbyInfoCallback(LobbyInfoCallback cb) = 0;        
+
+        virtual void leaveLobby() = 0;
     };
 
     template <typename T>

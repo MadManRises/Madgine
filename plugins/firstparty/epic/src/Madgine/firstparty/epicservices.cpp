@@ -287,12 +287,12 @@ namespace FirstParty {
             leaderboardsRecordsCountOptions.ApiVersion = EOS_LEADERBOARDS_GETLEADERBOARDRECORDCOUNT_API_LATEST;
 
             uint32_t leaderboardRecordsCount = EOS_Leaderboards_GetLeaderboardRecordCount(mLeaderboardsInterface, &leaderboardsRecordsCountOptions);
-            
+
             leaderboard.mEntries.clear();
-            pib.first->second.mLastUpdate = now;            
-            
+            pib.first->second.mLastUpdate = now;
+
             EOS_Leaderboards_CopyLeaderboardRecordByIndexOptions copyOptions {};
-            copyOptions.ApiVersion = EOS_LEADERBOARDS_COPYLEADERBOARDRECORDBYINDEX_API_LATEST;            
+            copyOptions.ApiVersion = EOS_LEADERBOARDS_COPYLEADERBOARDRECORDBYINDEX_API_LATEST;
 
             for (copyOptions.LeaderboardRecordIndex = 0; copyOptions.LeaderboardRecordIndex < leaderboardRecordsCount; ++copyOptions.LeaderboardRecordIndex) {
                 EOS_Leaderboards_LeaderboardRecord *leaderboardRecord = NULL;
@@ -450,6 +450,36 @@ namespace FirstParty {
     }
 
     Threading::Task<bool> EpicServices::unlockAchievementTask(const char *name)
+    {
+        throw 0;
+    }
+
+    Threading::Task<std::vector<Lobby>> EpicServices::getLobbyListTask()
+    {
+        throw 0;
+    }
+
+    Threading::Task<std::optional<Lobby>> EpicServices::createLobbyTask(MatchmakingCallback cb)
+    {
+        throw 0;
+    }
+
+    Threading::Task<std::optional<Lobby>> EpicServices::joinLobbyTask(uint64_t id, MatchmakingCallback cb)
+    {
+        throw 0;
+    }
+
+    Threading::Task<bool> EpicServices::startMatchTask()
+    {
+        throw 0;
+    }
+
+    void EpicServices::leaveLobby()
+    {
+        throw 0;
+    }
+
+    void EpicServices::setLobbyInfoCallback(LobbyInfoCallback cb)
     {
         throw 0;
     }

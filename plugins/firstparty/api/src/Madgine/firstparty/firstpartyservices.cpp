@@ -34,5 +34,25 @@ namespace FirstParty {
         return mRoot.taskQueue()->queueTask(unlockAchievementTask(name));
     }
 
+    Threading::TaskFuture<std::vector<Lobby>> FirstPartyServices::getLobbyList()
+    {
+        return mRoot.taskQueue()->queueTask(getLobbyListTask());
+    }
+
+    Threading::TaskFuture<std::optional<Lobby>> FirstPartyServices::createLobby(MatchmakingCallback cb)
+    {
+        return mRoot.taskQueue()->queueTask(createLobbyTask(std::move(cb)));
+    }
+
+    Threading::TaskFuture<std::optional<Lobby>> FirstPartyServices::joinLobby(uint64_t id, MatchmakingCallback cb)
+    {
+        return mRoot.taskQueue()->queueTask(joinLobbyTask(id, std::move(cb)));
+    }
+
+    Threading::TaskFuture<bool> FirstPartyServices::startMatch()
+    {
+        return mRoot.taskQueue()->queueTask(startMatchTask());
+    }
+
 }
 }

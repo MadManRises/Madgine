@@ -4,6 +4,8 @@
 
 #include "Interfaces/socket/socketapi.h"
 
+#undef SOCKET_ERROR
+
 namespace Engine {
 namespace Network {
 

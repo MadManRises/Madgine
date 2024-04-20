@@ -147,5 +147,100 @@ namespace FirstParty {
         co_return SteamUserStats()->StoreStats();
     }
 
+    Threading::Task<std::vector<Lobby>> SteamServices::getLobbyListTask()
+    {
+        LobbyMatchList_t result = (co_await steam_sender<LobbyMatchList_t>(SteamMatchmaking()->RequestLobbyList())).value();
+
+        std::vector<Lobby> lobbies;
+        lobbies.reserve(result.m_nLobbiesMatching);
+
+        for (size_t i = 0; i < result.m_nLobbiesMatching; ++i) {
+            Lobby &lobby = lobbies.emplace_back();
+            lobby.mId = SteamMatchmaking()->GetLobbyByIndex(i).ConvertToUint64();
+        }
+
+        co_return std::move(lobbies);
+    }
+
+    Threading::Task<std::optional<Lobby>> SteamServices::createLobbyTask(MatchmakingCallback cb)
+    {
+        assert(!mCurrentLobby.IsValid());
+
+        LobbyCreated_t result = (co_await steam_sender<LobbyCreated_t>(SteamMatchmaking()->CreateLobby(k_ELobbyTypePublic, 2))).value();
+
+        if (result.m_eResult != k_EResultOK) {
+            LOG_ERROR("Error creating Steam Lobby: " << result.m_eResult);
+            co_return {};
+        }
+
+        mCurrentMatchmakingCallback = std::move(cb);
+        mCurrentLobby.SetFromUint64(result.m_ulSteamIDLobby);
+
+        updateLobbyInfo();
+
+        co_return Lobby { result.m_ulSteamIDLobby };
+    }
+
+    Threading::Task<std::optional<Lobby>> SteamServices::joinLobbyTask(uint64_t id, MatchmakingCallback cb)
+    {
+        assert(!mCurrentLobby.IsValid());
+
+        LobbyEnter_t result = (co_await steam_sender<LobbyEnter_t>(SteamMatchmaking()->JoinLobby(id))).value();
+
+        if (result.m_EChatRoomEnterResponse != k_EChatRoomEnterResponseSuccess) {
+            LOG_ERROR("Error joining Steam Lobby(" << id << "): " << result.m_EChatRoomEnterResponse);
+            co_return {};
+        }
+
+        mCurrentMatchmakingCallback = std::move(cb);
+        mCurrentLobby.SetFromUint64(result.m_ulSteamIDLobby);
+
+        updateLobbyInfo();
+
+        co_return Lobby { result.m_ulSteamIDLobby };
+    }
+
+    Threading::Task<bool> SteamServices::startMatchTask()
+    {
+        assert(mCurrentLobby.IsValid());
+    }
+
+    void SteamServices::leaveLobby()
+    {
+        if (mCurrentLobby.IsValid()) {
+            SteamMatchmaking()->LeaveLobby(mCurrentLobby);
+            mCurrentLobby.Clear();
+            mCurrentMatchmakingCallback = {};
+        }
+    }
+
+    void SteamServices::setLobbyInfoCallback(LobbyInfoCallback cb)
+    {
+        mLobbyInfoCallback = std::move(cb);
+
+        updateLobbyInfo();
+    }
+
+    void SteamServices::updateLobbyInfo()
+    {
+        if (mCurrentLobby.IsValid() && mLobbyInfoCallback) {
+
+            int players = SteamMatchmaking()->GetNumLobbyMembers(mCurrentLobby);
+
+            LobbyInfo lobbyInfo;
+            for (int i = 0; i < players; ++i) {
+                CSteamID user = SteamMatchmaking()->GetLobbyMemberByIndex(mCurrentLobby, i);
+                PlayerInfo &info = lobbyInfo.mPlayers.emplace_back();
+                info.mName = SteamFriends()->GetFriendPersonaName(user);
+            }
+            mLobbyInfoCallback(lobbyInfo);
+        }
+    }
+
+    void SteamServices::onLobbyInfoUpdate(LobbyDataUpdate_t *data)
+    {
+        updateLobbyInfo();
+    }
+
 }
 }
