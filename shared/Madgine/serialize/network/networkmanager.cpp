@@ -55,7 +55,7 @@ namespace Network {
         return NetworkManagerResult::SUCCESS;
     }
 
-    void NetworkManager::connectImpl(Execution::VirtualReceiverBase<type_pack<NetworkManagerResult, Serialize::SyncManagerResult>> &receiver, std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
+    void NetworkManager::connectImpl(Execution::VirtualReceiverBase<type_pack<NetworkManagerResult, Serialize::SyncManagerResult>> &receiver, std::string_view url, int portNr, Serialize::Format format, TimeOut timeout)
     {
         if (isConnected()) {
             receiver.set_error(NetworkManagerResult::ALREADY_CONNECTED);
@@ -84,7 +84,7 @@ namespace Network {
         }
     }
 
-    int NetworkManager::acceptConnections(std::unique_ptr<Serialize::Formatter> (*format)(), int limit, TimeOut timeout)
+    int NetworkManager::acceptConnections(Serialize::Format format, int limit, TimeOut timeout)
     {
         int count = 0;
         if (isServer()) {
@@ -102,7 +102,7 @@ namespace Network {
         return count;
     }
 
-    NetworkManagerResult NetworkManager::acceptConnection(std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
+    NetworkManagerResult NetworkManager::acceptConnection(Serialize::Format format, TimeOut timeout)
     {
         if (!isServer())
             return NetworkManagerResult::NO_SERVER;

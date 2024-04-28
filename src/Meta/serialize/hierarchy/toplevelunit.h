@@ -25,6 +25,7 @@ namespace Serialize {
 
         ParticipantId participantId() const;
 
+        void setStaticSlaveId(UnitId slaveId);
         void receiveStateImpl(Execution::VirtualReceiverBase<bool> &receiver, SyncManager *mgr);
         ASYNC_STUB(receiveState, receiveStateImpl, Execution::make_simple_virtual_sender<bool>);
         void stateReadDone();

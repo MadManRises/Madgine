@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Generic/callerhierarchy.h"
-#include "Generic/execution/sender.h"
 #include "Generic/closure.h"
+#include "Generic/execution/sender.h"
 #include "Generic/offsetptr.h"
 #include "serializableunit.h"
 
@@ -53,15 +53,13 @@ namespace Serialize {
 
         bool isMaster() const;
 
-        
-        friend META_EXPORT FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *unit, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver);
+        friend META_EXPORT FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *unit);
         friend META_EXPORT std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *unit, ParticipantId answerTarget, MessageId answerId,
             const std::set<ParticipantId> &targets);
         friend META_EXPORT FormattedBufferedStream &getMasterRequestResponseTarget(const SyncableUnitBase *unit, ParticipantId answerTarget, MessageId answerId);
         friend META_EXPORT FormattedBufferedStream &getMasterRequestResponseTarget(const SyncableUnitBase *unit, ParticipantId answerTarget);
 
         friend META_EXPORT void beginRequestResponseMessage(const SyncableUnitBase *unit, FormattedBufferedStream &stream, MessageId id);
-
 
     protected:
         void setSlaveId(UnitId id, SerializeManager *mgr);
@@ -89,7 +87,7 @@ namespace Serialize {
         FormattedBufferedStream &getSlaveMessageTarget() const;
 
         void clearSlaveId(SerializeManager *mgr);
-        
+
         friend struct SyncManager;
         template <typename T, typename Base>
         friend struct TableInitializer;
@@ -155,26 +153,37 @@ namespace Serialize {
         {
             using traits = typename Callable<f>::traits;
             using R = typename traits::return_type;
-            return make_message_sender<R>(
-                [this](auto &receiver, Args &&...args2) {
-                    typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args2)... };
-                    if (this->isMaster()) {
-                        this->writeFunctionAction(functionIndex<f>, &argTuple);
-                        if constexpr (std::same_as<decltype(TupleUnpacker::invokeExpand(f, static_cast<T *>(this), argTuple)), void>) {
+
+            if constexpr (std::same_as<R, void>) {
+                return make_message_sender<>(
+                    [this](auto &receiver, Args &&...args2) {
+                        typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args2)... };
+                        if (this->isMaster()) {
+                            this->writeFunctionAction(functionIndex<f>, &argTuple);
                             TupleUnpacker::invokeExpand(f, static_cast<T *>(this), argTuple);
                             receiver.set_value();
                         } else {
-                            receiver.set_value(TupleUnpacker::invokeExpand(f, static_cast<T *>(this), argTuple));
+                            this->writeFunctionRequest(functionIndex<f>, CALL, &argTuple, 0, 0, receiver);
                         }
-                    } else {
-                        this->writeFunctionRequest(functionIndex<f>, CALL, &argTuple, 0, 0, receiver);
-                    }
-                },
-                std::forward<Args>(args)...);
+                    },
+                    std::forward<Args>(args)...);
+            } else {
+                return make_message_sender<R>(
+                    [this](auto &receiver, Args &&...args2) {
+                        typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args2)... };
+                        if (this->isMaster()) {
+                            this->writeFunctionAction(functionIndex<f>, &argTuple);
+                            receiver.set_value(TupleUnpacker::invokeExpand(f, static_cast<T *>(this), argTuple));
+                        } else {
+                            this->writeFunctionRequest(functionIndex<f>, CALL, &argTuple, 0, 0, receiver);
+                        }
+                    },
+                    std::forward<Args>(args)...);
+            }
         }
 
         template <auto f, typename... Args>
-        void notify(const std::set<ParticipantId> &targets, Args &&...args)
+        void notify_some(const std::set<ParticipantId> &targets, Args &&...args)
         {
             assert(this->isMaster());
             if (!targets.empty()) {
@@ -182,6 +191,15 @@ namespace Serialize {
                 typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
                 this->writeFunctionAction(functionIndex<f>, &argTuple, targets);
             }
+        }
+
+        template <auto f, typename... Args>
+        void notify(Args &&...args)
+        {
+            assert(this->isMaster());
+            using traits = typename Callable<f>::traits;
+            typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
+            this->writeFunctionAction(functionIndex<f>, &argTuple);
         }
 
         template <auto f, typename... Args>

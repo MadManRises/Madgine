@@ -20,8 +20,8 @@ namespace Serialize {
         FormattedBufferedStream &operator=(FormattedBufferedStream &&) = default;
 
         void beginMessageWrite();
-        void beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessageReceiver receiver);
         void endMessageWrite();
+        void endMessageWrite(ParticipantId requester, MessageId requestId, GenericMessageReceiver receiver = {});
 
         struct META_EXPORT MessageReadMarker {
             MessageReadMarker(MessageId id = 0, Formatter *formatter = nullptr)

@@ -95,23 +95,24 @@ namespace Serialize {
         return 0;
     }
 
-    MessageId buffered_streambuf::beginMessageWriteImpl()
+    void buffered_streambuf::beginMessageWriteImpl()
     {
+        assert(mSendBuffer.empty());
         extend();
-        BufferedMessageHeader *header = reinterpret_cast<BufferedMessageHeader *>(mSendBuffer.data());
-        header->mMessageId = ++mRunningMessageId;
-        return header->mMessageId;
     }
 
-    void buffered_streambuf::endMessageWriteImpl()
+    MessageId buffered_streambuf::endMessageWriteImpl()
     {
+        MessageId id = ++mRunningMessageId;
         assert(!mSendBuffer.empty());
         BufferedMessageHeader *header = reinterpret_cast<BufferedMessageHeader *>(mSendBuffer.data());
         header->mMsgSize = pptr() - pbase() - sizeof(BufferedMessageHeader);
+        header->mMessageId = id;
         assert(header->mMsgSize > 0);
         mSendBuffer.resize(pptr() - pbase());
         mSendBuffer.shrink_to_fit();
         mBufferedSendMsgs.emplace(BufferedSendMessage { std::move(mSendBuffer) });
+        return id;
     }
 
     MessageId buffered_streambuf::beginMessageReadImpl()

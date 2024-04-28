@@ -6,6 +6,8 @@
 
 #include <steam/steam_api.h>
 
+#include "steamsyncmanager.h"
+
 namespace Engine {
 namespace FirstParty {
 
@@ -14,15 +16,15 @@ namespace FirstParty {
         SteamServices(Root::Root &root);
         ~SteamServices();
 
-        virtual std::string_view key() const override;
+        std::string_view key() const override;
 
         ////////// LEADERBOARD
 
-        virtual Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd) override;
+        Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd) override;
 
         /////////// STATS        
 
-        virtual Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) override;
+        Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) override;
         void requestCurrentStats();
 
         Threading::TaskPromise<bool> mStatsRequestedPromise;
@@ -31,24 +33,33 @@ namespace FirstParty {
 
         /////////// ACHIEVEMENTS
 
-        virtual Threading::Task<bool> unlockAchievementTask(const char *name) override;
+        Threading::Task<bool> unlockAchievementTask(const char *name) override;
 
         /////////// MATCHMAKING
 
-        virtual Threading::Task<std::vector<Lobby>> getLobbyListTask() override;
-        virtual Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb) override;
-        virtual Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb) override;
-        virtual Threading::Task<bool> startMatchTask() override;
-        virtual void leaveLobby() override;
-        virtual void setLobbyInfoCallback(LobbyInfoCallback cb) override;
+        Threading::Task<std::vector<Lobby>> getLobbyListTask() override;
+        Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb) override;
+        Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb, SessionStartedCallback sessionCb) override;
+        Threading::Task<bool> startMatchTask() override;
+        void leaveLobby() override;
+        void leaveMatch() override;
+        bool isLobbyOwner() const override;
+        void setLobbyInfoCallback(LobbyInfoCallback cb) override;
 
         void updateLobbyInfo();
+        void onMatchStarted(CSteamID serverID);
 
         CSteamID mCurrentLobby;
         MatchmakingCallback mCurrentMatchmakingCallback;
-        LobbyInfoCallback mLobbyInfoCallback;
+        SessionStartedCallback mSessionStartedCallback;
+        LobbyInfoCallback mLobbyInfoCallback;        
+        
+
+        SteamSyncManager mSyncManager;
 
         STEAM_CALLBACK(SteamServices, onLobbyInfoUpdate, LobbyDataUpdate_t);
+        STEAM_CALLBACK(SteamServices, onChatUpdate, LobbyChatUpdate_t);
+        STEAM_CALLBACK(SteamServices, onGameCreated, LobbyGameCreated_t);
 
         //////////////////
 

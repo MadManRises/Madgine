@@ -312,10 +312,10 @@ namespace Serialize {
                     std::ranges::iterator_t<C> it;
                     STREAM_PROPAGATE_ERROR(performOperation(c, op, inout, it, inout.id(), id, hierarchy));
                 } else {
-                    FormattedBufferedStream &out = c.getSlaveRequestMessageTarget(inout.id(), id);
+                    FormattedBufferedStream &out = c.getSlaveRequestMessageTarget();
                     Serialize::write(out, op, "operation");
                     out.stream().pipe(inout.stream());
-                    out.endMessageWrite();
+                    out.endMessageWrite(inout.id(), id);
                 }
             }
             return {};

@@ -68,7 +68,7 @@ namespace Scene {
             throw 0;
         }
 
-        Serialize::FormattedBufferedStream &Engine::Scene::Entity::SyncableEntityComponentBase::getSlaveRequestMessageTarget(Serialize::ParticipantId requester, Serialize::MessageId requesterTransactionId, Serialize::GenericMessageReceiver receiver) const
+        Serialize::FormattedBufferedStream &Engine::Scene::Entity::SyncableEntityComponentBase::getSlaveRequestMessageTarget() const
         {
             throw 0;
         }

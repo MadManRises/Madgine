@@ -58,6 +58,13 @@ namespace Serialize {
         return SyncManager::getParticipantId(mSlaveManager);
     }
 
+    void TopLevelUnitBase::setStaticSlaveId(UnitId slaveId)
+    {
+        mStaticSlaveId = slaveId;
+        if (mReceivingMasterState)
+            setSlaveId(slaveId, mSlaveManager);
+    }
+
     void TopLevelUnitBase::receiveStateImpl(Execution::VirtualReceiverBase<bool> &receiver, SyncManager *mgr)
     {
         if (mStaticSlaveId)

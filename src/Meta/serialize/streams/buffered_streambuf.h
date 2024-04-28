@@ -23,8 +23,8 @@ namespace Serialize {
 
         virtual ~buffered_streambuf();
 
-        MessageId beginMessageWriteImpl() override;
-        void endMessageWriteImpl() override;
+        void beginMessageWriteImpl() override;
+        MessageId endMessageWriteImpl() override;
 
         MessageId beginMessageReadImpl() override;
 

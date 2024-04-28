@@ -16,6 +16,8 @@
 
 #include "Modules/threading/awaitables/awaitablesender.h"
 
+#include "Generic/execution/execution.h"
+
 METATABLE_BEGIN_BASE(Engine::FirstParty::SteamServices, Engine::FirstParty::FirstPartyServices)
 READONLY_PROPERTY(Initialized, mInitialized)
 METATABLE_END(Engine::FirstParty::SteamServices)
@@ -27,6 +29,7 @@ namespace FirstParty {
 
     SteamServices::SteamServices(Root::Root &root)
         : FirstPartyServicesImpl<SteamServices>(root)
+        , mSyncManager("SteamP2P")
     {
         if (SteamAPI_RestartAppIfNecessary(STEAM_APP_ID)) {
             mErrorCode = -1;
@@ -35,10 +38,13 @@ namespace FirstParty {
 
         mInitialized = SteamAPI_Init();
 
+        mSyncManager.setup();
+
         root.taskQueue()->queue([this]() -> Threading::Task<void> {
             while (mRoot.taskQueue()->running()) {
                 SteamAPI_RunCallbacks();
-                co_await 100ms;
+                mSyncManager.sendAndReceiveMessages();
+                co_await 10ms;
             }
         });
 
@@ -47,6 +53,8 @@ namespace FirstParty {
 
     SteamServices::~SteamServices()
     {
+        mSyncManager.disconnect();
+
         SteamAPI_Shutdown();
     }
 
@@ -156,13 +164,14 @@ namespace FirstParty {
 
         for (size_t i = 0; i < result.m_nLobbiesMatching; ++i) {
             Lobby &lobby = lobbies.emplace_back();
-            lobby.mId = SteamMatchmaking()->GetLobbyByIndex(i).ConvertToUint64();
+            CSteamID id = SteamMatchmaking()->GetLobbyByIndex(i);
+            lobby.mId = id.ConvertToUint64();
         }
 
         co_return std::move(lobbies);
     }
 
-    Threading::Task<std::optional<Lobby>> SteamServices::createLobbyTask(MatchmakingCallback cb)
+    Threading::Task<std::optional<Lobby>> SteamServices::createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb)
     {
         assert(!mCurrentLobby.IsValid());
 
@@ -174,6 +183,7 @@ namespace FirstParty {
         }
 
         mCurrentMatchmakingCallback = std::move(cb);
+        mSessionStartedCallback = std::move(sessionCb);
         mCurrentLobby.SetFromUint64(result.m_ulSteamIDLobby);
 
         updateLobbyInfo();
@@ -181,7 +191,7 @@ namespace FirstParty {
         co_return Lobby { result.m_ulSteamIDLobby };
     }
 
-    Threading::Task<std::optional<Lobby>> SteamServices::joinLobbyTask(uint64_t id, MatchmakingCallback cb)
+    Threading::Task<std::optional<Lobby>> SteamServices::joinLobbyTask(uint64_t id, MatchmakingCallback cb, SessionStartedCallback sessionCb)
     {
         assert(!mCurrentLobby.IsValid());
 
@@ -193,6 +203,7 @@ namespace FirstParty {
         }
 
         mCurrentMatchmakingCallback = std::move(cb);
+        mSessionStartedCallback = std::move(sessionCb);
         mCurrentLobby.SetFromUint64(result.m_ulSteamIDLobby);
 
         updateLobbyInfo();
@@ -203,6 +214,21 @@ namespace FirstParty {
     Threading::Task<bool> SteamServices::startMatchTask()
     {
         assert(mCurrentLobby.IsValid());
+        assert(isLobbyOwner());
+
+        size_t playerCount = SteamMatchmaking()->GetNumLobbyMembers(mCurrentLobby);
+
+        Serialize::Format format = mCurrentMatchmakingCallback(mSyncManager);
+        mSyncManager.listen(playerCount - 1, format);
+
+        SteamMatchmaking()->SetLobbyGameServer(mCurrentLobby, 0, 0, SteamUser()->GetSteamID());
+
+        if (playerCount > 1)
+            co_await mSyncManager.playersConnected().sender();
+
+        leaveLobby();
+
+        co_return true;
     }
 
     void SteamServices::leaveLobby()
@@ -211,7 +237,23 @@ namespace FirstParty {
             SteamMatchmaking()->LeaveLobby(mCurrentLobby);
             mCurrentLobby.Clear();
             mCurrentMatchmakingCallback = {};
+            mSessionStartedCallback = {};
+        } else {
+            LOG_WARNING("Trying to leave Lobby without being in one");
         }
+    }
+
+    void SteamServices::leaveMatch()
+    {
+        mSyncManager.disconnect();
+    }
+
+    bool SteamServices::isLobbyOwner() const
+    {
+        if (!mCurrentLobby.IsValid())
+            return false;
+
+        return SteamUser()->GetSteamID() == SteamMatchmaking()->GetLobbyOwner(mCurrentLobby);
     }
 
     void SteamServices::setLobbyInfoCallback(LobbyInfoCallback cb)
@@ -223,23 +265,54 @@ namespace FirstParty {
 
     void SteamServices::updateLobbyInfo()
     {
-        if (mCurrentLobby.IsValid() && mLobbyInfoCallback) {
+        if (mCurrentLobby.IsValid()) {
+            if (mLobbyInfoCallback) {
+                int players = SteamMatchmaking()->GetNumLobbyMembers(mCurrentLobby);
 
-            int players = SteamMatchmaking()->GetNumLobbyMembers(mCurrentLobby);
-
-            LobbyInfo lobbyInfo;
-            for (int i = 0; i < players; ++i) {
-                CSteamID user = SteamMatchmaking()->GetLobbyMemberByIndex(mCurrentLobby, i);
-                PlayerInfo &info = lobbyInfo.mPlayers.emplace_back();
-                info.mName = SteamFriends()->GetFriendPersonaName(user);
+                LobbyInfo lobbyInfo;
+                for (int i = 0; i < players; ++i) {
+                    CSteamID user = SteamMatchmaking()->GetLobbyMemberByIndex(mCurrentLobby, i);
+                    PlayerInfo &info = lobbyInfo.mPlayers.emplace_back();
+                    info.mName = SteamFriends()->GetFriendPersonaName(user);
+                }
+                mLobbyInfoCallback(lobbyInfo);
             }
-            mLobbyInfoCallback(lobbyInfo);
+            
+            //if (mLobbyRunning != running) {
+            //    onMatchStarted();
+            //}
+        }
+    }
+
+    void SteamServices::onMatchStarted(CSteamID serverID)
+    {
+        if (serverID != SteamUser()->GetSteamID()) {
+            Serialize::Format format = mCurrentMatchmakingCallback(mSyncManager);
+
+            SteamMatchmaking()->GetLobbyGameServer(mCurrentLobby, nullptr, nullptr, &serverID);
+
+            Execution::detach(mSyncManager.connect(serverID, format) | Execution::then([this]() {
+                if (mSessionStartedCallback)
+                    mSessionStartedCallback();
+
+                leaveLobby();
+            }));
         }
     }
 
     void SteamServices::onLobbyInfoUpdate(LobbyDataUpdate_t *data)
     {
         updateLobbyInfo();
+    }
+
+    void SteamServices::onChatUpdate(LobbyChatUpdate_t *data)
+    {
+        updateLobbyInfo();
+    }
+
+    void SteamServices::onGameCreated(LobbyGameCreated_t *data)
+    {
+        onMatchStarted(data->m_ulSteamIDGameServer);
     }
 
 }

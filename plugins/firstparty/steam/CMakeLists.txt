@@ -26,7 +26,7 @@ MESSAGE(STATUS "--- Steam End ---")
 set(sources "")
 FolderSources(sources "" src)
 FolderSources(sources src Madgine)
-	FolderSources(sources Madgine firstparty steamservices.cpp steamservices.h)
+	FolderSources(sources Madgine firstparty steamservices.cpp steamservices.h steamstreambuf.cpp steamstreambuf.h steamsyncmanager.cpp steamsyncmanager.h)
 
 add_plugin(SteamServices Madgine FirstParty ${sources} PRECOMPILED_HEADER src/Madgine/steamserviceslib.h)
 

@@ -20,6 +20,8 @@
 
 #include "Generic/execution/algorithm.h"
 
+#include "container/container_operations.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -92,6 +94,14 @@ namespace Serialize {
                 STREAM_PROPAGATE_ERROR(read(stream, id, "Id"));
                 stream.setId(id);
                 break;
+            case SEND_NAME_MAPPINGS: {
+                std::vector<std::pair<std::string, UnitId>> ids;
+                STREAM_PROPAGATE_ERROR(read(stream, ids, "Mappings"));
+                for (const auto &[name, id] : ids) {
+                    mTopLevelUnitNameMappings.at(name)->setStaticSlaveId(id);
+                }
+                break;
+            }
             default:
                 return STREAM_INTEGRITY_ERROR(stream) << "Invalid command used in message header: " << cmd;
             }
@@ -177,6 +187,30 @@ namespace Serialize {
             unit->removeManager(this);
         }
         mTopLevelUnits.clear();
+        mTopLevelUnitNameMappings.clear();
+    }
+
+    void SyncManager::addTopLevelItemImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, TopLevelUnitBase *unit, std::string_view name)
+    {
+        auto pib = mTopLevelUnitNameMappings.try_emplace(std::string { name }, unit);
+        assert(pib.second);
+
+        if (!mSlaveStream) {
+            for (FormattedBufferedStream &stream : mMasterStreams | std::views::transform(projectionPairSecond)) {
+                stream.beginMessageWrite();
+                stream.beginHeaderWrite();
+                write<UnitId>(stream, SERIALIZE_MANAGER, "Object");
+                write(stream, SEND_NAME_MAPPINGS, "Command");
+                stream.endHeaderWrite();
+                std::vector<std::pair<std::string_view, UnitId>> ids {
+                    { name, unit->masterId() }
+                };
+                write(stream, ids, "Mappings");
+                stream.endMessageWrite();
+            }
+        }
+
+        addTopLevelItemImpl(receiver, unit);
     }
 
     void SyncManager::addTopLevelItemImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, TopLevelUnitBase *unit, UnitId slaveId)
@@ -202,6 +236,10 @@ namespace Serialize {
 
     void SyncManager::removeTopLevelItem(TopLevelUnitBase *unit)
     {
+        auto it = std::ranges::find(mTopLevelUnitNameMappings, unit, &std::pair<const std::string, TopLevelUnitBase *>::second);
+        if (it != mTopLevelUnitNameMappings.end())
+            mTopLevelUnitNameMappings.erase(it);
+
         auto it2 = mSlaveMappings.begin();
         while (it2 != mSlaveMappings.end()) {
             if (it2->second->mTopLevel == unit) {
@@ -227,17 +265,6 @@ namespace Serialize {
         assert(mSlaveStream);
         return *mSlaveStream;
     }
-
-    /* bool SyncManager::isMessageAvailable()
-    {
-        if (mSlaveStream && mSlaveStream->isMessageAvailable())
-            return true;
-        for (FormattedBufferedStream &stream : mMasterStreams) {
-            if (stream.isMessageAvailable())
-                return true;
-        }
-        return false;
-    }*/
 
     void SyncManager::removeAllStreams()
     {
@@ -277,7 +304,7 @@ namespace Serialize {
             mReceivingMasterStateTimeout = timeout;
             for (TopLevelUnitBase *unit : mTopLevelUnits) {
                 Execution::detach(unit->receiveState(this) | Execution::then([this]() { decreaseReceivingCounter(); }));
-            }            
+            }
             decreaseReceivingCounter();
         } else {
             for (TopLevelUnitBase *unit : updatedUnits | std::views::reverse) {
@@ -331,6 +358,19 @@ namespace Serialize {
         stream.endHeaderWrite();
         write(stream, stream.id(), "Id");
         stream.endMessageWrite();
+
+        stream.beginMessageWrite();
+        stream.beginHeaderWrite();
+        write<UnitId>(stream, SERIALIZE_MANAGER, "Object");
+        write(stream, SEND_NAME_MAPPINGS, "Command");
+        stream.endHeaderWrite();
+        std::vector<std::pair<std::string_view, UnitId>> ids;
+        std::ranges::transform(mTopLevelUnitNameMappings, std::back_inserter(ids), [](const std::pair<const std::string, TopLevelUnitBase *> &p) {
+            return std::pair<std::string_view, UnitId> { p.first, p.second->masterId() };
+        });
+        write(stream, ids, "Mappings");
+        stream.endMessageWrite();
+
         for (TopLevelUnitBase *unit : mTopLevelUnits) {
             sendState(stream, unit);
         }

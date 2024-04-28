@@ -4,20 +4,20 @@
 namespace Engine {
 namespace Serialize {
 
-    void message_streambuf::beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessageReceiver receiver)
+    void message_streambuf::beginMessageWrite()
     {
         assert(!pptr());
-        MessageId id = beginMessageWriteImpl();
+        beginMessageWriteImpl();
         assert(pptr());
-        if (requester || receiver)
-            mPendingRequests.push_back({ id, requester, requestId, std::move(receiver) });
     }
 
-    void message_streambuf::endMessageWrite()
+    void message_streambuf::endMessageWrite(ParticipantId requester, MessageId requestId, GenericMessageReceiver receiver)
     {
         assert(pptr());
-        endMessageWriteImpl();
+        MessageId id = endMessageWriteImpl();
         setp(nullptr, nullptr);
+        if (requester || receiver)
+            mPendingRequests.push_back({ id, requester, requestId, std::move(receiver) });
     }
 
     MessageId message_streambuf::beginMessageRead()

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Generic/execution/sender.h"
-#include "Generic/execution/virtualstate.h"
 #include "Generic/execution/virtualsender.h"
+#include "Generic/execution/virtualstate.h"
 #include "Generic/forward_capture.h"
 #include "Generic/nulledptr.h"
 
@@ -24,11 +24,12 @@ namespace Serialize {
 
         GenericMessageReceiver &operator=(GenericMessageReceiver &&) = default;
 
-        template <typename T>
-        void set_value(const T &t)
+        template <typename... V>
+        void set_value(const V &...v)
         {
             if (mPtr) {
-                mPtr->set_value(&t);
+                std::tuple<const V &...> values { v... };
+                mPtr->set_value(&values);
                 mPtr.reset();
             }
         }
@@ -56,22 +57,22 @@ namespace Serialize {
         NulledPtr<Execution::VirtualReceiverBase<MessageResult, const void *>> mPtr;
     };
 
-    template <typename _Rec, typename T>
+    template <typename _Rec, typename... V>
     struct MessageState : Execution::VirtualReceiverBase<MessageResult, const void *> {
         using Rec = _Rec;
-        
+
         MessageState(Rec &&rec)
             : mRec(std::forward<Rec>(rec))
         {
         }
-        void set_value(T &&value)
+        void set_value(V &&...value)
         {
-            mRec.set_value(std::forward<T>(value));
+            mRec.set_value(std::forward<V>(value)...);
         }
         virtual void set_value(const void *data) override final
         {
             assert(data);
-            mRec.set_value(*static_cast<const T *>(data));
+            TupleUnpacker::invokeFromTuple(LIFT(mRec.set_value, this), *static_cast<const std::tuple<const V &...>*>(data));
         }
         virtual void set_done() override final
         {
@@ -87,7 +88,7 @@ namespace Serialize {
     template <typename _Rec>
     struct MessageState<_Rec, void> : Execution::VirtualReceiverBase<MessageResult, const void *> {
         using Rec = _Rec;
-        
+
         MessageState(Rec &&rec)
             : mRec(std::forward<Rec>(rec))
         {
@@ -112,12 +113,12 @@ namespace Serialize {
         Rec mRec;
     };
 
-    template <typename T, typename F, typename... Args>
+    template <typename... V, typename F, typename... Args>
     auto make_message_sender(F &&f, Args &&...args)
     {
-        return Execution::make_sender<MessageResult, T>(
+        return Execution::make_sender<MessageResult, V...>(
             [f { forward_capture(std::forward<F>(f)) }, args = std::tuple<Args...> { std::forward<Args>(args)... }]<typename Rec>(Rec &&rec) mutable {
-                return Execution::make_simple_state<MessageState<Rec, T>>(std::forward<F>(f), std::move(args), std::forward<Rec>(rec));
+                return Execution::make_simple_state<MessageState<Rec, V...>>(std::forward<F>(f), std::move(args), std::forward<Rec>(rec));
             });
     }
 

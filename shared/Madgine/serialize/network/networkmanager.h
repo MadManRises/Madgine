@@ -23,14 +23,14 @@ namespace Network {
         void operator=(const NetworkManager &) = delete;
 
         NetworkManagerResult startServer(int port);
-        void connectImpl(Execution::VirtualReceiverBase<type_pack<NetworkManagerResult, Serialize::SyncManagerResult>> &receiver, std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout = {});
+        void connectImpl(Execution::VirtualReceiverBase<type_pack<NetworkManagerResult, Serialize::SyncManagerResult>> &receiver, std::string_view url, int portNr, Serialize::Format format, TimeOut timeout = {});
         ASYNC_STUB(connect, connectImpl, Execution::make_simple_virtual_sender<type_pack<NetworkManagerResult, Serialize::SyncManagerResult>>);
         
 
         void close();
 
-        NetworkManagerResult acceptConnection(std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout = {});
-        int acceptConnections(std::unique_ptr<Serialize::Formatter> (*format)(), int limit = -1, TimeOut timeout = 0ms);
+        NetworkManagerResult acceptConnection(Serialize::Format format, TimeOut timeout = {});
+        int acceptConnections(Serialize::Format format, int limit = -1, TimeOut timeout = 0ms);
 
         bool isConnected() const;
         bool isServer() const;

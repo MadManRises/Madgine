@@ -228,10 +228,10 @@ namespace Serialize {
     void SyncableUnitBase::writeFunctionRequest(uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver)
     {
         FormattedBufferedStream &out = getSlaveMessageTarget();
-        out.beginMessageWrite(requester, requesterTransactionId, std::move(receiver));
+        out.beginMessageWrite();
         SyncManager::writeHeader(out, this, MessageType::FUNCTION_REQUEST);
         mType->writeFunctionArguments({ out }, index, type, args);
-        out.endMessageWrite();
+        out.endMessageWrite(requester, requesterTransactionId, std::move(receiver));
     }
 
     void SyncableUnitBase::writeFunctionError(uint16_t index, MessageResult error, FormattedBufferedStream &target, MessageId answerId)
@@ -298,10 +298,10 @@ namespace Serialize {
         return out;
     }
 
-    FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *unit, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver)
+    FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *unit)
     {
         FormattedBufferedStream &out = unit->getSlaveMessageTarget();
-        out.beginMessageWrite(requester, requesterTransactionId, std::move(receiver));
+        out.beginMessageWrite();
         SyncManager::writeHeader(out, unit, MessageType::REQUEST);
         return out;
     }
@@ -324,9 +324,9 @@ namespace Serialize {
     void SyncableUnitBase::writeRequest(OffsetPtr offset, void *data, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver) const
     {
         uint16_t index = mType->getIndex(offset);
-        FormattedBufferedStream &stream = getSlaveRequestMessageTarget(this, requester, requesterTransactionId, std::move(receiver));
+        FormattedBufferedStream &stream = getSlaveRequestMessageTarget(this);
         mType->writeRequest(this, index, stream, data);
-        stream.endMessageWrite();
+        stream.endMessageWrite(requester, requesterTransactionId, std::move(receiver));
     }
 
     void SyncableUnitBase::writeRequestResponse(OffsetPtr offset, void *data, ParticipantId answerTarget, MessageId answerId) const

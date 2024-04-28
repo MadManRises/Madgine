@@ -12,8 +12,8 @@ namespace Serialize {
 
         message_streambuf &operator=(const message_streambuf &) = delete;
 
-        void beginMessageWrite(ParticipantId requester = 0, MessageId requestId = 0, GenericMessageReceiver receiver = {});
-        void endMessageWrite();
+        void beginMessageWrite();
+        void endMessageWrite(ParticipantId requester = 0, MessageId requestId = 0, GenericMessageReceiver receiver = {});
 
         MessageId beginMessageRead();
         std::streamsize endMessageRead();
@@ -21,8 +21,8 @@ namespace Serialize {
         PendingRequest getRequest(MessageId id);
 
     protected:
-        virtual MessageId beginMessageWriteImpl() = 0;
-        virtual void endMessageWriteImpl() = 0;
+        virtual void beginMessageWriteImpl() = 0;
+        virtual MessageId endMessageWriteImpl() = 0;
 
         virtual MessageId beginMessageReadImpl() = 0;
         virtual std::streamsize endMessageReadImpl();

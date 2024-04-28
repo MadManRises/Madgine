@@ -37,6 +37,7 @@ namespace Serialize {
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets();
 
         void clearTopLevelItems();
+        void addTopLevelItemImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, TopLevelUnitBase *unit, std::string_view name);
         void addTopLevelItemImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, TopLevelUnitBase *unit, UnitId slaveId = 0);
         ASYNC_STUB(addTopLevelItem, addTopLevelItemImpl, Execution::make_simple_virtual_sender<SyncManagerResult>);
         void removeTopLevelItem(TopLevelUnitBase *unit);
@@ -44,7 +45,6 @@ namespace Serialize {
 
         FormattedBufferedStream &getSlaveMessageTarget();
 
-        //bool isMessageAvailable();
         StreamResult receiveMessages(int msgCount = -1, TimeOut timeout = {});
         void sendMessages();
         StreamResult sendAndReceiveMessages();
@@ -93,6 +93,8 @@ namespace Serialize {
         std::optional<FormattedBufferedStream> mSlaveStream;
 
         std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId
+
+        std::map<std::string, TopLevelUnitBase *> mTopLevelUnitNameMappings;
 
         StreamResult mStreamError;
     };

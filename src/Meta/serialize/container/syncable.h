@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Serialize {
 
-    META_EXPORT FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *unit, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver);
+    META_EXPORT FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *unit);
     META_EXPORT std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *unit, ParticipantId answerTarget, MessageId answerId,
         const std::set<ParticipantId> &targets = {});
     void beginRequestResponseMessage(const SyncableUnitBase *unit, FormattedBufferedStream &stream, MessageId id);
@@ -25,9 +25,9 @@ namespace Serialize {
             return getMasterActionMessageTargets(parent(), answerTarget, answerId, targets);
         }
 
-        FormattedBufferedStream &getSlaveRequestMessageTarget(ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {}) const
+        FormattedBufferedStream &getSlaveRequestMessageTarget() const
         {
-            return Serialize::getSlaveRequestMessageTarget(parent(), requester, requesterTransactionId, std::move(receiver));
+            return Serialize::getSlaveRequestMessageTarget(parent());
         }
 
         ParticipantId participantId()

@@ -6,14 +6,11 @@
 
 #include "Modules/threading/taskfuture.h"
 
-#include "Meta/serialize/syncmanager.h"
+#include "Generic/closure.h"
 
 namespace Engine {
 namespace FirstParty {
 
-    struct FirstPartySyncManager : Serialize::SyncManager {
-    };
-    
     struct Leaderboard {
 
         enum ReferenceRank {
@@ -69,24 +66,27 @@ namespace FirstParty {
 
         ///////// MATCHMAKING
 
-        using MatchmakingCallback = Closure<void(FirstPartySyncManager&)>;
+        using MatchmakingCallback = Closure<Serialize::Format(FirstPartySyncManager&)>;
+        using SessionStartedCallback = Closure<void()>;
         using LobbyInfoCallback = Closure<void(const LobbyInfo &)>;
 
         Threading::TaskFuture<std::vector<Lobby>> getLobbyList();
         virtual Threading::Task<std::vector<Lobby>> getLobbyListTask() = 0;
 
-        Threading::TaskFuture<std::optional<Lobby>> createLobby(MatchmakingCallback cb);
-        virtual Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb) = 0;
+        Threading::TaskFuture<std::optional<Lobby>> createLobby(MatchmakingCallback cb, SessionStartedCallback sessionCb = {});
+        virtual Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb = {}) = 0;
 
-        Threading::TaskFuture<std::optional<Lobby>> joinLobby(uint64_t id, MatchmakingCallback cb);
-        virtual Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb) = 0;
+        Threading::TaskFuture<std::optional<Lobby>> joinLobby(uint64_t id, MatchmakingCallback cb, SessionStartedCallback sessionCb);
+        virtual Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb, SessionStartedCallback sessionCb) = 0;
 
         Threading::TaskFuture<bool> startMatch();
         virtual Threading::Task<bool> startMatchTask() = 0;
 
         virtual void setLobbyInfoCallback(LobbyInfoCallback cb) = 0;        
 
+        virtual bool isLobbyOwner() const = 0;
         virtual void leaveLobby() = 0;
+        virtual void leaveMatch() = 0;
     };
 
     template <typename T>

@@ -21,7 +21,7 @@ namespace FirstParty {
         Threading::Task<EOS_EpicAccountId> loginUser();
         Threading::Task<EOS_ProductUserId> connectLogin(EOS_EpicAccountId id);
 
-        virtual std::string_view key() const override;
+        std::string_view key() const override;
 
         ////////// LEADERBOARD
 
@@ -36,7 +36,7 @@ namespace FirstParty {
             } mAggregation;
         };
 
-        virtual Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd) override;
+        Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd) override;
         Threading::Task<std::vector<LeaderboardInfo>> getLeaderboards();
 
         struct LeaderboardCache {
@@ -53,20 +53,22 @@ namespace FirstParty {
 
         /////////// STATS
 
-        virtual Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) override;
+        Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) override;
 
         /////////// ACHIEVEMENTS
 
-        virtual Threading::Task<bool> unlockAchievementTask(const char *name) override;
+        Threading::Task<bool> unlockAchievementTask(const char *name) override;
 
         /////////// MATCHMAKING
 
-        virtual Threading::Task<std::vector<Lobby>> getLobbyListTask() override;
-        virtual Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb) override;
-        virtual Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb) override;
-        virtual Threading::Task<bool> startMatchTask() override;
-        virtual void leaveLobby() override;
-        virtual void setLobbyInfoCallback(LobbyInfoCallback cb) override;
+        Threading::Task<std::vector<Lobby>> getLobbyListTask() override;
+        Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb) override;
+        Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb, SessionStartedCallback sessionCb) override;
+        Threading::Task<bool> startMatchTask() override;
+        void leaveLobby() override;
+        void leaveMatch() override;
+        bool isLobbyOwner() const override;
+        void setLobbyInfoCallback(LobbyInfoCallback cb) override;
 
         //////////////////
 

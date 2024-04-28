@@ -86,6 +86,7 @@ namespace Serialize {
     struct SerializeTableCallbacks;
 
     struct Formatter;
+    using Format = std::unique_ptr<Formatter>(*)();
 
     struct CompareStreamId;
 
@@ -140,7 +141,8 @@ namespace Serialize {
     };
 
     enum Command {
-        SET_ID
+        SET_ID,
+        SEND_NAME_MAPPINGS
     };
 
     template <typename, typename... Configs>
