@@ -33,6 +33,10 @@ if (_Python3_LIBRARY_DEBUG)
 	target_compile_definitions(Python3 PUBLIC HAS_PYTHON3_DEBUG_LIB)
 endif (_Python3_LIBRARY_DEBUG)
 
+add_custom_command(TARGET Python3
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Python3::Python> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 
 set(sources "")
 FolderSources(sources "" tools)
