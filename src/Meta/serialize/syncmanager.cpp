@@ -22,6 +22,8 @@
 
 #include "container/container_operations.h"
 
+#include "streams/message_streambuf.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -269,11 +271,12 @@ namespace Serialize {
     void SyncManager::removeAllStreams()
     {
         removeSlaveStream();
-        mMasterStreams.clear();
+        for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
+            it = removeMasterStream(it);
     }
 
-    void SyncManager::setSlaveStreamImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, FormattedBufferedStream &&stream,
-        TimeOut timeout)
+    void SyncManager::setSlaveStreamImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, Format format, std::unique_ptr<message_streambuf> buffer,
+        TimeOut timeout, std::unique_ptr<SyncStreamData> data)
     {
         if (mSlaveStream) {
             receiver.set_error(SyncManagerResult::UNKNOWN_ERROR);
@@ -294,7 +297,9 @@ namespace Serialize {
         }
 
         if (state == SyncManagerResult::SUCCESS) {
-            mSlaveStream.emplace(std::move(stream));
+            if (!data)
+                data = createStreamData();
+            mSlaveStream.emplace(format(), std::move(buffer), std::move(data));
             setSlaveStreamData(mSlaveStream->data());
 
             assert(!mReceivingMasterState);
@@ -346,10 +351,16 @@ namespace Serialize {
         }
     }
 
-    SyncManagerResult SyncManager::addMasterStream(FormattedBufferedStream &&stream)
+    SyncManagerResult SyncManager::addMasterStream(Format format, std::unique_ptr<message_streambuf> buffer, std::unique_ptr<SyncStreamData> data)
     {
-        if (!stream)
-            return SyncManagerResult::UNKNOWN_ERROR;
+        if (!data)
+            data = createStreamData();
+        ParticipantId id = data->id();
+        auto pib = mMasterStreams.try_emplace(id, format(), std::move(buffer), std::move(data));
+
+        assert(pib.second);
+        
+        FormattedBufferedStream &stream = pib.first->second;
 
         stream.beginMessageWrite();
         stream.beginHeaderWrite();
@@ -375,8 +386,7 @@ namespace Serialize {
             sendState(stream, unit);
         }
 
-        ParticipantId id = stream.id();
-        mMasterStreams.try_emplace(id, std::move(stream));
+        
         return SyncManagerResult::SUCCESS;
     }
 
@@ -400,6 +410,11 @@ namespace Serialize {
         return SyncManagerResult::SUCCESS;
     }
 
+    std::map<ParticipantId, FormattedBufferedStream>::iterator SyncManager::removeMasterStream(std::map<ParticipantId, FormattedBufferedStream>::iterator it, SyncManagerResult reason)
+    {
+        return mMasterStreams.erase(it);
+    }
+
     ParticipantId SyncManager::getParticipantId(SyncManager *manager)
     {
         if (manager && manager->mSlaveStream) {
@@ -407,11 +422,6 @@ namespace Serialize {
         } else {
             return sLocalMasterParticipantId;
         }
-    }
-
-    StreamResult SyncManager::fetchStreamError()
-    {
-        return std::move(mStreamError);
     }
 
     void SyncManager::setError(SyncableUnitBase *unit, PendingRequest &pending, MessageResult error)
@@ -428,55 +438,60 @@ namespace Serialize {
         }
     }
 
-    StreamResult SyncManager::receiveMessages(int msgCount, TimeOut timeout)
+    void SyncManager::receiveMessages(int msgCount, TimeOut timeout)
     {
         if (mSlaveStream) {
-            if (StreamResult result = receiveMessages(*mSlaveStream, msgCount, timeout); result.mState != StreamState::OK) {
+            StreamResult result = receiveMessages(*mSlaveStream, msgCount, timeout);
+            switch (result.mState) {
+            case StreamState::OK:
+                if (mReceivingMasterState && mReceivingMasterStateTimeout.expired()) {
+                    //StreamResult result = STREAM_INTEGRITY_ERROR(*mSlaveStream) << "Server did not provide initial state in time (timeout)";
+                    removeSlaveStream(SyncManagerResult::TIMEOUT);
+                }
+                break;
+            default:
                 removeSlaveStream();
-                return result;
-            }
-            if (mReceivingMasterState && mReceivingMasterStateTimeout.expired()) {
-                StreamResult result = STREAM_INTEGRITY_ERROR(*mSlaveStream) << "Server did not provide initial state in time (timeout)";
-                removeSlaveStream(SyncManagerResult::TIMEOUT);
-                return result;
             }
         }
         for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-            if (StreamResult result = receiveMessages(it->second, msgCount,
-                    timeout);
-                result.mState != StreamState::OK) {
-                it = mMasterStreams.erase(it);
-                return result;
-            } else if (!it->second) {
-                it = mMasterStreams.erase(it);
-            } else {
+            StreamResult result = receiveMessages(it->second, msgCount, timeout);
+            switch (result.mState) {
+            case StreamState::OK:
                 ++it;
+                break;
+            default:
+                it = removeMasterStream(it);
             }
         }
-        return {};
     }
 
     void SyncManager::sendMessages()
     {
         if (mSlaveStream) {
-            if (!mSlaveStream->sendMessages()) {
+            StreamResult result = mSlaveStream->sendMessages();
+            switch (result.mState) {
+            case StreamState::OK:
+                break;
+            default:
                 removeSlaveStream();
             }
         }
         for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-            if (!it->second.sendMessages()) {
-                it = mMasterStreams.erase(it);
-            } else {
+            StreamResult result = it->second.sendMessages();
+            switch (result.mState) {
+            case StreamState::OK:
                 ++it;
+                break;
+            default:
+                it = removeMasterStream(it);
             }
         }
     }
 
-    StreamResult SyncManager::sendAndReceiveMessages()
+    void SyncManager::sendAndReceiveMessages()
     {
-        STREAM_PROPAGATE_ERROR(receiveMessages());
+        receiveMessages();
         sendMessages();
-        return {};
     }
 
     StreamResult SyncManager::convertPtr(FormattedSerializeStream &in,
@@ -556,13 +571,6 @@ namespace Serialize {
         return {};
     }
 
-    bool SyncManager::sendAllMessages(FormattedBufferedStream &stream,
-        TimeOut timeout)
-    {
-        //TODO: Use Timeout (possibly pass down)
-        return bool(stream.sendMessages());
-    }
-
     FormattedBufferedStream *SyncManager::getSlaveStream()
     {
         return mSlaveStream ? &*mSlaveStream : nullptr;
@@ -596,15 +604,9 @@ namespace Serialize {
         stream.endMessageWrite();
     }
 
-    SyncManagerResult SyncManager::recordStreamError(StreamResult error)
+    std::unique_ptr<SyncStreamData> SyncManager::createStreamData(ParticipantId id)
     {
-        mStreamError = std::move(error);
-        return SyncManagerResult::STREAM_ERROR;
-    }
-
-    std::unique_ptr<SyncStreamData> SyncManager::createStreamData()
-    {
-        return std::make_unique<SyncStreamData>(*this, createStreamId());
+        return std::make_unique<SyncStreamData>(*this, id);
     }
 
 } // namespace Serialize

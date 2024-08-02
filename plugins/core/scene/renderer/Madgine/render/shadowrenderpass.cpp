@@ -92,6 +92,8 @@ namespace Render {
                     return SceneInstanceData {
                         mv.Transpose(),
                         mv.Inverse().Transpose().Transpose(),
+                        Vector4 { 0.0f, 0.0f, 0.0f, 0.0f },
+                        Vector4 { 0.0f, 0.0f, 0.0f, 0.0f },
                         o.mBones
                     };
                 });

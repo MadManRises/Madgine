@@ -25,15 +25,14 @@ struct ScenePerFrame {
 struct SceneInstanceData{
 	row_major float4x4 mv;
 	row_major float4x4 anti_mv;	
+	float4 diffuseColor;
+	float4 specularColor;
 	ArrayPtr<float4x4> bones;
 	float _padding0;
-	float _padding1;
+	float _padding1;	
 };
 
 struct ScenePerObject {
-
-	float4 diffuseColor;
-	float4 specularColor;
 
 	float shininess;
 

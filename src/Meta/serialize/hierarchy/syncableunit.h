@@ -194,6 +194,7 @@ namespace Serialize {
         }
 
         template <auto f, typename... Args>
+        requires std::constructible_from<typename Callable<f>::traits::decay_argument_types::as_tuple, Args...>
         void notify(Args &&...args)
         {
             assert(this->isMaster());

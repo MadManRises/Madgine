@@ -2,6 +2,7 @@
 
 #include "widget.h"
 
+#include "util/colortintrenderdata.h"
 #include "util/layouts/explicitlayoutrenderdata.h"
 #include "util/layouts/uniformlayoutrenderdata.h"
 #include "util/textrenderdata.h"
@@ -14,7 +15,8 @@ namespace Widgets {
 
         SERIALIZABLEUNIT(TableWidget);
 
-        using Widget::Widget;
+        TableWidget(WidgetManager &manager, WidgetBase *parent = nullptr);
+
         virtual ~TableWidget() = default;
 
         void setRowCount(uint32_t count);
@@ -34,18 +36,37 @@ namespace Widgets {
 
         virtual void sizeChanged(const Vector3 &pixelSize) override;
 
-        TextRenderData mTextRenderData;
+        Execution::SignalStub<IndexType<uint32_t>> &selectedRowChanged();
+        IndexType<uint32_t> selectedRow() const;
+        void setSelectedRow(IndexType<uint32_t> row);
+
+    protected:
+        IndexType<uint32_t> rowIndex(float y);
+
+        void injectPointerEnter(const Input::PointerEventArgs &arg) override;
+        void injectPointerLeave(const Input::PointerEventArgs &arg) override;
+        void injectPointerMove(const Input::PointerEventArgs &arg) override;
+
+        void injectPointerClick(const Input::PointerEventArgs &arg) override;
 
     private:
         UniformLayoutRenderData mHorizontalLayoutRenderData;
         ExplicitLayoutRenderData mVerticalLayoutRenderData;
+        TextRenderData mTextRenderData;
+
+        ColorTintRenderData mSelectionRenderData;
 
         std::vector<std::string> mCellData;
 
-        uint32_t mRowCount = 0;        
+        uint32_t mRowCount = 0;
         std::vector<ExplicitLayoutConfig> mColumnConfigs;
 
         bool mNeedResize = false;
+
+        IndexType<uint32_t> mHoveredRow;
+        IndexType<uint32_t> mSelectedRow;
+
+        Execution::Signal<IndexType<uint32_t>> mSelectedRowChanged;
     };
 }
 }

@@ -53,13 +53,19 @@ namespace Render {
                 } else if (mesh.material() < meshData->mMaterials.size()) {
                     material = &meshData->mMaterials[mesh.material()];
                 }
+                ResourceBlock resource;
+                Vector4 diffuseColor { 1.0f, 1.0f, 1.0f, 1.0f };
+                if (material) {
+                    resource = material->mResourceBlock;
+                    diffuseColor = material->mDiffuseColor;
+                }
 
                 Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
                 Engine::Render::GPUPtr<Matrix4[]> bones;
                 if (skeleton)
                     bones = skeleton->mBoneMatrices;
 
-                mInstances[std::tuple<const GPUMeshData *, const GPUMeshData::Material *> { meshData, material }].push_back({ transform->worldMatrix(), bones });
+                mInstances[NonInstancedData { meshData, resource }].push_back({ transform->worldMatrix(), diffuseColor, bones });
             }
         });
 

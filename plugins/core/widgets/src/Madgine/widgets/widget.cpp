@@ -90,6 +90,20 @@ namespace Widgets {
         return mAbsolutePos;
     }
 
+    void WidgetBase::setAbsoluteSize(const Vector3 &size)
+    {
+        mAbsoluteSize = size;
+                
+        sizeChanged(size);
+
+        updateChildrenGeometry();
+    }
+
+    void WidgetBase::setAbsolutePosition(const Vector2 &pos)
+    {
+        mAbsolutePos = pos;
+    }
+
     void WidgetBase::applyGeometry()
     {
         if (mParent)
@@ -102,11 +116,12 @@ namespace Widgets {
     {
         Geometry geometry = calculateGeometry(fetchActiveConditions());
 
-        mAbsoluteSize = geometry.mSize * parentSize;
-        mAbsolutePos = (geometry.mPos * parentSize).xy() + parentPos;
+        setAbsolutePosition((geometry.mPos * parentSize).xy() + parentPos);
+        setAbsoluteSize(geometry.mSize * parentSize);
+    }
 
-        sizeChanged(mAbsoluteSize);
-
+    void WidgetBase::updateChildrenGeometry()
+    {
         for (WidgetBase *child : children()) {
             child->applyGeometry(mAbsoluteSize, mAbsolutePos);
         }
@@ -172,24 +187,10 @@ namespace Widgets {
         return mChildren.emplace_back(mManager.createWidgetByClass(_class, this)).get();
     }
 
-    template <typename WidgetType>
-    WidgetType *WidgetBase::createChild()
+    void WidgetBase::clearChildren()
     {
-        std::unique_ptr<WidgetType> p = mManager.create<WidgetType>(this);
-        WidgetType *w = p.get();
-        mChildren.emplace_back(std::move(p));
-        return w;
+        mChildren.clear();
     }
-
-    template WidgetBase *WidgetBase::createChild<WidgetBase>();
-    template Button *WidgetBase::createChild<Button>();
-    template Bar *WidgetBase::createChild<Bar>();
-    template Checkbox *WidgetBase::createChild<Checkbox>();
-    template Label *WidgetBase::createChild<Label>();
-    template Combobox *WidgetBase::createChild<Combobox>();
-    template Textbox *WidgetBase::createChild<Textbox>();
-    template SceneWindow *WidgetBase::createChild<SceneWindow>();
-    template Image *WidgetBase::createChild<Image>();
 
     size_t WidgetBase::depth(size_t layer)
     {

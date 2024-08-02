@@ -16,6 +16,7 @@ namespace Widgets {
     struct Image;
     struct TableWidget;
     struct TabBar;
+    struct Layout;
 
     struct Geometry;
     struct GeometrySourceInfo;

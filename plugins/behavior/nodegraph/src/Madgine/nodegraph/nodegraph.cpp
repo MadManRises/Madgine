@@ -15,8 +15,6 @@
 
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Meta/serialize/formatter/xmlformatter.h"
-
 #include "nodecollector.h"
 
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
@@ -28,6 +26,8 @@
 #include "nodeinterpreter.h"
 
 #include "nodes/util/librarynode.h"
+
+#include "Meta/serialize/formats.h"
 
 #include "nodes/accessornode.h"
 #include "nodes/functionnode.h"
@@ -85,7 +85,7 @@ namespace NodeGraph {
     {
         if (Filesystem::exists(path)) {
             Filesystem::FileManager mgr("Graph-Serializer");
-            Serialize::FormattedSerializeStream in = mgr.openRead(path, std::make_unique<Serialize::XMLFormatter>());
+            Serialize::FormattedSerializeStream in = mgr.openRead(path, Serialize::Formats::xml);
             STREAM_PROPAGATE_ERROR(Serialize::read(in, *this, "Graph", {}, Serialize::StateTransmissionFlags_ApplyMap));
 
             for (NodeBase *node : mNodes | std::views::transform(projectionUniquePtrToPtr)) {
@@ -226,7 +226,7 @@ namespace NodeGraph {
     void NodeGraph::saveToFile(const Filesystem::Path &path)
     {
         Filesystem::FileManager mgr("Graph-Serializer");
-        Serialize::FormattedSerializeStream out = mgr.openWrite(path, std::make_unique<Serialize::XMLFormatter>());
+        Serialize::FormattedSerializeStream out = mgr.openWrite(path, Serialize::Formats::xml);
         Serialize::write(out, *this, "Graph");
     }
 

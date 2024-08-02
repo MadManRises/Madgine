@@ -1,5 +1,6 @@
 #include "../../metalib.h"
 #include "message_streambuf.h"
+#include "streamresult.h"
 
 namespace Engine {
 namespace Serialize {
@@ -23,9 +24,9 @@ namespace Serialize {
     MessageId message_streambuf::beginMessageRead()
     {
         assert(!egptr());
-        MessageId id = beginMessageReadImpl();
-        assert(!id || egptr());
-        return id;
+        MessageId result = beginMessageReadImpl();
+        assert(result == 0 || egptr());
+        return result;
     }
 
     std::streamsize message_streambuf::endMessageRead()
@@ -48,7 +49,9 @@ namespace Serialize {
     }
 
     std::streamsize message_streambuf::endMessageReadImpl() {
-        return showmanyc();
+        std::streamsize result = showmanyc();
+        setg(nullptr, nullptr, nullptr);
+        return result;
     }
 
 }

@@ -142,9 +142,9 @@ namespace Render {
 
         mPipeline->bindResources(target, 3, mShadowResourceBlock);
 
-        for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *>, std::vector<LitSceneRenderData::ObjectData>> &instance : mData.mInstances) {
-            const GPUMeshData *meshData = std::get<0>(instance.first);
-            const GPUMeshData::Material *material = std::get<1>(instance.first);
+        for (const std::pair<const LitSceneRenderData::NonInstancedData, std::vector<LitSceneRenderData::ObjectData>> &instance : mData.mInstances) {
+            const GPUMeshData *meshData = instance.first.mMesh;
+            ResourceBlock material = instance.first.mMaterial;
 
             {
                 auto perObject = mPipeline->mapParameters<ScenePerObject>(2);
@@ -153,17 +153,13 @@ namespace Render {
 
                 perObject->hasDistanceField = false;
 
-                perObject->hasTexture = material && material->mResourceBlock;
-
-                perObject->diffuseColor = material ? material->mDiffuseColor : Vector4::UNIT_SCALE;
-
-                perObject->specularColor = Vector4 { 1.0f, 1.0f, 1.0f, 1.0f };
+                perObject->hasTexture = material;
 
                 perObject->shininess = 32.0f;
             }
 
             if (material)
-                mPipeline->bindResources(target, 2, material->mResourceBlock);
+                mPipeline->bindResources(target, 2, material);
             else
                 mPipeline->bindResources(target, 2, {});
 
@@ -175,6 +171,8 @@ namespace Render {
                     return SceneInstanceData {
                         mv.Transpose(),
                         mv.Inverse() /*.Transpose().Transpose()*/,
+                        o.mDiffuseColor,
+                        Vector4 { 1.0f, 1.0f, 1.0f, 1.0f },
                         o.mBones
                     };
                 });

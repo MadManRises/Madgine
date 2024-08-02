@@ -12,8 +12,9 @@
 #include "Madgine/serialize/filesystem/filemanager.h"
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/configs/controlled.h"
-#include "Meta/serialize/formatter/iniformatter.h"
 #include "Meta/serialize/serializetable_impl.h"
+
+#include "Meta/serialize/formats.h"
 
 #include "../render/rendercontext.h"
 #include "../render/rendertarget.h"
@@ -23,8 +24,6 @@
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
 #include "Madgine/resources/resourcemanager.h"
-
-#include "Meta/serialize/formatter/xmlformatter.h"
 
 #include "Generic/projections.h"
 
@@ -100,7 +99,7 @@ namespace Window {
     void MainWindow::saveLayout(const Filesystem::Path &path)
     {
         Filesystem::FileManager mgr { "Layout" };
-        Serialize::FormattedSerializeStream file = mgr.openWrite(path, std::make_unique<Serialize::XMLFormatter>());
+        Serialize::FormattedSerializeStream file = mgr.openWrite(path, Serialize::Formats::xml);
 
         if (file) {
             Serialize::write(file, *this, "Layout");
@@ -153,7 +152,7 @@ namespace Window {
 
             Filesystem::Path path = Filesystem::appDataPath() / "mainwindow.ini";
 
-            if (Serialize::FormattedSerializeStream in = mgr.openRead(path, std::make_unique<Serialize::IniFormatter>())) {
+            if (Serialize::FormattedSerializeStream in = mgr.openRead(path, Serialize::Formats::ini)) {
                 Serialize::StreamResult result = read(in, settings.mData, nullptr);
                 if (result.mState != Serialize::StreamState::OK) {
                     LOG_ERROR("Error loading MainWindow-Geometry from " << path << ": \n"
@@ -473,7 +472,7 @@ namespace Window {
     {
         Filesystem::FileManager mgr { "MainWindow-Layout" };
 
-        if (Serialize::FormattedSerializeStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
+        if (Serialize::FormattedSerializeStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", Serialize::Formats::ini)) {
             write(out, mOsWindow->data(), "data");
         }
     }

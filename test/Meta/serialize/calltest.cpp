@@ -21,8 +21,8 @@ TEST(Serialize_Call, Call)
     NoParent<TestUnit> unit1;
     NoParent<TestUnit> unit2;
 
-    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1));
-    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2));
+    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1, 10));
+    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2, 10));
 
     Buffer buffer;
     HANDLE_MGR_RESULT(mgr1, mgr1.setMasterBuffer(buffer));
@@ -99,9 +99,9 @@ TEST(Serialize_Call, Call_Hierarchical)
     NoParent<TestUnit> unit2;
     NoParent<TestUnit> unit3;
 
-    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1));
-    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2));
-    HANDLE_MGR_RECEIVER(mgr3.addTopLevelItemImpl(receiver, &unit3));
+    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1, 10));
+    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2, 10));
+    HANDLE_MGR_RECEIVER(mgr3.addTopLevelItemImpl(receiver, &unit3, 10));
 
     Buffer buffer;
     HANDLE_MGR_RESULT(mgr1, mgr1.setMasterBuffer(buffer));

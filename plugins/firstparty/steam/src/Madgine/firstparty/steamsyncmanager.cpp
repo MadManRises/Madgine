@@ -7,6 +7,8 @@
 
 #include "steamstreambuf.h"
 
+#include "steamstreamdata.h"
+
 #include "Meta/serialize/streams/syncstreamdata.h"
 
 namespace Engine {
@@ -55,7 +57,7 @@ namespace FirstParty {
         identity.SetSteamID(target);
         HSteamNetConnection con = SteamNetworkingSockets()->ConnectP2P(identity, 0, 0, nullptr);
 
-        setSlaveStreamImpl(receiver, Serialize::FormattedBufferedStream { format(), std::make_unique<SteamStreambuf>(con), createStreamData() }, timeout);
+        setSlaveStreamImpl(receiver, format, std::make_unique<SteamStreambuf>(con), timeout, std::make_unique<SteamStreamData>(*this, createStreamId(), target));
     }
 
     void SteamSyncManager::disconnect()
@@ -63,6 +65,7 @@ namespace FirstParty {
         if (mListenSocket != k_HSteamListenSocket_Invalid) {
             SteamNetworkingSockets()->CloseListenSocket(mListenSocket);
             mListenSocket = k_HSteamListenSocket_Invalid;
+            mStoredPlayers.clear();
         }
         removeAllStreams();
         clearTopLevelItems();
@@ -73,7 +76,35 @@ namespace FirstParty {
         return mPlayersConnected;
     }
 
-    void SteamSyncManager::onIncomingConnection(SteamNetConnectionStatusChangedCallback_t *con)
+    Serialize::ParticipantId SteamSyncManager::resolvePlayerId(CSteamID id)
+    {
+        if (id == SteamUser()->GetSteamID())
+            return SerializeManager::sLocalMasterParticipantId;
+
+        for (const Serialize::FormattedBufferedStream& out : getMasterMessageTargets()) {
+            if (static_cast<SteamStreamData*>(out.data())->user() == id) {
+                return out.id();
+            }
+        }
+         
+        throw 0;
+    }
+
+    void SteamSyncManager::removeSlaveStream(Serialize::SyncManagerResult reason)
+    {
+        SyncManager::removeSlaveStream(reason);
+    }
+
+    std::map<Serialize::ParticipantId, Serialize::FormattedBufferedStream>::iterator SteamSyncManager::removeMasterStream(std::map<Serialize::ParticipantId, Serialize::FormattedBufferedStream>::iterator it, Serialize::SyncManagerResult reason)
+    {
+        SteamStreamData *data = static_cast<SteamStreamData*>(it->second.data());
+
+        mStoredPlayers[data->user()] = data->id();
+
+        return SyncManager::removeMasterStream(it, reason);
+    }
+
+    void SteamSyncManager::onConnectionUpdate(SteamNetConnectionStatusChangedCallback_t *con)
     {
         if (con->m_info.m_hListenSocket != k_HSteamListenSocket_Invalid) {
             switch (con->m_info.m_eState) {
@@ -81,7 +112,18 @@ namespace FirstParty {
                 EResult result = SteamNetworkingSockets()->AcceptConnection(con->m_hConn);
                 assert(result == k_EResultOK);
 
-                Serialize::SyncManagerResult result2 = addMasterStream(Serialize::FormattedBufferedStream { mFormat(), std::make_unique<SteamStreambuf>(con->m_hConn), createStreamData() });
+                CSteamID user = con->m_info.m_identityRemote.GetSteamID();
+
+                Serialize::ParticipantId id;
+                auto it = mStoredPlayers.find(user);
+                if (it != mStoredPlayers.end())
+                    id = it->second;
+                else
+                    id = createStreamId();
+
+                std::unique_ptr<SteamStreamData> data = std::make_unique<SteamStreamData>(*this, id, user);
+
+                Serialize::SyncManagerResult result2 = addMasterStream(mFormat, std::make_unique<SteamStreambuf>(con->m_hConn), std::move(data));
                 assert(result2 == Serialize::SyncManagerResult::SUCCESS);
                 break;
             }

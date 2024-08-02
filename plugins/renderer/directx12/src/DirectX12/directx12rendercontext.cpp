@@ -102,17 +102,17 @@ namespace Render {
 
         HRESULT hr;
 
-        {
+        /* {
             ReleasePtr<ID3D12Debug> debugController;
             if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
                 debugController->EnableDebugLayer();
                 ReleasePtr<ID3D12Debug1> debugController1;
                 if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1)))) {
-                    //debugController1->SetEnableGPUBasedValidation(true);
+                    debugController1->SetEnableGPUBasedValidation(true);
                     DX12_LOG("Enabled Debug Layer");
                 }
             }
-        }
+        }*/
 
         assert(*sDevice == nullptr);
 

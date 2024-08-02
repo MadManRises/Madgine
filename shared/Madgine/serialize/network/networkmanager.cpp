@@ -71,7 +71,7 @@ namespace Network {
             return;
         }
 
-        setSlaveStreamImpl(receiver, Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(socket))), createStreamData() }, timeout);        
+        setSlaveStreamImpl(receiver, format, std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(socket))), timeout);        
     }
 
     void NetworkManager::close()
@@ -92,7 +92,7 @@ namespace Network {
             SocketAPIResult error = sock.accept(mServerSocket, timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
                 if (sock) {
-                    if (addMasterStream(Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(sock))), createStreamData() }) == Serialize::SyncManagerResult::SUCCESS) {
+                    if (addMasterStream(format, std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(sock)))) == Serialize::SyncManagerResult::SUCCESS) {
                         ++count;
                     }
                 }
@@ -111,9 +111,8 @@ namespace Network {
         SocketAPIResult error = sock.accept(mServerSocket, timeout);
         if (!sock)
             return recordSocketError(error);
-
-        Serialize::FormattedBufferedStream stream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(sock))), createStreamData() };
-        return addMasterStream(std::move(stream));
+        
+        return addMasterStream(format, std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(sock))));
     }
 
     bool NetworkManager::isConnected() const

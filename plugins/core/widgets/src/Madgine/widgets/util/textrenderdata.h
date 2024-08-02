@@ -17,7 +17,7 @@
 namespace Engine {
 namespace Widgets {
 
-    struct TextRenderData : RenderData {
+    struct MADGINE_WIDGETS_EXPORT TextRenderData : RenderData {
 
         struct Line {
             const char *mBegin, *mEnd;

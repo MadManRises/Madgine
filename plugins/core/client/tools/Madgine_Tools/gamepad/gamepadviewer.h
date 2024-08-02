@@ -13,6 +13,7 @@ namespace Tools {
         GamepadViewer(ImRoot &root);
 
         virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         virtual std::string_view key() const override;
 

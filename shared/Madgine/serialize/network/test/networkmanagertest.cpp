@@ -4,9 +4,9 @@
 
 #include "Madgine/serialize/network/networkmanager.h"
 
-#include <future>
+#include "Meta/serialize/formats.h"
 
-#include "Meta/serialize/formatter/safebinaryformatter.h"
+#include <future>
 
 #include "../../../test/Meta/serialize/testManager.h"
 
@@ -21,16 +21,14 @@ TEST(NetworkManager, Connect)
 
     ASSERT_EQ(server.startServer(1234), NetworkManagerResult::SUCCESS) << "SocketAPI: " << server.getSocketAPIError();
 
-    auto formatter = []() -> std::unique_ptr<Formatter> { return std::make_unique<SafeBinaryFormatter>(); };
-
 #if !EMSCRIPTEN
     auto future = std::async(std::launch::async, [&]() {
-        return server.acceptConnection(formatter, 4s);
+        return server.acceptConnection(Formats::safebinary, 4s);
     });
     NetworkManager client("testNetworkClient");
 
     TestReceiver<NetworkManagerResult> receiver;
-    Engine::Execution::detach(client.connect("127.0.0.1", 1234, formatter, 4s) | Engine::Execution::then_receiver(receiver));
+    Engine::Execution::detach(client.connect("127.0.0.1", 1234, Formats::safebinary, 4s) | Engine::Execution::then_receiver(receiver));
     EXPECT_EQ(future.get(), NetworkManagerResult::SUCCESS);
     server.sendMessages();
     client.receiveMessages(-1, 1s);

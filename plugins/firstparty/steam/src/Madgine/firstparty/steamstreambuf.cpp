@@ -118,19 +118,22 @@ namespace FirstParty {
         }
     }
 
-    std::streamsize SteamStreambuf::receiveMessages()
+    Serialize::StreamResult SteamStreambuf::receiveMessages()
     {
         if (!mReceivingMessage) {
-            return SteamNetworkingSockets()->ReceiveMessagesOnConnection(mConnection, &mReceivingMessage, 1);
+            int result = SteamNetworkingSockets()->ReceiveMessagesOnConnection(mConnection, &mReceivingMessage, 1);
+            if (result < 0)
+                throw 0;
         }
 
-        return 0;
+        return {};
     }
 
-    std::streamsize SteamStreambuf::sendMessages()
+    Serialize::StreamResult SteamStreambuf::sendMessages()
     {
         size_t count = mSendMessages.size();
-        std::streamsize result = count;
+
+        Serialize::StreamResult result;
 
         if (count > 0) {
             int64_t messageNumbers[64];
@@ -141,7 +144,14 @@ namespace FirstParty {
 
             for (size_t i = 0; i < count; ++i)
                 if (messageNumbers[i] <= 0)
-                    result = messageNumbers[i] - 1;
+                    switch (-messageNumbers[i]) {
+                    case k_EResultNoConnection:
+                        result = std::move(STREAM_CONNECTION_LOST_ERROR());
+                        break;
+                    default:
+                        throw 0;
+                    }
+                    
 
             for (SteamMessagePtr &msg : mSendMessages)
                 msg.release();
@@ -161,15 +171,6 @@ namespace FirstParty {
             return c;
         }
         return traits_type::eof();
-    }
-
-    int SteamStreambuf::sync()
-    {
-        if (sendMessages() < 0)
-            return -1;
-        if (receiveMessages() < 0)
-            return -1;
-        return 0;
     }
 
 }

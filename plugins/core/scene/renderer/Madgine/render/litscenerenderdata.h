@@ -19,11 +19,18 @@ namespace Render {
 
         Camera *mCamera;
 
+        struct NonInstancedData {
+            const GPUMeshData *mMesh;
+            ResourceBlock mMaterial;
+
+            constexpr auto operator<=>(const NonInstancedData &) const = default;
+        };
         struct ObjectData {
             Matrix4 mTransform;
+            Vector4 mDiffuseColor;
             GPUPtr<Matrix4[]> mBones;
         };
-        std::map<std::tuple<const GPUMeshData *, const GPUMeshData::Material *>, std::vector<ObjectData>> mInstances;
+        std::map<NonInstancedData, std::vector<ObjectData>> mInstances;
     };
 
 }

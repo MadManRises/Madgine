@@ -9,7 +9,6 @@
 #include "Meta/math/vector2i.h"
 
 #include "Madgine/serialize/memory/memorymanager.h"
-#include "Meta/serialize/formatter/safebinaryformatter.h"
 #include "Meta/serialize/operations.h"
 
 #include "Generic/areaview.h"
@@ -24,6 +23,8 @@
 #include "Madgine/serialize/filesystem/filemanager.h"
 
 #include "Meta/serialize/container/container_operations.h"
+
+#include "Meta/serialize/formats.h"
 
 #undef INFINITE
 #include "msdfgen.h"
@@ -124,7 +125,7 @@ namespace Render {
 
 
             Memory::MemoryManager cache("msdf_cache");
-            Serialize::FormattedSerializeStream in = cache.openRead(std::move(fileBuffer), std::make_unique<Serialize::SafeBinaryFormatter>());
+            Serialize::FormattedSerializeStream in = cache.openRead(std::move(fileBuffer), Serialize::Formats::safebinary);
             assert(in);
             ByteBuffer b;
             Vector2i textureSize;
@@ -344,7 +345,7 @@ namespace Render {
             co_return false;
 
         Filesystem::FileManager cache("msdf_cache");
-        Serialize::FormattedSerializeStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+        Serialize::FormattedSerializeStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), Serialize::Formats::safebinary);
         if (out) {
             write(out, font.mGlyphs, "glyphs");
             write(out, textureSize, "size");

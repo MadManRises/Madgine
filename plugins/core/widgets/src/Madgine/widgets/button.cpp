@@ -18,6 +18,7 @@ MEMBER(mText)
 NAMED_MEMBER(TextData, mTextRenderData)
 NAMED_MEMBER(Image, mImageRenderData)
 NAMED_MEMBER(ColorTint, mColorTintRenderData)
+MEMBER(mEnabled)
 METATABLE_END(Engine::Widgets::Button)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
@@ -25,6 +26,7 @@ FIELD(mText)
 FIELD(mTextRenderData)
 FIELD(mImageRenderData)
 FIELD(mColorTintRenderData)
+FIELD(mEnabled)
 SERIALIZETABLE_END(Engine::Widgets::Button)
 
 namespace Engine {
@@ -40,6 +42,16 @@ namespace Widgets {
         return mClicked;
     }
 
+    void Button::setEnabled(bool enabled)
+    {
+        mEnabled = enabled;
+    }
+
+    bool Button::isEnabled() const
+    {
+        return mEnabled;
+    }
+
     void Button::vertices(WidgetsRenderData &renderData, size_t layer)
     {
         const Atlas2::Entry *entry = manager().lookUpImage(mImageRenderData.image());
@@ -47,7 +59,8 @@ namespace Widgets {
         Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
         Vector3 size = getAbsoluteSize();
 
-        Color4 color = mHovered ? mColorTintRenderData.mHighlightedColor : mColorTintRenderData.mNormalColor;
+        Color4 color = mEnabled ? (mHovered ? mColorTintRenderData.mHighlightedColor : mColorTintRenderData.mNormalColor)
+                                : mColorTintRenderData.mDisabledColor;
 
         if (entry) {
             mImageRenderData.renderImage(renderData, pos, size.xy(), *entry, color);
@@ -72,7 +85,8 @@ namespace Widgets {
 
     void Button::injectPointerClick(const Input::PointerEventArgs &arg)
     {
-        emitClicked();
+        if (mEnabled)
+            emitClicked();
         WidgetBase::injectPointerClick(arg);
     }
 

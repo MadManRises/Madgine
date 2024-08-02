@@ -2,16 +2,22 @@
 
 #include "Meta/metalib.h"
 
-#include "Meta/serialize/formatter/xmlformatter.h"
+#include "Meta/serialize/formats.h"
 
 #include "formattertestbase.h"
+
+#include "../testunit.h"
+#include "../testManager.h"
+#include "Meta/serialize/container/noparent.h"
+#include "Meta/serialize/streams/formattedserializestream.h"
+#include "Meta/serialize/operations.h"
 
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
 TEST(Serialize_Formatter, XML)
 {
-    FormatterBaseTest<XMLFormatter>(R"(<unit1>
+    FormatterBaseTest(Formats::xml, R"(<unit1>
     <list1>
         <Item>1</Item>
         <Item>2</Item>
@@ -117,7 +123,7 @@ TEST(Serialize_Formatter, XML_InvalidParse)
 
     NoParent<TestUnit> unit;
 
-    FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file) } };
+    FormattedSerializeStream in { Formats::xml(), SerializeStream { std::move(file) } };
 
     StreamResult result = read(in, unit, nullptr);
     ASSERT_EQ(result.mState, StreamState::PARSE_ERROR);
@@ -181,7 +187,7 @@ TEST(Serialize_Formatter, XML_ExtendedOrder)
 
     NoParent<TestUnit> unit;
 
-    FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file) } };
+    FormattedSerializeStream in { Formats::xml(), SerializeStream { std::move(file) } };
 
     HANDLE_STREAM_RESULT(read(in, unit, nullptr));
     ASSERT_EQ(unit.complexList1.front().i, 2);

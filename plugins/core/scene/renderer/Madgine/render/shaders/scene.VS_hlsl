@@ -64,7 +64,7 @@ VertexShaderOutput main(AppData IN)
     
     OUT.position = mul(app.p, OUT.viewPos + float4(aPos2, 0.0, 0.0));
     
-    OUT.color = IN.aColor;
+    OUT.color = IN.aColor * aInstance.diffuseColor;
 
 	OUT.normal = mul((float3x3)aInstance.anti_mv, IN.aNormal);
 

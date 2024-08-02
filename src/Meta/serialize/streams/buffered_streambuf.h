@@ -27,6 +27,7 @@ namespace Serialize {
         MessageId endMessageWriteImpl() override;
 
         MessageId beginMessageReadImpl() override;
+        std::streamsize endMessageReadImpl() override;
 
     protected:
         pos_type seekoff(off_type off, std::ios_base::seekdir dir,
@@ -36,10 +37,9 @@ namespace Serialize {
 
         int_type overflow(int c = EOF) override;
 
-        int sync() override;
         void extend();
-        std::streamsize receiveMessages();
-        std::streamsize sendMessages();
+        StreamResult receiveMessages() override;
+        StreamResult sendMessages() override;
 
     private:
         //read

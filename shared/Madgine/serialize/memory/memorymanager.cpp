@@ -28,15 +28,15 @@ namespace Memory {
     {
     }
 
-    Serialize::FormattedSerializeStream MemoryManager::openRead(ByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::FormattedSerializeStream MemoryManager::openRead(ByteBuffer buffer, Serialize::Format format)
     {
-        Serialize::FormattedSerializeStream stream { std::move(format), wrapStream(Stream { std::make_unique<MemoryReadBuffer>(std::move(buffer)) }, true) };
+        Serialize::FormattedSerializeStream stream { format(), wrapStream(Stream { std::make_unique<MemoryReadBuffer>(std::move(buffer)) }, true) };
         return stream;
     }
 
-    Serialize::FormattedSerializeStream MemoryManager::openWrite(WritableByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::FormattedSerializeStream MemoryManager::openWrite(WritableByteBuffer buffer, Serialize::Format format)
     {
-        return { std::move(format), wrapStream(Stream { std::make_unique<MemoryWriteBuffer>(std::move(buffer)) }) };
+        return { format(), wrapStream(Stream { std::make_unique<MemoryWriteBuffer>(std::move(buffer)) }) };
     }
 
 }

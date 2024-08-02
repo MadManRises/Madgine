@@ -28,10 +28,6 @@ namespace Threading {
     void TaskPromiseSharedStateBase::finalize()
     {
         std::lock_guard guard { mMutex };
-        for (TaskHandle &handle : mThenResumes) {
-            handle.resumeInQueue();
-        }
-        mThenResumes.clear();
         mDone = true;
     }
 
@@ -39,28 +35,6 @@ namespace Threading {
     {
         std::lock_guard guard { mMutex };
         mDestroyed = true;
-    }
-
-    bool TaskPromiseSharedStateBase::then_await(TaskHandle handle)
-    {
-        std::lock_guard guard { mMutex };
-        if (!mDone) {
-            mThenResumes.emplace_back(std::move(handle));
-            return true;
-        } else {
-            handle.release();
-            return false;
-        }
-    }
-
-    void TaskPromiseSharedStateBase::then(TaskHandle handle)
-    {
-        std::lock_guard guard { mMutex };
-        if (!mDone) {
-            mThenResumes.emplace_back(std::move(handle));
-        } else {
-            handle.resumeInQueue();
-        }
     }
 
     void TaskPromiseSharedStateBase::setException(std::exception_ptr exception)

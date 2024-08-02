@@ -159,9 +159,9 @@ namespace Serialize {
         mSlaveStreamData = data;
     }
 
-    std::unique_ptr<SerializeStreamData> SerializeManager::createStreamData()
+    std::unique_ptr<SerializeStreamData> SerializeManager::createStreamData(ParticipantId id)
     {
-        return std::make_unique<SerializeStreamData>(*this, createStreamId());
+        return std::make_unique<SerializeStreamData>(*this, id);
     }
 
     ParticipantId SerializeManager::createStreamId() { return ++sRunningStreamId; }

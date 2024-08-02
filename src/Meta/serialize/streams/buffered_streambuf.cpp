@@ -84,17 +84,6 @@ namespace Serialize {
         return traits_type::eof();
     }
 
-    int buffered_streambuf::sync()
-    {
-        if (sendMessages() < 0)
-            return -1;
-        if (mBuffer->pubsync() < 0)
-            return -1;
-        if (receiveMessages() < 0)
-            return -1;
-        return 0;
-    }
-
     void buffered_streambuf::beginMessageWriteImpl()
     {
         assert(mSendBuffer.empty());
@@ -117,54 +106,62 @@ namespace Serialize {
 
     MessageId buffered_streambuf::beginMessageReadImpl()
     {
-        receiveMessages();
-        if (!egptr())
+        if (mRecBuffer.empty() || mBytesToRead > 0 || mReceiveMessageHeader.mMessageId == 0)
             return 0;
+        setg(mRecBuffer.data(), mRecBuffer.data(), mRecBuffer.data() + mReceiveMessageHeader.mMsgSize);
+#if ENABLE_MESSAGE_LOGGING
+        MessageLogger::log(this, mReceiveMessageHeader, std::move(mRecBuffer));
+#endif
         return mReceiveMessageHeader.mMessageId;
     }
 
-    std::streamsize buffered_streambuf::sendMessages()
+    std::streamsize buffered_streambuf::endMessageReadImpl()
+    {
+        mReceiveMessageHeader.mMessageId = 0;
+        mRecBuffer.clear();
+        mBytesToRead = sizeof mReceiveMessageHeader;
+        return message_streambuf::endMessageReadImpl();
+    }
+
+    StreamResult buffered_streambuf::sendMessages()
     {
         while (!mBufferedSendMsgs.empty()) {
             BufferedSendMessage msg = std::move(mBufferedSendMsgs.front());
             mBufferedSendMsgs.pop();
             int num = mBuffer->sputn(msg.mData.data(), msg.mData.size());
             if (num != msg.mData.size()) {
-                return -1;
+                throw 0;
             }
 #if ENABLE_MESSAGE_LOGGING
             MessageLogger::log(this, std::move(msg));
 #endif
         }
-        return 0;
+        if (mBuffer->pubsync() < 0)
+            throw 0;
+        return {};
     }
 
-    std::streamsize buffered_streambuf::receiveMessages()
+    StreamResult buffered_streambuf::receiveMessages()
     {
-        int readCount = 0;
-        if (!mRecBuffer.empty() && mBytesToRead == 0 && !egptr()) {
-            mRecBuffer.clear();
-            mBytesToRead = sizeof mReceiveMessageHeader;
-        }
         if (mRecBuffer.empty()) {
             assert(mBytesToRead > 0);
             std::streamsize avail = mBuffer->in_avail();
             if (avail < 0) {
-                return avail;
+                throw 0;
             } else if (avail > 0) {
                 if (avail > mBytesToRead) {
                     avail = mBytesToRead;
                 }
                 int num = mBuffer->sgetn(reinterpret_cast<char *>(&mReceiveMessageHeader + 1) - mBytesToRead, avail);
                 if (num != avail) {
-                    return -1;
+                    throw 0;
                 }
-                readCount += num;
                 mBytesToRead -= num;
                 if (mBytesToRead == 0) {
                     assert(mReceiveMessageHeader.mMsgSize > 0);
                     mBytesToRead = mReceiveMessageHeader.mMsgSize;
                     mRecBuffer.resize(mBytesToRead);
+                    assert(mReceiveMessageHeader.mMessageId != 0);
                 }
             }
         }
@@ -172,27 +169,19 @@ namespace Serialize {
         if (!mRecBuffer.empty() && mBytesToRead > 0) {
             std::streamsize avail = mBuffer->in_avail();
             if (avail < 0) {
-                return avail;
+                throw 0;
             } else if (avail > 0) {
                 if (avail > mBytesToRead) {
                     avail = mBytesToRead;
                 }
                 int num = mBuffer->sgetn(mRecBuffer.data() + mReceiveMessageHeader.mMsgSize - mBytesToRead, avail);
                 if (num != avail) {
-                    return -1;
+                    throw 0;
                 }
-                readCount += num;
                 mBytesToRead -= num;
-                if (mBytesToRead == 0) {
-                    setg(mRecBuffer.data(), mRecBuffer.data(), mRecBuffer.data() + mReceiveMessageHeader.mMsgSize);
-#if ENABLE_MESSAGE_LOGGING
-                    MessageLogger::log(this, mReceiveMessageHeader, std::move(mRecBuffer));
-                    mRecBuffer = { 1 };
-#endif
-                }
             }
         }
-        return readCount;
+        return {};
     }
 
 }

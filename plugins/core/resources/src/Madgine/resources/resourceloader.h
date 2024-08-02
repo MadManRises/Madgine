@@ -235,9 +235,7 @@ namespace Resources {
             if (!ptr)
                 return;
 
-            Threading::TaskFuture<void> task = queueUnload(Threading::make_task(&T::unloadImpl, std::move(loader), *ptr), loader->loadingTaskQueue());
-
-            task.then([ptr { std::move(ptr) }]() mutable { ptr.reset(); }, loader->loadingTaskQueue());
+            queueUnload(Threading::make_task(&T::unloadImpl, std::move(loader), *ptr).then([ptr { std::move(ptr) }]() mutable { ptr.reset(); }), loader->loadingTaskQueue());            
         }
 
         static void resetHandle(const Handle &handle, T *loader = nullptr)
@@ -250,16 +248,10 @@ namespace Resources {
                 Threading::TaskFuture<void> task = unload(handle, loader);
 
                 Resource *resource = handle.resource();
-                auto cleanup = [&data { *loader->mData }, handle { getData(handle)->mHolder }]() {
+                queueUnload(task.then([&data { *loader->mData }, handle { getData(handle)->mHolder }]() {
                     typename traits::iterator it = traits::toIterator(data, handle);
                     data.erase(it);
-                };
-                if (task.is_ready()) {
-                    cleanup();
-                } else {
-                    task.then(std::move(cleanup),
-                        loader->loadingTaskQueue());
-                }
+                }), loader->loadingTaskQueue());
 
                 if ((typename traits::handle) * resource->mData == handle.mData)
                     *resource->mData = {};

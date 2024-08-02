@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pendingrequest.h"
+#include "streamresult.h"
 
 namespace Engine {
 namespace Serialize {
@@ -19,6 +20,9 @@ namespace Serialize {
         std::streamsize endMessageRead();
 
         PendingRequest getRequest(MessageId id);
+
+        virtual StreamResult sendMessages() = 0;
+        virtual StreamResult receiveMessages() = 0;
 
     protected:
         virtual void beginMessageWriteImpl() = 0;

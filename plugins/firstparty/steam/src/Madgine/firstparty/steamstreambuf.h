@@ -49,10 +49,9 @@ namespace FirstParty {
 
         int_type overflow(int c = EOF) override;
 
-        int sync() override;
         void extend();
-        std::streamsize receiveMessages();
-        std::streamsize sendMessages();
+        Serialize::StreamResult receiveMessages() override;
+        Serialize::StreamResult sendMessages() override;
 
     private:
         HSteamNetConnection mConnection;

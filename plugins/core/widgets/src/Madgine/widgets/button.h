@@ -11,12 +11,17 @@
 namespace Engine {
 namespace Widgets {
     struct MADGINE_WIDGETS_EXPORT Button : Widget<Button> {
+
+        SERIALIZABLEUNIT(Button)
         
         Button(WidgetManager &manager, WidgetBase *parent = nullptr);
 
         virtual ~Button() = default;
 
         Execution::SignalStub<> &clickEvent();
+
+        void setEnabled(bool enabled);
+        bool isEnabled() const;
 
         void vertices(WidgetsRenderData &renderData, size_t layer) override;
 
@@ -40,6 +45,8 @@ namespace Widgets {
         Execution::Signal<> mClicked;
 
         bool mHovered = false;
+
+        bool mEnabled = true;
     };
 
 }

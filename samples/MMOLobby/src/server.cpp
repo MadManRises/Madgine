@@ -3,8 +3,6 @@
 
 #include "server.h"
 
-#include "Meta/serialize/formatter/xmlformatter.h"
-
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
 namespace MMOLobby {
@@ -45,7 +43,7 @@ Engine::Network::NetworkManager &Server::network()
 
 void Server::checkConnections()
 {
-    mNetwork.acceptConnections([]() -> std::unique_ptr<Engine::Serialize::Formatter> { return std::make_unique<Engine::Serialize::XMLFormatter>(); });
+    mNetwork.acceptConnections(Engine::Serialize::Formats::xml);
     if (Engine::Serialize::StreamResult result = mNetwork.sendAndReceiveMessages(); result.mState != Engine::Serialize::StreamState::OK) {
         LOG_ERROR(result);
     }

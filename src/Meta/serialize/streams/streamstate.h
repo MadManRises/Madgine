@@ -14,7 +14,8 @@ namespace Serialize {
         CLOSED_BY_USER,
         SEND_FAILURE,
         RECEIVE_FAILURE,
-        REJECTED)
+        REJECTED,
+        CONNECTION_LOST)
 
 }
 }

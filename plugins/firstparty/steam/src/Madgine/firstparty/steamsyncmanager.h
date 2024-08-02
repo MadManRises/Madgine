@@ -6,12 +6,11 @@
 
 #include "Generic/execution/signal.h"
 
-
 namespace Engine {
 namespace FirstParty {
 
     struct SteamSyncManager : FirstPartySyncManager {
-        using FirstPartySyncManager::FirstPartySyncManager;        
+        using FirstPartySyncManager::FirstPartySyncManager;
 
         void setup();
 
@@ -24,6 +23,12 @@ namespace FirstParty {
 
         Execution::SignalStub<> &playersConnected();
 
+        Serialize::ParticipantId resolvePlayerId(CSteamID id);
+
+    protected:
+        void removeSlaveStream(Serialize::SyncManagerResult reason = Serialize::SyncManagerResult::UNKNOWN_ERROR) override;
+        std::map<Serialize::ParticipantId, Serialize::FormattedBufferedStream>::iterator removeMasterStream(std::map<Serialize::ParticipantId, Serialize::FormattedBufferedStream>::iterator it, Serialize::SyncManagerResult reason = Serialize::SyncManagerResult::UNKNOWN_ERROR) override;
+
     private:
         Serialize::Format mFormat = nullptr;
 
@@ -32,7 +37,9 @@ namespace FirstParty {
         size_t mRemainingPlayersToConnect;
         Execution::Signal<> mPlayersConnected;
 
-        STEAM_CALLBACK(SteamSyncManager, onIncomingConnection, SteamNetConnectionStatusChangedCallback_t);
+        STEAM_CALLBACK(SteamSyncManager, onConnectionUpdate, SteamNetConnectionStatusChangedCallback_t);
+
+        std::map<CSteamID, Serialize::ParticipantId> mStoredPlayers;
     };
 
 }

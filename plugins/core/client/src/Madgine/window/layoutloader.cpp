@@ -7,9 +7,9 @@
 
 #include "Madgine/serialize/filesystem/filemanager.h"
 
-#include "Meta/serialize/streams/formattedserializestream.h"
+#include "Meta/serialize/formats.h"
 
-#include "Meta/serialize/formatter/xmlformatter.h"
+#include "Meta/serialize/streams/formattedserializestream.h"
 
 #include "Meta/serialize/operations.h"
 
@@ -42,7 +42,7 @@ namespace Window {
 
     Serialize::FormattedSerializeStream LayoutLoader::Interface::Resource::readAsFormattedStream(Serialize::SerializeManager &mgr)
     {
-        return Serialize::FormattedSerializeStream { std::make_unique<Serialize::XMLFormatter>(), mgr.wrapStream(readAsStream(), true) };
+        return Serialize::FormattedSerializeStream { Serialize::Formats::xml(), mgr.wrapStream(readAsStream(), true) };
     }
 
 }

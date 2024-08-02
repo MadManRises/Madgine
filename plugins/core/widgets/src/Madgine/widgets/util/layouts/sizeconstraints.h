@@ -26,7 +26,8 @@ namespace Widgets {
             };
         }
 
-        SizeConstraints& operator+=(const SizeConstraints& other) {
+        SizeConstraints &operator+=(const SizeConstraints &other)
+        {
             mMin += other.mMin;
             mPreferred += other.mPreferred;
             mMax += other.mMax;
@@ -44,6 +45,15 @@ namespace Widgets {
         {
             float range = (factor < 0.0f ? mPreferred - mMin : mMax - mPreferred);
             return mPreferred + factor * range;
+        }
+
+        friend SizeConstraints max(const SizeConstraints &first, const SizeConstraints &second)
+        {
+            return {
+                std::max(first.mMin, second.mMin),
+                std::max(first.mPreferred, second.mPreferred),
+                std::max(first.mMax, second.mMax)
+            };
         }
     };
 

@@ -530,6 +530,9 @@ namespace Serialize {
             mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
             //_traits::revalidateHandleAfterRemove(mActiveIterator, *this, Base::begin(), true, oldSize);
         }
+        
+    private:
+        void emplace() { } //only used to hide any potential emplace() in base class;
 
     protected:
         position_handle mActiveIterator;

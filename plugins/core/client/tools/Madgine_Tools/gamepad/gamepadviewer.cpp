@@ -47,9 +47,16 @@ namespace Tools {
         co_return true;
     }
 
+    Threading::Task<void> GamepadViewer::finalize()
+    {
+        mGamepadTexture.reset();
+
+        co_await ToolBase::finalize();
+    }
+
     void GamepadViewer::render()
     {
-        if (ImGui::Begin("GamepadViewer", &mVisible, ImGuiWindowFlags_NoScrollbar)) {            
+        if (ImGui::Begin("GamepadViewer", &mVisible, ImGuiWindowFlags_NoScrollbar)) {
 
             const ImGuiStyle &Style = ImGui::GetStyle();
             ImDrawList *DrawList = ImGui::GetWindowDrawList();

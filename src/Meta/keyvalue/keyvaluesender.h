@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Generic/execution/virtualstate.h"
 #include "Generic/execution/concepts.h"
+#include "Generic/execution/virtualstate.h"
 
 namespace Engine {
 
@@ -22,14 +22,14 @@ struct KeyValueSenderState : KeyValueSenderStateBase {
 
     virtual void connect(Execution::VirtualReceiverBase<GenericResult, const ArgumentList &> &receiver) override
     {
-        mState.emplace<State>(
-            Execution::connect(std::forward<Sender>(std::get<Sender>(mState)), receiver));
+        mState.emplace<State>(DelayedConstruct<State> {
+            [&]() { return Execution::connect(std::forward<Sender>(std::get<Sender>(mState)), receiver); } });
     }
 
     virtual void start() override
     {
         std::get<State>(mState).start();
-    }    
+    }
 
     std::variant<Sender, State> mState;
 };

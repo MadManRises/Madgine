@@ -7,19 +7,13 @@ namespace Execution {
 
     template <typename... _Ty>
     struct Signal : SignalStub<_Ty...> {
-        Signal() = default;
-
-        Signal(const Signal<_Ty...> &other) = default;
-
-        Signal(Signal<_Ty...> &&other) noexcept = default;
 
         void emit(_Ty... args)
         {
-            std::lock_guard guard { this->mMutex };
-            Connection<_Ty...> *current = this->mConnectedSlots;
-            this->mConnectedSlots = nullptr;
-            while (current) {
-                current = current->signal(args...);
+            ConnectionStack<Connection<SignalStub<_Ty...>, _Ty...>> stack = std::move(this->mStack);
+
+            while (Connection<SignalStub<_Ty...>, _Ty...> *current = stack.pop()) {
+                current->set_value(args...);
             }
         }
     };

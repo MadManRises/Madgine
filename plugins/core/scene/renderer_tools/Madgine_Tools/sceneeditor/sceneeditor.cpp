@@ -30,8 +30,6 @@
 
 #include "Madgine/serialize/filesystem/filemanager.h"
 #include "Madgine/serialize/memory/memorymanager.h"
-#include "Meta/serialize/formatter/safebinaryformatter.h"
-#include "Meta/serialize/formatter/xmlformatter.h"
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
 #include "Interfaces/input/inputevents.h"
@@ -43,6 +41,8 @@
 #include "Madgine/parametertuple.h"
 
 #include "Madgine_Tools/behaviortool.h"
+
+#include "Meta/serialize/formats.h"
 
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
@@ -215,7 +215,7 @@ namespace Tools {
 
         if (mMode == STOP) {
             Memory::MemoryManager mgr { "Tmp" };
-            Serialize::FormattedSerializeStream out = mgr.openWrite(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
+            Serialize::FormattedSerializeStream out = mgr.openWrite(mStartBuffer, Serialize::Formats::safebinary);
             Serialize::write(out, *mSceneMgr, "Scene");
         }
 
@@ -242,7 +242,7 @@ namespace Tools {
         mMode = STOP;
 
         Memory::MemoryManager mgr { "Tmp" };
-        Serialize::FormattedSerializeStream in = mgr.openRead(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
+        Serialize::FormattedSerializeStream in = mgr.openRead(mStartBuffer, Serialize::Formats::safebinary);
         Serialize::StreamResult result = Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
         if (result.mState != Serialize::StreamState::OK) {
             LOG_ERROR(*result.mError);
@@ -259,7 +259,7 @@ namespace Tools {
         auto guard = mSceneMgr->mutex().lock(AccessMode::WRITE);
 
         Filesystem::FileManager mgr { "Scene" };
-        Serialize::FormattedSerializeStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
+        Serialize::FormattedSerializeStream in = mgr.openRead(mCurrentSceneFile, Serialize::Formats::xml);
         Serialize::StreamResult result = Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
         if (result.mState != Serialize::StreamState::OK) {
             LOG_ERROR(*result.mError);
@@ -273,7 +273,7 @@ namespace Tools {
         auto guard = mSceneMgr->mutex().lock(AccessMode::READ);
 
         Filesystem::FileManager mgr { "Scene" };
-        Serialize::FormattedSerializeStream out = mgr.openWrite(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
+        Serialize::FormattedSerializeStream out = mgr.openWrite(mCurrentSceneFile, Serialize::Formats::xml);
         Serialize::write(out, *mSceneMgr, "Scene");
     }
 

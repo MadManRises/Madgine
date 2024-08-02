@@ -2,16 +2,21 @@
 
 #include "Madgine/audio/audioapi.h"
 
+#include "Modules/threading/madgineobject.h"
+
 typedef int PaDeviceIndex;
 struct PaDeviceInfo;
 
 namespace Engine {
 namespace Audio {
     
-    struct PortAudioApi : AudioApiImpl<PortAudioApi> {
+    struct PortAudioApi : AudioApiImpl<PortAudioApi>, Threading::MadgineObject<PortAudioApi> {
 
         PortAudioApi(Root::Root &root);
         ~PortAudioApi();
+
+        bool init();
+        void finalize();
 
         virtual std::string_view key() const override;
 
@@ -29,7 +34,7 @@ namespace Audio {
         std::list<PortAudioStream> mBusyStreams;
 
         PaDeviceIndex mDevice;
-        const PaDeviceInfo *mDeviceInfo;
+        const PaDeviceInfo *mDeviceInfo = nullptr;
     };
 
 }

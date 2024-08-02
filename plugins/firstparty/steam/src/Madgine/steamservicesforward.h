@@ -3,5 +3,7 @@
 namespace Engine {
 namespace FirstParty {
 
+	struct SteamSyncManager;
+
 }
 }

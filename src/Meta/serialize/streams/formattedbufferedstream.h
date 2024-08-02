@@ -13,7 +13,7 @@ namespace Serialize {
 
     struct META_EXPORT FormattedBufferedStream : FormattedSerializeStream {
 
-        FormattedBufferedStream(std::unique_ptr<Formatter> format, std::unique_ptr<message_streambuf> buffer, std::unique_ptr<SyncStreamData> data);
+        FormattedBufferedStream(std::unique_ptr<Serialize::Formatter> format, std::unique_ptr<message_streambuf> buffer, std::unique_ptr<SyncStreamData> data);
         FormattedBufferedStream(FormattedBufferedStream &&other) = default;
         FormattedBufferedStream(FormattedBufferedStream &&other, SyncManager *mgr);
 
@@ -46,7 +46,7 @@ namespace Serialize {
 
         PendingRequest getRequest(MessageId id);
 
-        FormattedBufferedStream &sendMessages();
+        StreamResult sendMessages();
 
         StreamResult beginHeaderRead();
         StreamResult endHeaderRead();
@@ -54,6 +54,8 @@ namespace Serialize {
         void beginHeaderWrite();
         void endHeaderWrite();
 
+    protected:
+        message_streambuf &buffer();
     };
 
 }

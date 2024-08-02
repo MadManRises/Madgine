@@ -45,8 +45,8 @@ float median(float r, float g, float b) {
 
 PixelShaderOutput main(PixelShaderInput IN)
 {
-    float4 diffuseColor = IN.color * object.diffuseColor;
-	float4 specularColor = object.specularColor;
+    float4 diffuseColor = IN.color;
+	float4 specularColor = float4(1.0, 1.0, 1.0, 1.0);
 
 	float3 normal = normalize(IN.normal);
 

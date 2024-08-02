@@ -60,14 +60,17 @@ namespace Widgets {
 
         Vector3 getAbsoluteSize() const;
         Vector2 getAbsolutePosition() const;
+        void setAbsoluteSize(const Vector3 &size);
+        void setAbsolutePosition(const Vector2 &pos);
 
         void applyGeometry();
-        void applyGeometry(const Vector3 &parentSize, const Vector2 &parentPos = Vector2::ZERO);
+        void applyGeometry(const Vector3 &parentSize, const Vector2 &parentPos = Vector2::ZERO);        
+        virtual void updateChildrenGeometry();
         Geometry calculateGeometry(uint16_t activeConditions, GeometrySourceInfo *source = nullptr);
+        
 
         WidgetBase *createChild(WidgetClass _class);
-        template <typename WidgetType = WidgetBase>
-        MADGINE_WIDGETS_EXPORT WidgetType *createChild();
+        void clearChildren();
 
         WidgetBase *getChildRecursive(std::string_view name);
         template <typename T>

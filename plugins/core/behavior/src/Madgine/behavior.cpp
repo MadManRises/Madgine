@@ -92,11 +92,13 @@ void CoroutineBehaviorState::unhandled_exception()
 
 void CoroutineBehaviorState::set_error(BehaviorError result)
 {
+    mDebugLocation.stepOut(mReceiver->debugLocation());
     mReceiver->set_error(result);
 }
 
 void CoroutineBehaviorState::set_done()
 {
+    mDebugLocation.stepOut(mReceiver->debugLocation());
     mReceiver->set_done();
 }
 

@@ -63,6 +63,11 @@ namespace FirstParty {
         return "SteamServices";
     }
 
+    std::string SteamServices::currentUserName() const
+    {
+        return SteamFriends()->GetPersonaName();
+    }
+
     Threading::Task<Leaderboard> SteamServices::getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd)
     {
         ELeaderboardDataRequest requestmode;
@@ -166,12 +171,13 @@ namespace FirstParty {
             Lobby &lobby = lobbies.emplace_back();
             CSteamID id = SteamMatchmaking()->GetLobbyByIndex(i);
             lobby.mId = id.ConvertToUint64();
+            lobby.mProperties = getLobbyProperties(id);
         }
 
         co_return std::move(lobbies);
     }
 
-    Threading::Task<std::optional<Lobby>> SteamServices::createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb)
+    Threading::Task<std::optional<Lobby>> SteamServices::createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb, std::map<std::string, std::string> properties)
     {
         assert(!mCurrentLobby.IsValid());
 
@@ -185,6 +191,9 @@ namespace FirstParty {
         mCurrentMatchmakingCallback = std::move(cb);
         mSessionStartedCallback = std::move(sessionCb);
         mCurrentLobby.SetFromUint64(result.m_ulSteamIDLobby);
+
+        for (const auto &[key, value] : properties)
+            SteamMatchmaking()->SetLobbyData(mCurrentLobby, key.c_str(), value.c_str());
 
         updateLobbyInfo();
 
@@ -211,24 +220,36 @@ namespace FirstParty {
         co_return Lobby { result.m_ulSteamIDLobby };
     }
 
-    Threading::Task<bool> SteamServices::startMatchTask()
+    Threading::Task<ServerInfo> SteamServices::startMatchTask()
     {
         assert(mCurrentLobby.IsValid());
         assert(isLobbyOwner());
 
-        size_t playerCount = SteamMatchmaking()->GetNumLobbyMembers(mCurrentLobby);
+        int playerCount = SteamMatchmaking()->GetNumLobbyMembers(mCurrentLobby);
+
+        ServerInfo server;
+        server.mPlayers = getLobbyPlayers();
+        std::vector<CSteamID> players;
+        for (int i = 0; i < playerCount; ++i) {            
+            players.emplace_back(SteamMatchmaking()->GetLobbyMemberByIndex(mCurrentLobby, i));
+        }
 
         Serialize::Format format = mCurrentMatchmakingCallback(mSyncManager);
         mSyncManager.listen(playerCount - 1, format);
 
         SteamMatchmaking()->SetLobbyGameServer(mCurrentLobby, 0, 0, SteamUser()->GetSteamID());
-
+        
         if (playerCount > 1)
             co_await mSyncManager.playersConnected().sender();
-
+        
         leaveLobby();
 
-        co_return true;
+        
+        for (size_t i = 0; i < playerCount; ++i) {            
+            server.mIds.emplace_back(mSyncManager.resolvePlayerId(players[i]));
+        }
+
+        co_return std::move(server);
     }
 
     void SteamServices::leaveLobby()
@@ -263,21 +284,24 @@ namespace FirstParty {
         updateLobbyInfo();
     }
 
+    void SteamServices::setLobbyProperty(std::string_view key, std::string_view value)
+    {
+        if (!mCurrentLobby.IsValid())
+            return;
+
+        SteamMatchmaking()->SetLobbyData(mCurrentLobby, key.data(), value.data());
+    }
+
     void SteamServices::updateLobbyInfo()
     {
         if (mCurrentLobby.IsValid()) {
             if (mLobbyInfoCallback) {
-                int players = SteamMatchmaking()->GetNumLobbyMembers(mCurrentLobby);
-
                 LobbyInfo lobbyInfo;
-                for (int i = 0; i < players; ++i) {
-                    CSteamID user = SteamMatchmaking()->GetLobbyMemberByIndex(mCurrentLobby, i);
-                    PlayerInfo &info = lobbyInfo.mPlayers.emplace_back();
-                    info.mName = SteamFriends()->GetFriendPersonaName(user);
-                }
+                lobbyInfo.mPlayers = getLobbyPlayers();
+                lobbyInfo.mProperties = getLobbyProperties(mCurrentLobby);
                 mLobbyInfoCallback(lobbyInfo);
             }
-            
+
             //if (mLobbyRunning != running) {
             //    onMatchStarted();
             //}
@@ -293,11 +317,39 @@ namespace FirstParty {
 
             Execution::detach(mSyncManager.connect(serverID, format) | Execution::then([this]() {
                 if (mSessionStartedCallback)
-                    mSessionStartedCallback();
+                    mSessionStartedCallback(getLobbyPlayers());
 
                 leaveLobby();
             }));
         }
+    }
+
+    std::map<std::string, std::string> SteamServices::getLobbyProperties(CSteamID lobby)
+    {
+        int dataCount = SteamMatchmaking()->GetLobbyDataCount(lobby);
+
+        std::map<std::string, std::string> properties;
+        for (int i = 0; i < dataCount; ++i) {
+            char key[256];
+            char value[256];
+            bool result = SteamMatchmaking()->GetLobbyDataByIndex(lobby, i, key, 255, value, 255);
+            if (result)
+                properties[key] = value;
+        }
+        return properties;
+    }
+
+    std::vector<PlayerInfo> SteamServices::getLobbyPlayers()
+    {
+        int playerCount = SteamMatchmaking()->GetNumLobbyMembers(mCurrentLobby);
+
+        std::vector<PlayerInfo> players;
+        for (int i = 0; i < playerCount; ++i) {
+            CSteamID user = SteamMatchmaking()->GetLobbyMemberByIndex(mCurrentLobby, i);
+            PlayerInfo &info = players.emplace_back();
+            info.mName = SteamFriends()->GetFriendPersonaName(user);
+        }
+        return players;
     }
 
     void SteamServices::onLobbyInfoUpdate(LobbyDataUpdate_t *data)

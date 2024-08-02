@@ -21,6 +21,7 @@
 #include "tablewidget.h"
 #include "textbox.h"
 #include "textedit.h"
+#include "layout.h"
 
 #include "Madgine/imageloader/imagedata.h"
 
@@ -72,7 +73,8 @@ namespace Widgets {
         "Image",
         "TableWidget",
         "TabBar",
-        "TextEdit"
+        "TextEdit",
+        "Layout"
     };
 
     static float sDragDistanceThreshold = 5.0f;
@@ -156,6 +158,7 @@ namespace Widgets {
     template std::unique_ptr<Image> WidgetManager::create<Image>(WidgetBase *);
     template std::unique_ptr<TableWidget> WidgetManager::create<TableWidget>(WidgetBase *);
     template std::unique_ptr<TextEdit> WidgetManager::create<TextEdit>(WidgetBase *);
+    template std::unique_ptr<Layout> WidgetManager::create<Layout>(WidgetBase *);
 
     template <typename WidgetType>
     WidgetType *WidgetManager::createTopLevel()
@@ -195,6 +198,8 @@ namespace Widgets {
             return create<TabBar>(parent);
         case WidgetClass::TEXTEDIT:
             return create<TextEdit>(parent);
+        case WidgetClass::LAYOUT:
+            return create<Layout>(parent);
         default:
             std::terminate();
         }
@@ -259,6 +264,9 @@ namespace Widgets {
             break;
         case WidgetClass::TEXTEDIT:
             out = &serializeTable<TextEdit>();
+            break;
+        case WidgetClass::LAYOUT:
+            out = &serializeTable<Layout>();
             break;
         default:
             std::terminate();

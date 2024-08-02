@@ -22,14 +22,16 @@ namespace Filesystem {
     {
     }
 
-    Serialize::FormattedSerializeStream FileManager::openRead(const Path &path, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::FormattedSerializeStream FileManager::openRead(const Path &path, Serialize::Format format)
     {
         assert(!getSlaveStreamData());
 
-        Stream stream = openFileRead(path, format->mBinary);
+        std::unique_ptr<Serialize::Formatter> formatter = format();
+
+        Stream stream = openFileRead(path, formatter->mBinary);
         if (stream) {
             return Serialize::FormattedSerializeStream {
-                std::move(format),
+                std::move(formatter),
                 wrapStream(std::move(stream), true)
             };
         } else {
@@ -37,12 +39,14 @@ namespace Filesystem {
         }
     }
 
-    Serialize::FormattedSerializeStream FileManager::openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::FormattedSerializeStream FileManager::openWrite(const Path &path, Serialize::Format format)
     {
-        Stream stream = openFileWrite(path, format->mBinary);
+        std::unique_ptr<Serialize::Formatter> formatter = format();
+
+        Stream stream = openFileWrite(path, formatter->mBinary);
         if (stream) {
             return Serialize::FormattedSerializeStream {
-                std::move(format),
+                std::move(formatter),
                 wrapStream(std::move(stream))
             };
         } else {

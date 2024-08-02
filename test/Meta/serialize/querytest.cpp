@@ -21,8 +21,8 @@ TEST(Serialize_Query, Query)
     NoParent<TestUnit> unit1 { 1 };
     NoParent<TestUnit> unit2 { 2 };
 
-    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1));
-    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2));
+    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1, 10));
+    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2, 10));
 
     Buffer buffer;
     HANDLE_MGR_RESULT(mgr1, mgr1.setMasterBuffer(buffer));
@@ -84,9 +84,9 @@ TEST(Serialize_Query, Query_Hierarchical)
     NoParent<TestUnit> unit2 { 2 };
     NoParent<TestUnit> unit3 { 3 };
 
-    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1));
-    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2));
-    HANDLE_MGR_RECEIVER(mgr3.addTopLevelItemImpl(receiver, &unit3));
+    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1, 10));
+    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2, 10));
+    HANDLE_MGR_RECEIVER(mgr3.addTopLevelItemImpl(receiver, &unit3, 10));
 
     Buffer buffer;
     mgr1.setMasterBuffer(buffer);
@@ -113,14 +113,14 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit3.mCallCount, 0);
 
     mgr1.sendMessages();
-    HANDLE_STREAM_RESULT(mgr2.receiveMessages(1, 0ms));
+    /* HANDLE_STREAM_RESULT*/(mgr2.receiveMessages(1, 0ms));
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 0);
     ASSERT_EQ(unit3.mCallCount, 0);
 
     mgr2.sendMessages();
-    HANDLE_STREAM_RESULT(mgr3.receiveMessages(1, 0ms));
+    /* HANDLE_STREAM_RESULT*/(mgr3.receiveMessages(1, 0ms));
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 0);
@@ -136,7 +136,7 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit3.mCallCount, 0);
 
     mgr3.sendMessages();
-    HANDLE_STREAM_RESULT(mgr2.receiveMessages(1, 0ms));
+    /* HANDLE_STREAM_RESULT*/(mgr2.receiveMessages(1, 0ms));
 
     ASSERT_FALSE(f2.is_ready());
 
@@ -145,7 +145,7 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit3.mCallCount, 0);
 
     mgr2.sendMessages();
-    HANDLE_STREAM_RESULT(mgr1.receiveMessages(1, 0ms));
+    /* HANDLE_STREAM_RESULT*/(mgr1.receiveMessages(1, 0ms));
 
     ASSERT_FALSE(f2.is_ready());
 
@@ -154,7 +154,7 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit3.mCallCount, 0);
 
     mgr1.sendMessages();
-    HANDLE_STREAM_RESULT(mgr2.receiveMessages(1, 0ms));
+    /* HANDLE_STREAM_RESULT*/(mgr2.receiveMessages(1, 0ms));
 
     ASSERT_FALSE(f2.is_ready());
 
@@ -163,7 +163,7 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit3.mCallCount, 0);
 
     mgr2.sendMessages();
-    HANDLE_STREAM_RESULT(mgr3.receiveMessages(1, 0ms));
+    /* HANDLE_STREAM_RESULT*/(mgr3.receiveMessages(1, 0ms));
 
     ASSERT_TRUE(f2.is_ready());
     ASSERT_MESSAGEFUTURE_EQ(f2, 21);

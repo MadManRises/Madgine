@@ -9,8 +9,11 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
+#include "widgetmanager.h"
+
 METATABLE_BEGIN_BASE(Engine::Widgets::TableWidget, Engine::Widgets::WidgetBase)
 NAMED_MEMBER(TextData, mTextRenderData)
+NAMED_MEMBER(SelectionColors, mSelectionRenderData)
 PROPERTY(RowCount, rowCount, setRowCount)
 PROPERTY(ColumnCount, columnCount, setColumnCount)
 PROPERTY(ColumnConfigs, columnConfigs, setColumnConfigs)
@@ -19,11 +22,17 @@ METATABLE_END(Engine::Widgets::TableWidget)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::TableWidget, Engine::Widgets::WidgetBase)
 FIELD(mTextRenderData)
 FIELD(mRowCount)
+FIELD(mSelectionRenderData)
 ENCAPSULATED_FIELD(mColumnConfigs, columnConfigs, setColumnConfigs)
 SERIALIZETABLE_END(Engine::Widgets::TableWidget)
 
 namespace Engine {
 namespace Widgets {
+
+    TableWidget::TableWidget(WidgetManager &manager, WidgetBase *parent) 
+        : Widget(manager, parent, { .acceptsPointerEvents = true })
+    {
+    }
 
     void TableWidget::setRowCount(uint32_t count)
     {
@@ -33,6 +42,9 @@ namespace Widgets {
             applyGeometry();
 
             mCellData.resize(count * columnCount());
+
+            if (mSelectedRow && mSelectedRow >= mRowCount)
+                setSelectedRow({});
         }
     }
 
@@ -109,6 +121,8 @@ namespace Widgets {
         float fullWidth = mVerticalLayoutRenderData.fullSize();
         float fullHeight = mHorizontalLayoutRenderData.fullSize(mRowCount);
 
+        const Atlas2::Entry *blankEntry = manager().lookUpImage("blank_white");
+
         AreaView<std::string, 2> view { mCellData.data(), { columnCount(), mRowCount } };
 
         for (size_t row = 0; row < mRowCount; ++row) {
@@ -118,8 +132,21 @@ namespace Widgets {
                 cellSize.z = size.z;
                 mTextRenderData.render(renderData, view[row][col], pos + cellPos, cellSize);
             }
+            auto [rowPos, rowSize] = mHorizontalLayoutRenderData.getElementDimensions(row);
+
+            if (blankEntry) {
+                Color4 color = mSelectionRenderData.mNormalColor;
+
+                if (mHoveredRow == row) {
+                    color = mSelectionRenderData.mHighlightedColor;
+                } else if (mSelectedRow == row) {
+                    color = mSelectionRenderData.mSelectedColor;
+                }
+
+                renderData.renderQuadUV({ pos.x, pos.y + rowPos, pos.z + 0.1f }, { fullWidth, rowSize }, color, {}, blankEntry->mArea, { 2048, 2048 }, blankEntry->mFlipped);
+            }
+
             if (row + 1 < mRowCount) {
-                auto [rowPos, rowSize] = mHorizontalLayoutRenderData.getElementDimensions(row);
                 float y = rowPos + rowSize;
                 Line3 line {
                     { pos.x,
@@ -134,7 +161,7 @@ namespace Widgets {
         }
 
         for (size_t col = 1; col < mColumnConfigs.size(); ++col) {
-            auto [x, _] = mVerticalLayoutRenderData.getElementDimensions(col);            
+            auto [x, _] = mVerticalLayoutRenderData.getElementDimensions(col);
             Line3 line {
                 { pos.x + x,
                     pos.y,
@@ -162,6 +189,56 @@ namespace Widgets {
             mNeedResize = true;
         }
         mVerticalLayoutRenderData.update(mColumnConfigs, pixelSize.x, pixelSize.z);
+    }
+
+    Execution::SignalStub<IndexType<uint32_t>> &TableWidget::selectedRowChanged()
+    {
+        return mSelectedRowChanged;
+    }
+
+    IndexType<uint32_t> TableWidget::selectedRow() const
+    {
+        return mSelectedRow;
+    }
+
+    void TableWidget::setSelectedRow(IndexType<uint32_t> row)
+    {
+        if (mSelectedRow != row) {
+            mSelectedRow = row;
+            mSelectedRowChanged.emit(mSelectedRow);
+        }
+    }
+
+    IndexType<uint32_t> TableWidget::rowIndex(float y)
+    {
+        uint32_t index = static_cast<uint32_t>(y / mHorizontalLayoutRenderData.getElementDimensions(0).second);
+        if (index >= mRowCount)
+            return {};
+        return index;
+    }
+
+    void TableWidget::injectPointerEnter(const Input::PointerEventArgs &arg)
+    {
+        mHoveredRow = rowIndex(arg.windowPosition.y);
+        WidgetBase::injectPointerEnter(arg);
+    }
+
+    void TableWidget::injectPointerLeave(const Input::PointerEventArgs &arg)
+    {
+        mHoveredRow.reset();
+        WidgetBase::injectPointerLeave(arg);
+    }
+
+    void TableWidget::injectPointerMove(const Input::PointerEventArgs &arg)
+    {
+        mHoveredRow = rowIndex(arg.windowPosition.y);
+        WidgetBase::injectPointerMove(arg);
+    }
+
+    void TableWidget::injectPointerClick(const Input::PointerEventArgs &arg)
+    {
+        setSelectedRow(mHoveredRow);
+        WidgetBase::injectPointerClick(arg);
     }
 
 }

@@ -129,7 +129,7 @@ namespace TupleUnpacker {
     }
 
     template <typename F, typename... Args>
-    decltype(auto) invoke(F &&f, Args &&...args)
+    decltype(auto) invoke(F &&f, Args &&...args) 
     {
         return invokeFromTuple(std::forward<F>(f), std::forward_as_tuple(std::forward<Args>(args)...));
     }
@@ -315,8 +315,7 @@ namespace TupleUnpacker {
     concept Tuplefyable = decltype(num_bindings_impl<T>()) {} > 0;
 #endif
 
-    namespace detail
-    {
+    namespace detail {
         struct Test2 {
             int a, b;
         };

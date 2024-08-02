@@ -38,7 +38,7 @@ namespace Serialize {
     protected:
         void setSlaveStreamData(SerializeStreamData *data);
 
-        std::unique_ptr<SerializeStreamData> createStreamData();
+        std::unique_ptr<SerializeStreamData> createStreamData(ParticipantId id = createStreamId());
         static ParticipantId createStreamId();
 
 		static SyncableUnitBase *getByMasterId(UnitId unit);

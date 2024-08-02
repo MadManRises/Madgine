@@ -32,7 +32,7 @@ namespace Serialize {
         : Stream(std::move(other))
         , mData(std::move(other.mData))
     {
-        mData->setManager(mgr);
+        //mData->setManager(mgr);
     }
 
     SerializeStream::~SerializeStream() = default;
@@ -46,16 +46,18 @@ namespace Serialize {
 
     StreamResult SerializeStream::read(void *buffer, size_t size)
     {
-        Stream::read(buffer, size);
-        return checkState("read");
+        if (Stream::read(buffer, size) < 0) {
+            auto error = STREAM_ERROR(StreamState::OK, *this, true);
+            error.mType = streamError(state(), error.mMsg);
+            error.mMsg << "after read";
+            return error;
+        }
+        return {};
     }
 
     StreamResult SerializeStream::readN(std::string &buffer, size_t n)
     {
-        //assert(!format().mBinary);
-
-        skipWs();
-        STREAM_PROPAGATE_ERROR(checkState("skipWs"));
+        STREAM_PROPAGATE_ERROR(skipWs());        
 
         if (n == 0)
             return {};
@@ -66,10 +68,7 @@ namespace Serialize {
 
     StreamResult SerializeStream::readUntil(std::string &buffer, const char *delim)
     {
-        //assert(!format().mBinary);
-
-        skipWs();
-        STREAM_PROPAGATE_ERROR(checkState("skipWs"));
+        STREAM_PROPAGATE_ERROR(skipWs());
 
         buffer.resize(255);
         size_t i = 0;
@@ -274,7 +273,7 @@ namespace Serialize {
 
     SerializeStream &SerializeStream::operator<<(const ByteBuffer &b)
     {
-        return operator<<(Base64::encode(b));        
+        return operator<<(Base64::encode(b));
     }
 
     void SerializeStream::write(const Void &)
@@ -286,22 +285,14 @@ namespace Serialize {
         return *this;
     }
 
-    StreamResult SerializeStream::checkState(const char *op)
+    StreamResult SerializeStream::skipWs(bool overwrite)
     {
-        if (!*this) {
-            const char *msg;
-            if (state() & std::ios_base::badbit) {
-                msg = "Stream corrupt";
-            } else if (state() & std::ios_base::failbit) {
-                msg = "Operation failure";
-            } else if (state() & std::ios_base::eofbit) {
-                msg = "Unexpected EOF";
-            } else
-                throw 0;
-            return STREAM_PARSE_ERROR(*this, true) << msg << " after " << op;
-        } else {
-            return {};
+        if (!Stream::skipWs(overwrite)) {
+            auto error = STREAM_ERROR(StreamState::OK, *this, true);
+            error.mType = streamError(state(), error.mMsg);
+            error.mMsg << "after skipWs";
         }
+        return {};
     }
 
 }

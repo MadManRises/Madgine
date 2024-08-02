@@ -3,14 +3,15 @@
 #include "Generic/execution/concepts.h"
 #include "Generic/type_pack.h"
 #include "Generic/genericresult.h"
-#include "Generic/container/unmanaged/queue.h"
+#include "Generic/execution/connection.h"
+#include "Generic/execution/container/queue.h"
 
 namespace Engine {
 namespace Threading {
 
     struct MODULES_EXPORT DataMutex {
 
-        struct LockState : UnmanagedQueueNode<LockState> {
+        struct LockState {
             LockState(DataMutex *mutex, AccessMode mode)
                 : mMutex(mutex)
                 , mMode(mode)
@@ -18,9 +19,14 @@ namespace Threading {
             }
 
             virtual void onLockAcquired() = 0;
+            void cancel() {
+                throw 0;
+            }
 
             DataMutex *mMutex = nullptr;
             AccessMode mMode;
+
+            std::atomic<LockState *> mNext = nullptr;
         };
 
         struct MODULES_EXPORT Lock : private LockState {
@@ -133,8 +139,8 @@ namespace Threading {
         std::shared_mutex mMutex;
         std::string mName;
 
-        UnmanagedQueue<LockState> mReadQueue;
-        UnmanagedQueue<LockState> mWriteQueue;        
+        Execution::ConnectionQueue<LockState> mReadQueue;
+        Execution::ConnectionQueue<LockState> mWriteQueue;        
     };
 
 }

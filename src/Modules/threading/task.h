@@ -17,8 +17,10 @@ namespace Threading {
     template <typename T>
     concept IsTask = is_task<T>::value;
 
-    template <typename T, bool Immediate>
+    template <typename _T, bool Immediate>
     struct [[nodiscard]] Task {
+
+        using T = _T;
 
         static_assert(!IsTask<T>);
 
@@ -103,6 +105,14 @@ namespace Threading {
         {
             assert(!mHandle || mHandle.done());
             return mState->get();
+        }
+
+        template <typename F>
+        Task<std::invoke_result_t<F>, Immediate> then(F&& f) &&{
+            return [](F f, Task task) -> Task<std::invoke_result_t<F>, Immediate>{
+                co_await std::move(task);
+                f();
+            }(std::forward<F>(f), std::move(*this));
         }
 
     private:

@@ -52,8 +52,8 @@
 
 #include "Madgine_Tools/behaviortool.h"
 
-#include "Madgine/nodegraph/nodes/functionnode.h"
 #include "Madgine/nodegraph/nodes/accessornode.h"
+#include "Madgine/nodegraph/nodes/functionnode.h"
 
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
@@ -738,15 +738,14 @@ namespace Tools {
 
     void NodeGraphEditor::load(std::string_view name)
     {
-        mGraphHandle.load(name).then([this](bool b) {
+        mRoot.taskQueue()->queueTask(mGraphHandle.load(name).then([this](bool b) {
             if (b) {
                 mGraph = *mGraphHandle;
                 mFilePath = mGraphHandle.info()->resource()->path();
             } else
                 mGraph = {};
             createEditor();
-        },
-            mRoot.taskQueue());
+        }));
     }
 
     void NodeGraphEditor::create()

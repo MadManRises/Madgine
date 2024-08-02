@@ -9,7 +9,7 @@
 
 #include "Meta/serialize/streams/formattedserializestream.h"
 
-#include "Meta/serialize/formatter/safebinaryformatter.h"
+#include "Meta/serialize/formats.h"
 
 #include "Meta/serialize/operations.h"
 
@@ -270,7 +270,7 @@ namespace Widgets {
     Threading::Task<bool> AtlasLoader::loadImpl(PreprocessedUIAtlas &data, ResourceDataInfo &info)
     {
         Serialize::SerializeManager mgr { "Atlas" };
-        Serialize::FormattedSerializeStream stream { std::make_unique<Serialize::SafeBinaryFormatter>(), mgr.wrapStream(info.resource()->readAsStream(true), true) };
+        Serialize::FormattedSerializeStream stream { Serialize::Formats::safebinary(), mgr.wrapStream(info.resource()->readAsStream(true), true) };
         Serialize::StreamResult result = Serialize::read(stream, data, "Atlas");
         if (result.mState != Serialize::StreamState::OK) {
             LOG_ERROR("Failed loading Atlas " << info.resource()->path());
@@ -324,7 +324,7 @@ namespace Widgets {
                 atlas.insert(images);
                 Filesystem::FileManager outMgr { "Atlas" };
                 Filesystem::Path outPath = intermediateDir / (std::string { path.stem() } + ".atl");
-                Serialize::FormattedSerializeStream out = outMgr.openWrite(outPath, std::make_unique<Serialize::SafeBinaryFormatter>());
+                Serialize::FormattedSerializeStream out = outMgr.openWrite(outPath, Serialize::Formats::safebinary);
                 
                 Serialize::write(out, atlas, "Atlas");   
 

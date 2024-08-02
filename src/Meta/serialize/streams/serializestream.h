@@ -147,8 +147,7 @@ namespace Serialize {
 
         SerializeStream &operator<<(const Void &);
 
-    protected:
-        StreamResult checkState(const char *op);
+        StreamResult skipWs(bool overwrite = false);
 
     protected:
         std::unique_ptr<SerializeStreamData> mData;

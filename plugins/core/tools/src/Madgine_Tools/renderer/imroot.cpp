@@ -11,8 +11,6 @@
 
 #include "im3d/im3d.h"
 
-#include "Meta/serialize/formatter/iniformatter.h"
-
 #include "Generic/container/safeiterator.h"
 
 #include "Meta/serialize/operations.h"
@@ -22,6 +20,8 @@
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+
+#include "Meta/serialize/formats.h"
 
 #include "Generic/projections.h"
 
@@ -60,7 +60,7 @@ namespace Tools {
     {
         auto buf = std::make_unique<std::stringbuf>();
         std::stringbuf *outBuffer = buf.get();
-        Serialize::FormattedSerializeStream out { std::make_unique<Serialize::IniFormatter>(), { std::move(buf) } };
+        Serialize::FormattedSerializeStream out { Serialize::Formats::ini(), { std::move(buf) } };
 
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
         for (ToolBase *tool : root->tools() | std::views::transform(projectionUniquePtrToPtr)) {
@@ -208,7 +208,7 @@ namespace Tools {
         if (mToolReadTool) {
 
             auto buf = std::make_unique<std::stringbuf>(mToolReadBuffer.str());
-            Serialize::FormattedSerializeStream in { std::make_unique<Serialize::IniFormatter>(), { std::move(buf) } };
+            Serialize::FormattedSerializeStream in { Serialize::Formats::ini(), { std::move(buf) } };
 
             Serialize::StreamResult result = Serialize::read(in, *mToolReadTool, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
             if (result.mState != Serialize::StreamState::OK) {

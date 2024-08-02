@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Serialize {
 
-    FormattedBufferedStream::FormattedBufferedStream(std::unique_ptr<Formatter> format, std::unique_ptr<message_streambuf> buffer, std::unique_ptr<SyncStreamData> data)
+    FormattedBufferedStream::FormattedBufferedStream(std::unique_ptr<Serialize::Formatter> format, std::unique_ptr<message_streambuf> buffer, std::unique_ptr<SyncStreamData> data)
         : FormattedSerializeStream(std::move(format), { std::move(buffer), std::move(data) })
     {
     }
@@ -17,36 +17,42 @@ namespace Serialize {
     FormattedBufferedStream::FormattedBufferedStream(FormattedBufferedStream &&other, SyncManager *mgr)
         : FormattedBufferedStream(std::move(other))
     {
-        mFormatter->stream().data()->setManager(mgr);
+        //mFormatter->stream().data()->setManager(mgr);
     }
 
     void FormattedBufferedStream::beginMessageWrite()
     {
-        static_cast<message_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite();
+        buffer().beginMessageWrite();
         mFormatter->beginMessageWrite();
     }
 
     void FormattedBufferedStream::endMessageWrite()
     {
         mFormatter->endMessageWrite();
-        static_cast<message_streambuf &>(mFormatter->stream().buffer()).endMessageWrite();
+        buffer().endMessageWrite();
     }
 
     void FormattedBufferedStream::endMessageWrite(ParticipantId requester, MessageId requestId, GenericMessageReceiver receiver)
     {
         mFormatter->endMessageWrite();
-        static_cast<message_streambuf &>(mFormatter->stream().buffer()).endMessageWrite(requester, requestId, std::move(receiver));
+        buffer().endMessageWrite(requester, requestId, std::move(receiver));
     }
 
     StreamResult FormattedBufferedStream::beginMessageRead(MessageReadMarker &msg)
     {
-        if (mFormatter) {
-            MessageId id = static_cast<message_streambuf &>(mFormatter->stream().buffer()).beginMessageRead();
-            if (id != 0) {
-                mFormatter->stream().clear();
-                STREAM_PROPAGATE_ERROR(mFormatter->beginMessageRead());
-                msg = { id, mFormatter.get() };
-            }
+        if (!mFormatter)
+            throw 0;
+                
+        MessageId id = buffer().beginMessageRead();
+        if (id == 0) {
+            STREAM_PROPAGATE_ERROR(buffer().receiveMessages());
+            id = buffer().beginMessageRead();
+        }
+        
+        if (id != 0) {
+            mFormatter->stream().clear();
+            STREAM_PROPAGATE_ERROR(mFormatter->beginMessageRead());
+            msg = { id, mFormatter.get() };
         }
         return {};
     }
@@ -64,12 +70,12 @@ namespace Serialize {
     }
 
     StreamResult FormattedBufferedStream::MessageReadMarker::end()
-    {        
+    {
         assert(mId);
         STREAM_PROPAGATE_ERROR(mFormatter->endMessageRead());
         mFormatter->stream().skipWs();
         mFormatter->stream().clear();
-        if (static_cast<message_streambuf&>(mFormatter->stream().buffer()).endMessageRead() > 0) {
+        if (static_cast<message_streambuf &>(mFormatter->stream().buffer()).endMessageRead() > 0) {
             printf("Message not fully read!");
         }
         mFormatter = nullptr;
@@ -84,14 +90,14 @@ namespace Serialize {
 
     PendingRequest FormattedBufferedStream::getRequest(MessageId id)
     {
-        return static_cast<message_streambuf &>(mFormatter->stream().buffer()).getRequest(id);
+        return buffer().getRequest(id);
     }
 
-    FormattedBufferedStream &FormattedBufferedStream::sendMessages()
+    StreamResult FormattedBufferedStream::sendMessages()
     {
-        if (mFormatter)
-            mFormatter->stream().stream().flush();
-        return *this;
+        if (!mFormatter)
+            throw 0;
+        return buffer().sendMessages();
     }
 
     StreamResult FormattedBufferedStream::beginHeaderRead()
@@ -112,6 +118,11 @@ namespace Serialize {
     void FormattedBufferedStream::endHeaderWrite()
     {
         mFormatter->endHeaderWrite();
+    }
+
+    message_streambuf &FormattedBufferedStream::buffer()
+    {
+        return static_cast<message_streambuf &>(mFormatter->stream().buffer());
     }
 
 }

@@ -136,7 +136,7 @@ namespace FirstParty {
 
         mUserId = root.taskQueue()->queueTask(loginUser());
 
-        mProductUserId = mUserId.then([this](EOS_EpicAccountId id) { return connectLogin(id); }, root.taskQueue());
+        mProductUserId = root.taskQueue()->queueTask(mUserId.then([this](EOS_EpicAccountId id) { return connectLogin(id); }));
     }
 
     EpicServices::~EpicServices()
@@ -257,6 +257,11 @@ namespace FirstParty {
     std::string_view EpicServices::key() const
     {
         return "EpicServices";
+    }
+
+    std::string EpicServices::currentUserName() const
+    {
+        throw 0;
     }
 
     Threading::Task<Leaderboard> EpicServices::getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd)
@@ -459,7 +464,7 @@ namespace FirstParty {
         throw 0;
     }
 
-    Threading::Task<std::optional<Lobby>> EpicServices::createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb)
+    Threading::Task<std::optional<Lobby>> EpicServices::createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb, std::map<std::string, std::string> properties)
     {
         throw 0;
     }
@@ -469,7 +474,7 @@ namespace FirstParty {
         throw 0;
     }
 
-    Threading::Task<bool> EpicServices::startMatchTask()
+    Threading::Task<ServerInfo> EpicServices::startMatchTask()
     {
         throw 0;
     }
@@ -490,6 +495,11 @@ namespace FirstParty {
     }
 
     void EpicServices::setLobbyInfoCallback(LobbyInfoCallback cb)
+    {
+        throw 0;
+    }
+
+    void Engine::FirstParty::EpicServices::setLobbyProperty(std::string_view key, std::string_view value)
     {
         throw 0;
     }

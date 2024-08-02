@@ -42,9 +42,15 @@ struct container_api_impl<C, std::list<Ty...>> : C {
     }
 
     template <typename... _Ty>
-    decltype(auto) emplace_back(_Ty &&... args)
+    decltype(auto) emplace_back(_Ty &&...args)
     {
-        return *this->emplace(this->end(), std::forward<_Ty>(args)...);
+        return emplace(this->end(), std::forward<_Ty>(args)...);
+    }
+
+    template <typename... _Ty>
+    decltype(auto) emplace(const typename C::iterator &it, _Ty &&...args)
+    {
+        return Engine::emplace(*this, it, std::forward<_Ty>(args)...);
     }
 
     const typename C::value_type &back() const
@@ -94,9 +100,10 @@ struct container_api_impl<C, std::vector<Ty...>> : C {
     }
 
     template <typename... _Ty>
-    decltype(auto) emplace_back(_Ty &&... args)
+    decltype(auto) emplace_back(_Ty &&...args)
     {
-        return this->emplace(this->end(), std::forward<_Ty>(args)...);
+        bool success;
+        return Engine::emplace(success, *this, this->end(), std::forward<_Ty>(args)...);
     }
 
     value_type &at(size_t i)
@@ -147,7 +154,7 @@ struct container_api_impl<C, std::deque<Ty...>> : C {
 
     decltype(auto) push_back(const value_type &item)
     {
-        return *emplace_back(item);        
+        return *emplace_back(item);
     }
 
     decltype(auto) push_back(value_type &&item)
@@ -158,7 +165,7 @@ struct container_api_impl<C, std::deque<Ty...>> : C {
     template <typename... _Ty>
     decltype(auto) emplace_back(_Ty &&...args)
     {
-        return *emplace(static_cast<C&>(*this), this->end(), std::forward<_Ty>(args)...);
+        return *emplace(static_cast<C &>(*this), this->end(), std::forward<_Ty>(args)...);
     }
 
     value_type &at(size_t i)
@@ -205,10 +212,12 @@ struct container_api_impl<C, std::map<K, T, Ty...>> : SortedContainerApi<C> {
     }
 
     template <typename... _Ty>
-    auto try_emplace(const K &key, _Ty &&... args) -> decltype(C::emplace(C::lower_bound(key), std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(std::forward<_Ty>(args)...)))
+    auto try_emplace(const K &key, _Ty &&...args) -> decltype(emplace(std::declval<C &>(), C::lower_bound(key), std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(std::forward<_Ty>(args)...)))
     {
-        auto it = C::lower_bound(key);
-        return C::emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(std::forward<_Ty>(args)...));
+        auto where = C::lower_bound(key);
+        bool success;
+        auto it = emplace(success, static_cast<C &>(*this), where, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(std::forward<_Ty>(args)...));
+        return std::make_pair(it, success);
     }
 };
 

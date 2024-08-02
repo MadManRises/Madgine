@@ -53,7 +53,7 @@ struct Stream {
         return std::istreambuf_iterator<char>();
     }
 
-    size_t read(void *buffer, size_t size)
+    std::streamsize read(void *buffer, size_t size)
     {
         mStream.read(static_cast<char *>(buffer), size);
         return mStream.gcount();
@@ -91,11 +91,12 @@ struct Stream {
         mStream.setstate(state);
     }
 
-    void skipWs(bool overwrite = false)
+    bool skipWs(bool overwrite = false)
     {
         if (overwrite || isSkipWs()) {
-            mStream >> std::ws;
+            return static_cast<bool>(mStream >> std::ws);
         }
+        return true;
     }
 
     bool isSkipWs() const {

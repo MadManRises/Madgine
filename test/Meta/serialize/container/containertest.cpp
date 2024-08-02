@@ -40,8 +40,8 @@ TEST(Serialize_Container, SyncedUnit)
     unit1.set1 = { 1, 2, 3 };
     unit2.set1 = { 4, 5, 6 };
 
-    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1));
-    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2));
+    HANDLE_MGR_RECEIVER(mgr1.addTopLevelItemImpl(receiver, &unit1, 10));
+    HANDLE_MGR_RECEIVER(mgr2.addTopLevelItemImpl(receiver, &unit2, 10));
 
     Buffer buffer;
     HANDLE_MGR_RESULT(mgr1, mgr1.setMasterBuffer(buffer));
@@ -104,10 +104,10 @@ TEST(Serialize_Container, Array)
 
     Buffer buffer;
     FormattedSerializeStream stream1 {
-        std::make_unique<SafeBinaryFormatter>(), SerializeStream { std::make_unique<TestBuf>(buffer, true) }
+        Formats::safebinary(), SerializeStream { std::make_unique<TestBuf>(buffer, true) }
     };
     FormattedSerializeStream stream2 {
-        std::make_unique<SafeBinaryFormatter>(), SerializeStream { std::make_unique<TestBuf>(buffer, false) }
+        Formats::safebinary(), SerializeStream { std::make_unique<TestBuf>(buffer, false) }
     };
 
     write(stream1, array, "array");

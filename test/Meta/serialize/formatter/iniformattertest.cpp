@@ -2,7 +2,7 @@
 
 #include "Meta/metalib.h"
 
-#include "Meta/serialize/formatter/iniformatter.h"
+#include "Meta/serialize/formats.h"
 
 #include "formattertestbase.h"
 
@@ -11,7 +11,7 @@ using namespace std::chrono_literals;
 
 TEST(Serialize_Formatter, Ini)
 {
-    FormatterBaseTest<IniFormatter>(R"(size=3
+    FormatterBaseTest(Formats::ini, R"(size=3
 Item=1
 Item=2
 Item=3

@@ -52,10 +52,10 @@ namespace Resources {
             std::unique_lock lock { mMutex };
 
             if (mLoadingTask.valid()) {
-                mLoadingTask = mLoadingTask.then_task(std::move(task), queue);
+                mLoadingTask = queueLoad(mLoadingTask.then_task(std::move(task)), queue);
                 assert(!mUnloadingTask.valid());
             } else if (mUnloadingTask.valid()) {
-                mLoadingTask = mUnloadingTask.then_task(std::move(task), queue);
+                mLoadingTask = queueLoad(mUnloadingTask.then_task(std::move(task)), queue);
                 mUnloadingTask.reset();
             } else {
                 mLoadingTask = queueLoad(std::move(task), queue);
@@ -67,7 +67,7 @@ namespace Resources {
         {
             std::unique_lock lock { mMutex };
             if (mLoadingTask.valid()) {
-                mUnloadingTask = mLoadingTask.then_task(std::move(task), queue);
+                mUnloadingTask = queueUnload(mLoadingTask.then_task(std::move(task)), queue);
                 mLoadingTask.reset();
             }
             return mUnloadingTask.valid() ? mUnloadingTask : Threading::TaskFuture<void>::make_ready();

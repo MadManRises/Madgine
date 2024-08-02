@@ -1,66 +1,40 @@
 #pragma once
 
-#include "virtualstate.h"
 #include "../genericresult.h"
+#include "virtualsender.h"
+#include "virtualstate.h"
 
 namespace Engine {
 namespace Execution {
 
-    template <typename... Ty>
-    struct Connection : protected VirtualReceiverBase<GenericResult, Ty...> {
+    template <typename Stub, typename... Ty>
+    struct Connection : VirtualReceiverBase<GenericResult, Ty...> {
 
-        Connection(SignalStub<Ty...> *stub)
+        Connection(Stub *stub)
             : mStub(stub)
         {
         }
 
         void start()
         {
-            mStub->enqueue(this, mNext);
-        }
-
-        void cancel(Connection *&next)
-        {
-            next = mNext;
-            mNext = nullptr;
-
-            this->set_done();
-        }
-
-        void cancel(Connection *con, Connection *&next)
-        {
-            if (con == this) {
-                cancel(next);
-            } else if (mNext) {
-                mNext->cancel(con, mNext);
-            }
-        }
-
-        Connection *signal(Ty... args)
-        {
-            Connection *next = mNext;
-            mNext = nullptr;
-
-            this->set_value(std::forward<Ty>(args)...);
-
-            return next;
-        }
-
-        Connection<Ty...> *next() const
-        {
-            return mNext;
+            mStub->enqueue(this);
         }
 
     protected:
-        SignalStub<Ty...> *mStub;
-        Connection<Ty...> *mNext = nullptr;
+        template <typename>
+        friend struct ConnectionStack;
+        template <typename>
+        friend struct ConnectionQueue;
+
+        Stub *mStub;
+        std::atomic<Connection<Stub, Ty...> *> mNext = nullptr;
     };
 
-    template <typename Rec, typename... Ty>
-    struct StoppableConnection : VirtualStateEx<Rec, Connection<Ty...>, type_pack<GenericResult>, Ty...> {
+    template <typename Stub, typename Rec, typename... Ty>
+    struct StoppableConnection : VirtualStateEx<Rec, Connection<Stub, Ty...>, type_pack<GenericResult>, Ty...> {
 
         struct callback {
-            callback(StoppableConnection<Rec, Ty...> *con)
+            callback(StoppableConnection<Stub, Rec, Ty...> *con)
                 : mCon(con)
             {
             }
@@ -70,11 +44,11 @@ namespace Execution {
                 mCon->stop();
             }
 
-            StoppableConnection<Rec, Ty...> *mCon;
+            StoppableConnection<Stub, Rec, Ty...> *mCon;
         };
 
-        StoppableConnection(Rec &&rec, SignalStub<Ty...> *stub)
-            : Execution::VirtualStateEx<Rec, Connection<Ty...>, type_pack<GenericResult>, Ty...>(std::forward<Rec>(rec), stub)
+        StoppableConnection(Rec &&rec, Stub *stub)
+            : Execution::VirtualStateEx<Rec, Connection<Stub, Ty...>, type_pack<GenericResult>, Ty...>(std::forward<Rec>(rec), stub)
             , mCallback(Execution::get_stop_token(this->mRec), callback { this })
         {
         }
@@ -84,7 +58,7 @@ namespace Execution {
             if (Execution::get_stop_token(this->mRec).stop_requested())
                 this->set_done();
             else
-                Connection<Ty...>::start();
+                Connection<Stub, Ty...>::start();
         }
 
         void stop()
@@ -95,7 +69,7 @@ namespace Execution {
         std::stop_callback<callback> mCallback;
     };
 
-    template <typename... Ty>
+    template <typename Stub, typename... Ty>
     struct ConnectionSender {
 
         using result_type = GenericResult;
@@ -105,15 +79,15 @@ namespace Execution {
         using is_sender = void;
 
         template <typename Rec>
-        friend auto tag_invoke(Execution::connect_t, ConnectionSender<Ty...> &&sender, Rec &&rec)
+        friend auto tag_invoke(Execution::connect_t, ConnectionSender<Stub, Ty...> &&sender, Rec &&rec)
         {
             if constexpr (Execution::has_stop_token<Rec>)
-                return StoppableConnection<Rec, Ty...> { std::forward<Rec>(rec), sender.mStub };
+                return StoppableConnection<Stub, Rec, Ty...> { std::forward<Rec>(rec), sender.mStub };
             else
-                return Execution::make_virtual_state<Connection<Ty...>, GenericResult, Ty...>(std::forward<Rec>(rec), sender.mStub);
+                return Execution::make_virtual_state<Connection<Stub, Ty...>, GenericResult, Ty...>(std::forward<Rec>(rec), sender.mStub);
         }
 
-        SignalStub<Ty...> *mStub;
+        Stub *mStub;
     };
 
 }

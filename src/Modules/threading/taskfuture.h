@@ -55,38 +55,33 @@ namespace Threading {
             return mState->is_ready();
         }
 
-        bool await_ready() const
+        auto sender() const 
         {
-            return is_ready();
+            return mState->sender();
         }
 
-        bool await_suspend(TaskHandle handle)
+        auto operator co_await() const
         {
-            return mState->then_await(std::move(handle));
+            return TaskFutureAwaitable<T> { mState };
         }
 
-        const T &await_resume() const
+        template <typename U>
+        ImmediateTask<U> then_task(Task<U> task)
         {
-            return get();
+            return [](Task<U> task, TaskFuture<T> fut) -> ImmediateTask<U> {
+                co_await fut;
+                co_await std::move(task);
+            }(std::move(task), *this);
         }
 
         template <typename F>
-        auto then(F &&f, TaskQueue *queue)
+        auto then(F &&f)
         {
-            auto task = [](F f, TaskFuture<T> fut) -> decltype(make_task(std::forward<F>(f), fut)) {
-                co_return co_await make_task(std::forward<F>(f), fut);
+            using WrappedTask = ImmediateTask<decltype(make_task(std::declval<F>(), std::declval<T>()))::T>;
+            return [](F f, TaskFuture<T> fut) -> WrappedTask {
+                const T &value = co_await fut;
+                co_await make_task(std::forward<F>(f), value);
             }(std::forward<F>(f), *this);
-
-            return then_task(std::move(task), queue);
-        }
-
-        template <typename R>
-        auto then_task(Task<R> task, TaskQueue *queue)
-        {
-            auto fut = task.get_future();
-            auto handle = task.assign(queue);
-            mState->then(std::move(handle));
-            return fut;
         }
 
         const T &get() const
@@ -144,37 +139,33 @@ namespace Threading {
             return mState->is_ready();
         }
 
-        bool await_ready() const
+        auto sender() const
         {
-            return is_ready();
+            return mState->sender();
+        }
+           
+        auto operator co_await() const
+        {
+            return TaskFutureAwaitable<void> { mState };
         }
 
-        bool await_suspend(TaskHandle handle)
+        template <typename U>
+        ImmediateTask<U> then_task(Task<U> task)
         {
-            return mState->then_await(std::move(handle));
-        }
-
-        void await_resume() const
-        {
-            assert(is_ready());
-            return mState->get();
+            return [](Task<U> task, TaskFuture<void> fut) -> ImmediateTask<U> {
+                co_await fut;
+                co_await std::move(task);
+            }(std::move(task), *this);
         }
 
         template <typename F>
-        auto then(F &&f, TaskQueue *queue)
+        auto then(F f)
         {
-            auto task = make_task(std::forward<F>(f));
-
-            return then_task(std::move(task), queue);
-        }
-
-        template <typename R>
-        auto then_task(Task<R> task, TaskQueue *queue)
-        {
-            auto fut = task.get_future();
-            auto handle = task.assign(queue);
-            mState->then(std::move(handle));
-            return fut;
+            using WrappedTask = ImmediateTask<decltype(make_task(std::declval<F>()))::T>;
+            return [](F f, TaskFuture<void> fut) -> WrappedTask {
+                co_await fut;
+                co_await make_task(std::forward<F>(f));
+            }(std::forward<F>(f), *this);
         }
 
     private:

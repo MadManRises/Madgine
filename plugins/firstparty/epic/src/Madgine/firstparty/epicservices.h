@@ -23,6 +23,10 @@ namespace FirstParty {
 
         std::string_view key() const override;
 
+        ////////// IDENTITY
+
+        std::string currentUserName() const override;
+
         ////////// LEADERBOARD
 
         struct LeaderboardInfo {
@@ -62,13 +66,15 @@ namespace FirstParty {
         /////////// MATCHMAKING
 
         Threading::Task<std::vector<Lobby>> getLobbyListTask() override;
-        Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb) override;
+        Threading::Task<std::optional<Lobby>> createLobbyTask(MatchmakingCallback cb, SessionStartedCallback sessionCb, std::map<std::string, std::string> properties = {}) override;
         Threading::Task<std::optional<Lobby>> joinLobbyTask(uint64_t id, MatchmakingCallback cb, SessionStartedCallback sessionCb) override;
-        Threading::Task<bool> startMatchTask() override;
+        Threading::Task<ServerInfo> startMatchTask() override;
         void leaveLobby() override;
         void leaveMatch() override;
         bool isLobbyOwner() const override;
+
         void setLobbyInfoCallback(LobbyInfoCallback cb) override;
+        void setLobbyProperty(std::string_view key, std::string_view value) override;
 
         //////////////////
 
