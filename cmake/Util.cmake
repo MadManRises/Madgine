@@ -86,7 +86,7 @@ endif()
 
 if (GCC OR CLANG)
 	add_compile_options(-Wno-extra-qualification -Wno-instantiation-after-specialization -Wno-dll-attribute-on-redeclaration -Wno-pragma-pack -Wno-undefined-var-template)	
-	if (CLANG AND CLANG_VERSION_MAJOR GREATER_EQUAL 15)
+	if (CLANG AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15)
 		add_compile_options(-Wno-deprecated-non-prototype)
 	endif ()
 	if (NOT MSVC)
