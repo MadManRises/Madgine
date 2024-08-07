@@ -113,12 +113,12 @@ namespace NodeGraph {
 
         void start()
         {
-            mDebugLocation.stepInto(Execution::get_debug_location(mRec));
-            auto &handle = Execution::get_context(mRec);
+            mDebugLocation.stepInto(Execution::get_debug_location(this->mRec));
+            auto &handle = Execution::get_context(this->mRec);
             handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(0, flowOutIndex), mDebugLocation);
         }
 
-        NodeDebugLocation mDebugLocation = &Execution::get_context(mRec).mInterpreter;
+        NodeDebugLocation mDebugLocation = &Execution::get_context(this->mRec).mInterpreter;
     };
 
     template <uint32_t flowOutIndex>
@@ -257,17 +257,17 @@ namespace NodeGraph {
                 if (mResults.size() <= flowOutIndex)
                     mResults.resize(flowOutIndex + 1);
                 mResults[flowOutIndex] = { std::forward<Args>(args)... };
-                start();
+                this->start();
             }
 
             void set_error(BehaviorError result)
             {
-                mRec.set_error(std::move(result));
+                this->mRec.set_error(std::move(result));
             }
 
             void set_done()
             {
-                mRec.set_done();
+                this->mRec.set_done();
             }
 
             std::vector<NodeResults> &mResults;
