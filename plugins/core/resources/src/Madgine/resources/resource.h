@@ -4,6 +4,7 @@ namespace Engine {
 namespace Resources {
 
     MADGINE_RESOURCES_EXPORT Threading::TaskFuture<bool> queueLoad(Threading::Task<bool> task, Threading::TaskQueue *queue);
+    MADGINE_RESOURCES_EXPORT Threading::TaskFuture<void> queueUnload(Threading::Task<void> task, Threading::TaskQueue *queue);
 
     template <typename Interface>
     struct ResourceDataInfoBase {
