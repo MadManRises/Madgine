@@ -7,7 +7,9 @@
 
 #include "Madgine_Tools/inspector/inspector.h"
 
+#if ENABLE_TASK_TRACKING
 #include "Madgine_Tools/tasktracker/tasktracker.h"
+#endif
 
 #include "Madgine_Tools/imgui/clientimroot.h"
 
