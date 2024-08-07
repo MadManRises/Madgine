@@ -37,7 +37,7 @@ inline void dx12Check(const char *file, size_t line, HRESULT result = 0)
     }
 }
 
-#define DX12_CHECK(...) dx12Check(__FILE__, __LINE__, __VA_ARGS__)
+#define DX12_CHECK(...) dx12Check(__FILE__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
 
 #define DX12_LOG(x) LOG_DEBUG("DX12: " << x)
 //#define DX12_LOG(x)
