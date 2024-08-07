@@ -129,7 +129,7 @@ namespace TupleUnpacker {
     }
 
     template <typename F, typename... Args>
-    decltype(auto) invoke(F &&f, Args &&...args) 
+    decltype(auto) invoke(F &&f, Args &&...args)
     {
         return invokeFromTuple(std::forward<F>(f), std::forward_as_tuple(std::forward<Args>(args)...));
     }
@@ -218,35 +218,43 @@ namespace TupleUnpacker {
 
         template <typename T>
         concept TuplefyableTest8 = is_direct_list_initializable_v<std::remove_reference_t<T>,
-            any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest9<T>;
+                                       any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper>
+            && !TuplefyableTest9<T>;
 
         template <typename T>
         concept TuplefyableTest7 = is_direct_list_initializable_v<std::remove_reference_t<T>,
-                                       any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+                                       any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper>
+            && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
 
         template <typename T>
         concept TuplefyableTest6 = is_direct_list_initializable_v<std::remove_reference_t<T>,
-                                       any_helper, any_helper, any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+                                       any_helper, any_helper, any_helper, any_helper, any_helper, any_helper>
+            && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
 
         template <typename T>
         concept TuplefyableTest5 = is_direct_list_initializable_v<std::remove_reference_t<T>,
-                                       any_helper, any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+                                       any_helper, any_helper, any_helper, any_helper, any_helper>
+            && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
 
         template <typename T>
         concept TuplefyableTest4 = is_direct_list_initializable_v<std::remove_reference_t<T>,
-                                       any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+                                       any_helper, any_helper, any_helper, any_helper>
+            && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
 
         template <typename T>
         concept TuplefyableTest3 = is_direct_list_initializable_v<std::remove_reference_t<T>,
-                                       any_helper, any_helper, any_helper> && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+                                       any_helper, any_helper, any_helper>
+            && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
 
         template <typename T>
         concept TuplefyableTest2 = is_direct_list_initializable_v<std::remove_reference_t<T>,
-                                       any_helper, any_helper> && !TuplefyableTest3<T> && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+                                       any_helper, any_helper>
+            && !TuplefyableTest3<T> && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
 
         template <typename T>
         concept TuplefyableTest1 = is_direct_list_initializable_v<std::remove_reference_t<T>,
-                                       any_helper> && !TuplefyableTest2<T> && !TuplefyableTest3<T> && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+                                       any_helper>
+            && !TuplefyableTest2<T> && !TuplefyableTest3<T> && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
     }
 
     template <typename T>
@@ -267,18 +275,15 @@ namespace TupleUnpacker {
     }
 
     template <typename T, size_t size>
-    concept TuplefyableHelper = requires(T &t)
-    {
-        {
-            num_bindings_impl<T>(t)
-            } -> std::same_as<std::integral_constant<size_t, size>>;
-    };
+    concept TuplefyableHelper = Aggregate<T>
+        && requires(T &t) {
+               {
+                   num_bindings_impl<T>(t)
+               } -> std::same_as<std::integral_constant<size_t, size>>;
+           };
 
     template <typename T>
-    concept Tuplefyable = std::invoke_result_t<decltype(num_bindings_impl<T>), T &>
-    {
-    }
-    > 0 && std::is_class_v<T> &&std::is_standard_layout_v<T>;
+    concept Tuplefyable = Aggregate<T> && std::invoke_result_t<decltype(num_bindings_impl<T>), T &> {} > 0;
 
 #else
 
@@ -301,9 +306,7 @@ namespace TupleUnpacker {
                     [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h] = u; std::integral_constant<size_t, 8>{}; })) { return {}; },
                     [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h,i] = u; std::integral_constant<size_t, 9>{}; })) { return {}; } }(std::declval<T>(), int {})
 #    if _MSC_VER > 1929
-            )
-        {
-        }
+            ) {}
 #    endif
         ;
     }

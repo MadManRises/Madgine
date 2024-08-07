@@ -125,8 +125,8 @@ namespace Serialize {
     }
 
     template <typename Compound, typename Primitive, typename F>
-    requires(!Reference<F> && PrimitiveType<Primitive>)
-        StreamResult scanPrimitive(FormattedSerializeStream &in, const char *name, F &&callback)
+        requires(!Reference<F> && PrimitiveType<Primitive>)
+    StreamResult scanPrimitive(FormattedSerializeStream &in, const char *name, F &&callback)
     {
         return visitStream<Compound>(in, name, StreamVisitorImpl { [callback { std::move(callback) }](PrimitiveHolder<Primitive>, FormattedSerializeStream &stream, const char *name, std::span<std::string_view> tags) -> StreamResult {
             Primitive v;
@@ -137,8 +137,8 @@ namespace Serialize {
     }
 
     template <typename Compound, typename TargetCompound, typename F>
-    requires(!Reference<F> && !PrimitiveType<TargetCompound>)
-        StreamResult scanCompound(FormattedSerializeStream &in, const char *name, F &&callback)
+        requires(!Reference<F> && !PrimitiveType<TargetCompound>)
+    StreamResult scanCompound(FormattedSerializeStream &in, const char *name, F &&callback)
     {
         using BaseType = std::conditional_t<std::derived_from<TargetCompound, SyncableUnitBase>, SyncableUnitBase, SerializableDataUnit>;
         const StreamVisitor *genericVisitor;
@@ -164,11 +164,11 @@ namespace Serialize {
         static StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
         {
             if constexpr (std::is_const_v<T>) {
-                //Don't do anything here
+                // Don't do anything here
                 return {};
             } else if constexpr (PrimitiveType<T>) {
                 return in.readPrimitive(t, name);
-                //mLog.log(t);
+                // mLog.log(t);
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
                 return t.readState(in, name, hierarchy, flags);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
@@ -183,10 +183,10 @@ namespace Serialize {
         static void write(FormattedSerializeStream &out, const T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
         {
             if constexpr (std::is_const_v<T>) {
-                //Don't do anything here
+                // Don't do anything here
             } else if constexpr (PrimitiveType<T>) {
                 out.writePrimitive(t, name);
-                //mLog.log(t);
+                // mLog.log(t);
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
                 t.writeState(out, name, hierarchy, flags);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
@@ -246,7 +246,7 @@ namespace Serialize {
                     },
                     StreamResult {});
             } else {
-                //static_assert(isPrimitiveType_v<T>, "Invalid Type");
+                // static_assert(isPrimitiveType_v<T>, "Invalid Type");
                 return {};
             }
         }
@@ -255,6 +255,7 @@ namespace Serialize {
         {
             if constexpr (std::derived_from<T, SerializableUnitBase>) {
                 SerializableUnitPtr { &item }.setSynced(b);
+            } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 TupleUnpacker::forEach(TupleUnpacker::toTuple(item), [&](auto &t) {
                     Serialize::setSynced(t, b);
@@ -292,11 +293,11 @@ namespace Serialize {
         {
             auto tags = TagsSelector<Configs...>::getTags();
             if constexpr (std::is_const_v<T>) {
-                //Don't do anything here
+                // Don't do anything here
                 return {};
             } else if constexpr (InstanceOf<T, EnumType>) {
                 return visitor.visit(PrimitiveHolder<EnumTag> { &T::Representation::sTable }, in, name, tags);
-            } else if constexpr (InstanceOf<T, Flags>){
+            } else if constexpr (InstanceOf<T, Flags>) {
                 return visitor.visit(PrimitiveHolder<FlagsTag> { &T::Representation::sTable }, in, name, tags);
             } else if constexpr (PrimitiveType<T>) {
                 return visitor.visit(PrimitiveHolder<typename PrimitiveReducer<T>::type> {}, in, name, tags);
@@ -500,7 +501,6 @@ namespace Serialize {
         {
             Serialize::write<uint64_t>(out, std::chrono::duration_cast<std::chrono::nanoseconds>(d).count(), name, hierarchy);
         }
-
     };
 
 }

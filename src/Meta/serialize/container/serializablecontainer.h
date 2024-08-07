@@ -230,9 +230,15 @@ namespace Serialize {
             }
 
             template <typename... Ty>
+            auto emplace_local(bool& success, const const_iterator& it, Ty &&...args)
+            {
+                return this->mContainer.emplace_intern(success, it, std::forward<Ty>(args)...);
+            }
+
+            template <typename... Ty>
             friend auto tag_invoke(emplace_t, bool &success, Operation &self, const const_iterator &it, Ty &&...args)
             {
-                return self.mContainer.emplace_intern(success, it, std::forward<Ty>(args)...);
+                return self.emplace_local(success, it, std::forward<Ty>(args)...);
             }
 
             decltype(auto) physical()

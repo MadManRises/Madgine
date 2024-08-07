@@ -8,6 +8,8 @@ namespace Engine {
 template <typename Parent>
 struct BumpAllocator {
 
+    static constexpr size_t goodSize = Parent::goodSize;
+
     template <typename... Args>
     BumpAllocator(Args &&...args)
         : mParent(std::forward<Args>(args)...)

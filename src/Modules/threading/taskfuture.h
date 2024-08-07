@@ -70,14 +70,14 @@ namespace Threading {
         {
             return [](Task<U> task, TaskFuture<T> fut) -> ImmediateTask<U> {
                 co_await fut;
-                co_await std::move(task);
+                co_return co_await std::move(task);
             }(std::move(task), *this);
         }
 
         template <typename F>
         auto then(F &&f)
         {
-            using WrappedTask = ImmediateTask<decltype(make_task(std::declval<F>(), std::declval<T>()))::T>;
+            using WrappedTask = ImmediateTask<typename decltype(make_task(std::declval<F>(), std::declval<T>()))::T>;
             return [](F f, TaskFuture<T> fut) -> WrappedTask {
                 const T &value = co_await fut;
                 co_await make_task(std::forward<F>(f), value);
@@ -154,14 +154,14 @@ namespace Threading {
         {
             return [](Task<U> task, TaskFuture<void> fut) -> ImmediateTask<U> {
                 co_await fut;
-                co_await std::move(task);
+                co_return co_await std::move(task);
             }(std::move(task), *this);
         }
 
         template <typename F>
         auto then(F f)
         {
-            using WrappedTask = ImmediateTask<decltype(make_task(std::declval<F>()))::T>;
+            using WrappedTask = ImmediateTask<typename decltype(make_task(std::declval<F>()))::T>;
             return [](F f, TaskFuture<void> fut) -> WrappedTask {
                 co_await fut;
                 co_await make_task(std::forward<F>(f));

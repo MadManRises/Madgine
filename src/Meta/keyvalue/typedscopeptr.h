@@ -10,7 +10,7 @@ struct META_EXPORT ScopePtr {
     constexpr ScopePtr() = default;
 
     template <typename T>
-        ScopePtr(T *t)
+    ScopePtr(T *t)
         : ScopePtr(resolveCustomScopePtr(t))
     {
     }
@@ -41,7 +41,7 @@ struct META_EXPORT ScopePtr {
 
     ScopeIterator find(std::string_view key) const;
     ScopeField operator[](std::string_view key) const;
-    //bool isEditable(const std::string &key) const;
+    // bool isEditable(const std::string &key) const;
     ScopeIterator begin() const;
     ScopeIterator end() const;
 
@@ -56,6 +56,7 @@ struct META_EXPORT ScopePtr {
 };
 
 template <typename T>
+    requires(!std::is_pointer_v<T>)
 T *scope_cast(const ScopePtr &ptr)
 {
     size_t offset = 0;

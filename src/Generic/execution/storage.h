@@ -67,7 +67,7 @@ namespace Execution {
     };
 
     template <typename Sender>
-    using ValueStorage = typename Sender::value_types<ValueStorageImpl>;
+    using ValueStorage = typename Sender::template value_types<ValueStorageImpl>;
 
     template <typename Sender>
     using ErrorStorage = ErrorStorageImpl<typename Sender::result_type>;

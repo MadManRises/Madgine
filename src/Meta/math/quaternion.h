@@ -7,6 +7,7 @@
 namespace Engine {
 
 struct Quaternion {
+    using is_aggregate = void;
 
     Quaternion()
         : x(0.0f)

@@ -13,11 +13,11 @@ namespace Execution {
         {
             {
                 std::lock_guard guard { this->mStack.mutex() };
-                mValue.emplace(std::forward<_Ty>(args)...);
+                this->mValue.emplace(std::forward<_Ty>(args)...);
             }
 
             while (Connection<FlagStub<_Ty...>, _Ty...> *current = this->mStack.pop()){
-                TupleUnpacker::invokeExpand(&Connection<FlagStub<_Ty...>, _Ty...>::set_value, current, *mValue);
+                TupleUnpacker::invokeExpand(&Connection<FlagStub<_Ty...>, _Ty...>::set_value, current, *this->mValue);
             }
         }
     };

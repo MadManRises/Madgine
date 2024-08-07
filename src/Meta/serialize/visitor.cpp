@@ -35,27 +35,27 @@ namespace Serialize {
         return in.readPrimitive<FlagsHolder>(dummy, name);        
     }
 
-    template StreamResult visitSkipPrimitive<bool>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<uint8_t>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<int8_t>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<uint16_t>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<int16_t>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<uint32_t>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<int32_t>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<uint64_t>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<int64_t>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<float>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<SyncableUnitBase*>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<SerializableDataUnit *>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<std::string>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<ByteBuffer>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<Void>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<Vector2>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<Vector3>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<Vector4>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<Matrix3>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<Color3>(FormattedSerializeStream &, const char *);
-    template StreamResult visitSkipPrimitive<Color4>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<bool>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<uint8_t>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<int8_t>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<uint16_t>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<int16_t>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<uint32_t>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<int32_t>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<uint64_t>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<int64_t>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<float>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<SyncableUnitBase *>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<SerializableDataUnit *>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<std::string>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<ByteBuffer>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<Void>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<Vector2>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<Vector3>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<Vector4>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<Matrix3>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<Color3>(FormattedSerializeStream &, const char *);
+    template META_EXPORT StreamResult visitSkipPrimitive<Color4>(FormattedSerializeStream &, const char *);
 
 }
 }

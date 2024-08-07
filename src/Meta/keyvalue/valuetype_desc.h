@@ -34,6 +34,7 @@ auto resolveCustomScopePtr(T *t)
 }
 
 template <typename T>
+    requires(!std::is_pointer_v<T>)
 auto resolveCustomScopePtr(T &t)
 {
     return resolveCustomScopePtr(&t);
@@ -42,7 +43,7 @@ auto resolveCustomScopePtr(T &t)
 template <typename T, bool keepPtr = false>
 auto resolveHelper()
 {
-    using Ptr = decltype(resolveCustomScopePtr(std::declval<T *>()));
+    using Ptr = decltype(resolveCustomScopePtr(std::declval<T&>()));
     if constexpr (std::same_as<Ptr, ScopePtr>) {
         return type_holder<T>;
     } else {
@@ -379,14 +380,14 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
             return { { ValueTypeEnum::KeyValueVirtualSequenceRangeValue }, toValueTypeDesc<std::ranges::range_value_t<T>>() };
         else
             return { { ValueTypeEnum::KeyValueVirtualAssociativeRangeValue }, toValueTypeDesc<KeyType_t<std::ranges::range_value_t<T>>>(), toValueTypeDesc<ValueType_t<std::ranges::range_value_t<T>>>() };
-    } else if constexpr (InstanceOfA<T, TypedBoundApiFunction>){
+    } else if constexpr (InstanceOfA<T, TypedBoundApiFunction>) {
         return { { ValueTypeEnum::BoundApiFunctionValue }, is_instance_auto<T, TypedBoundApiFunction>::arguments::value };
     } else if constexpr (Pointer<T>) {
         if constexpr (Function<std::remove_pointer_t<T>>)
-            //return { { ValueTypeEnum::ApiFunctionValue }, nullptr };
+            // return { { ValueTypeEnum::ApiFunctionValue }, nullptr };
             throw 0;
         else if constexpr (std::same_as<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
-            //return { { ValueTypeEnum::ApiFunctionValue }, nullptr };
+            // return { { ValueTypeEnum::ApiFunctionValue }, nullptr };
             throw 0;
         else {
             return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<resolveCustomScopePtr_t<T>>> };

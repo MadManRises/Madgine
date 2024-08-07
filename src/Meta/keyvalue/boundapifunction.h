@@ -1,6 +1,8 @@
 #pragma once
 
 #include "apifunction.h"
+#include "typedscopeptr.h"
+
 
 namespace Engine {
 

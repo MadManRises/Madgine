@@ -113,14 +113,14 @@ decltype(auto) ValueType_as(const ValueType &v)
     } else if constexpr (InstanceOf<std::decay_t<T>, Flags>) {
         return ValueType_as_impl<FlagsHolder>(v).safe_cast<T>();
     } else {
-        using Ty = resolveCustomScopePtr_t<T, true>;
+        using Ty = resolveCustomScopePtr_t<T, true>;   
         if constexpr (Pointer<Ty>) {
             return scope_cast<std::remove_pointer_t<Ty>>(ValueType_as_impl<ScopePtr>(v));
         } else {
             return *scope_cast<Ty>(ValueType_as_impl<OwnedScopePtr>(v).get());
         }
     }
-    //static_assert(dependent_bool<T, false>::value, "A ValueType can not be converted to the given target type");
+    // static_assert(dependent_bool<T, false>::value, "A ValueType can not be converted to the given target type");
 }
 
 template <bool reference_as_ptr = false, typename T>
@@ -129,7 +129,7 @@ decltype(auto) convert_ValueType(T &&t)
     static_assert(!requires { typename std::decay_t<T>::no_value_type; });
 
     if constexpr (InstanceOf<std::decay_t<T>, std::reference_wrapper>) {
-        //using Ty = typename std::decay_t<T>::type;
+        // using Ty = typename std::decay_t<T>::type;
         return convert_ValueType<true>(t.get());
     } else if constexpr (InstanceOf<T, std::optional>) {
         return std::forward<T>(t);
@@ -154,7 +154,7 @@ decltype(auto) convert_ValueType(T &&t)
         return FlagsHolder { std::forward<T>(t) };
     } else if constexpr (Execution::Sender<std::decay_t<T>>) {
         return KeyValueSender { std::forward<T>(t) };
-    } else if constexpr (InstanceOfA<std::decay_t<T>, TypedBoundApiFunction>){
+    } else if constexpr (InstanceOfA<std::decay_t<T>, TypedBoundApiFunction>) {
         return BoundApiFunction { std::forward<T>(t) };
     } else {
         if constexpr (Pointer<std::decay_t<T>>) {
@@ -167,12 +167,12 @@ decltype(auto) convert_ValueType(T &&t)
             return OwnedScopePtr { std::forward<T>(t) };
         }
     }
-    //static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
+    // static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
 }
 
 template <typename T>
-requires(ValueTypePrimitive<std::decay_t<T>> || std::same_as<ValueType, std::decay_t<T>>)
-    META_EXPORT void to_ValueType_impl(ValueType &v, T &&t);
+    requires(ValueTypePrimitive<std::decay_t<T>> || std::same_as<ValueType, std::decay_t<T>>)
+META_EXPORT void to_ValueType_impl(ValueType &v, T &&t);
 
 template <typename T>
 void to_ValueType(ValueType &v, T &&t)
@@ -187,16 +187,17 @@ void to_ValueType(ValueType &v, T &&t)
 struct ValueTypeRef {
     ValueType &mRef;
 
-    operator ValueType& () {
+    operator ValueType &()
+    {
         return mRef;
     }
 
     template <typename T>
-    ValueTypeRef& operator=(T&& v) {
+    ValueTypeRef &operator=(T &&v)
+    {
         to_ValueType(mRef, std::forward<T>(v));
         return *this;
     }
-
 };
 
 }
