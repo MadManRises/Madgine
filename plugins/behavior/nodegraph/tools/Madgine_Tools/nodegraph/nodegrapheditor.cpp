@@ -739,6 +739,7 @@ namespace Tools {
     void NodeGraphEditor::load(std::string_view name)
     {
         mRoot.taskQueue()->queueTask(mGraphHandle.load(name).then([this](bool b) {
+            mEditor.reset();
             if (b) {
                 mGraph = *mGraphHandle;
                 mFilePath = mGraphHandle.info()->resource()->path();
@@ -770,6 +771,8 @@ namespace Tools {
             return true;
         }
 
+        mGraph.mLayoutData = view;
+
         if (!mSaveQueued) {
             mIsDirty = true;
             return false;
@@ -777,9 +780,6 @@ namespace Tools {
 
         mSaveQueued = false;
         mIsDirty = false;
-
-        Stream layout = Filesystem::openFileWrite(layoutPath());
-        layout.write(view.data(), view.size());
 
         mGraph.saveToFile(mFilePath);
 
@@ -791,24 +791,10 @@ namespace Tools {
 
     size_t NodeGraphEditor::loadImpl(char *data)
     {
-        if (mFilePath.empty())
-            return 0;
-
-        Filesystem::Path path = layoutPath();
-
-        size_t size = Filesystem::fileInfo(path).mSize;
         if (data) {
-            Stream layout = Filesystem::openFileRead(path);
-            layout.read(data, size);
+            strcpy_s(data, mGraph.mLayoutData.size(), mGraph.mLayoutData.c_str());
         }
-        return size;
-    }
-
-    Filesystem::Path NodeGraphEditor::layoutPath() const
-    {
-        assert(!mFilePath.empty());
-
-        return mFilePath.parentPath() / (std::string { getCurrentName() } + ".json");
+        return mGraph.mLayoutData.size();
     }
 
     void NodeGraphEditor::createEditor()

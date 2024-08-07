@@ -35,8 +35,6 @@ namespace Tools {
         bool saveImpl(std::string_view view);
         size_t loadImpl(char *data);
 
-        Filesystem::Path layoutPath() const;
-
         void createEditor();
 
         void queryLink();

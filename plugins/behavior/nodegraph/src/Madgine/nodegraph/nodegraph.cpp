@@ -40,6 +40,7 @@ FIELD(mNodes, Serialize::ParentCreator<&Engine::NodeGraph::NodeGraph::readNode, 
 FIELD(mFlowOutPins)
 FIELD(mDataInPins)
 FIELD(mDataOutPins)
+FIELD(mLayoutData)
 SERIALIZETABLE_END(Engine::NodeGraph::NodeGraph)
 
 namespace Engine {
@@ -55,6 +56,7 @@ namespace NodeGraph {
         , mDataProviderPins(other.mDataProviderPins)
         , mDataInPins(other.mDataInPins)
         , mDataOutPins(other.mDataOutPins)
+        , mLayoutData(other.mLayoutData)
     {
         mNodes.reserve(other.mNodes.size());
         std::ranges::transform(other.mNodes, std::back_inserter(mNodes), [&](const std::unique_ptr<NodeBase> &node) { return node->clone(*this); });
@@ -73,6 +75,8 @@ namespace NodeGraph {
         mDataOutPins = other.mDataOutPins;
         mDataProviderPins = other.mDataProviderPins;
         mDataReceiverPins = other.mDataReceiverPins;
+
+        mLayoutData = other.mLayoutData;
 
         mNodes.clear();
         mNodes.reserve(other.mNodes.size());

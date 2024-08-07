@@ -82,6 +82,8 @@ namespace NodeGraph {
         std::vector<DataInPinPrototype> mDataInPins;
         std::vector<DataOutPinPrototype> mDataOutPins;
 
+        std::string mLayoutData;
+
         NodeInterpreterSender interpret() const;
 
     protected:
