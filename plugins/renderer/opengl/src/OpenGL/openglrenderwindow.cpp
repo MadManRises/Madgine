@@ -118,9 +118,11 @@ namespace Render {
 
     RenderFuture OpenGLRenderWindow::endFrame()
     {
-        OpenGLRenderTarget::endFrame();
+        RenderFuture result = OpenGLRenderTarget::endFrame();
 
         swapBuffers(getSurface(), mContext);
+
+        return result;
     }
 
     Vector2i OpenGLRenderWindow::size() const

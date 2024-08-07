@@ -51,7 +51,7 @@ namespace Render {
     {
         glDisable(GL_FRAMEBUFFER_SRGB);
 
-        RenderTarget::endFrame();
+        return RenderTarget::endFrame();
     }
 
     void OpenGLRenderTarget::setRenderSpace(const Rect2i &space)

@@ -243,7 +243,7 @@ namespace Render {
 
     RenderFuture OpenGLRenderTexture::endFrame()
     {
-        OpenGLRenderTarget::endFrame();
+        return OpenGLRenderTarget::endFrame();
     }
 
     const OpenGLTexture *OpenGLRenderTexture::texture(size_t index) const
