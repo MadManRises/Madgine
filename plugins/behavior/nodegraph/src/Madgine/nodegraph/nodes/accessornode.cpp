@@ -59,7 +59,7 @@ namespace NodeGraph {
         return std::make_unique<AccessorNode>(*this, graph);
     }
 
-    size_t AccessorNode::dataInBaseCount(uint32_t group) const
+    uint32_t AccessorNode::dataInBaseCount(uint32_t group) const
     {
         return 1;
     }
@@ -74,7 +74,7 @@ namespace NodeGraph {
         return { { ValueTypeEnum::ScopeValue }, mType };
     }
 
-    size_t AccessorNode::dataProviderBaseCount(uint32_t group) const
+    uint32_t AccessorNode::dataProviderBaseCount(uint32_t group) const
     {
         return 1;
     }

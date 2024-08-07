@@ -52,7 +52,7 @@ namespace NodeGraph {
         return mFlowInPins[group][index].mSources;
     }
 
-    size_t NodeBase::flowOutCount(uint32_t group) const
+    uint32_t NodeBase::flowOutCount(uint32_t group) const
     {
         return mFlowOutPins[group].size();
     }
@@ -70,7 +70,7 @@ namespace NodeGraph {
         return 6000 * group + 1001 + index;
     }
 
-    size_t NodeBase::dataInCount(uint32_t group) const
+    uint32_t NodeBase::dataInCount(uint32_t group) const
     {
         return mDataInPins[group].size();
     }
@@ -93,7 +93,7 @@ namespace NodeGraph {
         return 6000 * group + 2001 + index;
     }
 
-    size_t NodeBase::dataOutCount(uint32_t group) const
+    uint32_t NodeBase::dataOutCount(uint32_t group) const
     {
         return mDataOutPins[group].size();
     }
@@ -108,7 +108,7 @@ namespace NodeGraph {
         return 6000 * group + 3001 + index;
     }
 
-    size_t NodeBase::dataReceiverCount(uint32_t group) const
+    uint32_t NodeBase::dataReceiverCount(uint32_t group) const
     {
         return mDataReceiverPins[group].size();
     }
@@ -123,7 +123,7 @@ namespace NodeGraph {
         return 6000 * group + 4001 + index;
     }
 
-    size_t NodeBase::dataProviderCount(uint32_t group) const
+    uint32_t NodeBase::dataProviderCount(uint32_t group) const
     {
         return mDataProviderPins[group].size();
     }

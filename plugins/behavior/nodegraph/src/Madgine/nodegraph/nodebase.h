@@ -24,23 +24,23 @@ namespace NodeGraph {
         virtual std::string_view name() const = 0;
         virtual std::string_view className() const = 0;
 
-        virtual size_t flowInGroupCount() const { return 1; }
-        virtual size_t flowInCount(uint32_t group = 0) const { return 0; }
+        virtual uint32_t flowInGroupCount() const { return 1; }
+        virtual uint32_t flowInCount(uint32_t group = 0) const { return 0; }
         virtual std::string_view flowInName(uint32_t index, uint32_t group = 0) const { return "call"; }
         virtual uint32_t flowInMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
         const std::vector<Pin> &flowInSources(uint32_t index, uint32_t group = 0) const;
         static uint32_t flowInId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t flowOutGroupCount() const { return 1; }
-        size_t flowOutCount(uint32_t group = 0) const;
+        virtual uint32_t flowOutGroupCount() const { return 1; }
+        uint32_t flowOutCount(uint32_t group = 0) const;
         virtual std::string_view flowOutName(uint32_t index, uint32_t group = 0) const { return "return"; }
         virtual uint32_t flowOutMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual bool flowOutVariadic(uint32_t group = 0) const { return false; }
         Pin flowOutTarget(uint32_t index, uint32_t group = 0) const;
         static uint32_t flowOutId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t dataInGroupCount() const { return 1; }
-        size_t dataInCount(uint32_t group = 0) const;
+        virtual uint32_t dataInGroupCount() const { return 1; }
+        uint32_t dataInCount(uint32_t group = 0) const;
         virtual std::string_view dataInName(uint32_t index, uint32_t group = 0) const { return "read"; }
         virtual uint32_t dataInMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataInType(uint32_t index, uint32_t group = 0, bool bidir = true) const { throw 0; }
@@ -49,8 +49,8 @@ namespace NodeGraph {
         Pin dataInSource(uint32_t index, uint32_t group = 0) const;
         static uint32_t dataInId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t dataOutGroupCount() const { return 1; }
-        size_t dataOutCount(uint32_t group = 0) const;
+        virtual uint32_t dataOutGroupCount() const { return 1; }
+        uint32_t dataOutCount(uint32_t group = 0) const;
         virtual std::string_view dataOutName(uint32_t index, uint32_t group = 0) const { return "write"; }
         virtual uint32_t dataOutMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataOutType(uint32_t index, uint32_t group = 0, bool bidir = true) const { throw 0; }
@@ -58,8 +58,8 @@ namespace NodeGraph {
         Pin dataOutTarget(uint32_t index, uint32_t group = 0) const;
         static uint32_t dataOutId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t dataReceiverGroupCount() const { return 1; }
-        size_t dataReceiverCount(uint32_t group = 0) const;
+        virtual uint32_t dataReceiverGroupCount() const { return 1; }
+        uint32_t dataReceiverCount(uint32_t group = 0) const;
         virtual std::string_view dataReceiverName(uint32_t index, uint32_t group = 0) const { return "in"; }
         virtual uint32_t dataReceiverMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataReceiverType(uint32_t index, uint32_t group = 0, bool bidir = true) const { throw 0; }
@@ -67,8 +67,8 @@ namespace NodeGraph {
         const std::vector<Pin> &dataReceiverSources(uint32_t index, uint32_t group = 0) const;
         static uint32_t dataReceiverId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t dataProviderGroupCount() const { return 1; }
-        size_t dataProviderCount(uint32_t group = 0) const;
+        virtual uint32_t dataProviderGroupCount() const { return 1; }
+        uint32_t dataProviderCount(uint32_t group = 0) const;
         virtual std::string_view dataProviderName(uint32_t index, uint32_t group = 0) const { return "out"; }
         virtual uint32_t dataProviderMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataProviderType(uint32_t index, uint32_t group = 0, bool bidir = true) const { throw 0; }
@@ -119,11 +119,11 @@ namespace NodeGraph {
         virtual std::unique_ptr<NodeBase> clone(NodeGraph &graph) const = 0;
 
     protected:
-        virtual size_t flowOutBaseCount(uint32_t group = 0) const { return 0; }
-        virtual size_t dataInBaseCount(uint32_t group = 0) const { return 0; }
-        virtual size_t dataOutBaseCount(uint32_t group = 0) const { return 0; }
-        virtual size_t dataReceiverBaseCount(uint32_t group = 0) const { return 0; }
-        virtual size_t dataProviderBaseCount(uint32_t group = 0) const { return 0; }
+        virtual uint32_t flowOutBaseCount(uint32_t group = 0) const { return 0; }
+        virtual uint32_t dataInBaseCount(uint32_t group = 0) const { return 0; }
+        virtual uint32_t dataOutBaseCount(uint32_t group = 0) const { return 0; }
+        virtual uint32_t dataReceiverBaseCount(uint32_t group = 0) const { return 0; }
+        virtual uint32_t dataProviderBaseCount(uint32_t group = 0) const { return 0; }
 
         void setup();
 

@@ -55,17 +55,17 @@ namespace NodeGraph {
         return std::make_unique<FunctionNode>(*this, graph);
     }
 
-    size_t FunctionNode::flowInCount(uint32_t group) const
+    uint32_t FunctionNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t FunctionNode::flowOutBaseCount(uint32_t group) const
+    uint32_t FunctionNode::flowOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t FunctionNode::dataInBaseCount(uint32_t group) const
+    uint32_t FunctionNode::dataInBaseCount(uint32_t group) const
     {
         return mFunction ? mFunction->mArgumentsCount : 0;
     }
@@ -80,7 +80,7 @@ namespace NodeGraph {
         return mFunction->mArguments[index].mType;
     }
 
-    size_t FunctionNode::dataProviderBaseCount(uint32_t group) const
+    uint32_t FunctionNode::dataProviderBaseCount(uint32_t group) const
     {
         return 1;
     }

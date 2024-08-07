@@ -19,11 +19,11 @@ namespace NodeGraph {
         std::string_view className() const override;
         std::unique_ptr<NodeBase> clone(NodeGraph &graph) const override;
 
-        size_t flowInCount(uint32_t group) const override;
+        uint32_t flowInCount(uint32_t group) const override;
 
-        size_t flowOutBaseCount(uint32_t group) const override;
+        uint32_t flowOutBaseCount(uint32_t group) const override;
 
-        size_t dataProviderBaseCount(uint32_t group) const override;
+        uint32_t dataProviderBaseCount(uint32_t group) const override;
         ExtendedValueTypeDesc dataProviderType(uint32_t index, uint32_t group = 0, bool bidir = true) const override;
 
         void setupInterpret(NodeInterpreterStateBase &interpreter, std::unique_ptr<NodeInterpreterData> &data) const override;

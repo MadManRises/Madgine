@@ -34,17 +34,17 @@ namespace NodeGraph {
     {
     }
 
-    size_t PumpNode::flowInCount(uint32_t group) const
+    uint32_t PumpNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t PumpNode::flowOutBaseCount(uint32_t group) const
+    uint32_t PumpNode::flowOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t PumpNode::dataInBaseCount(uint32_t group) const
+    uint32_t PumpNode::dataInBaseCount(uint32_t group) const
     {
         return 1;
     }
@@ -60,7 +60,7 @@ namespace NodeGraph {
         return desc;
     }
 
-    size_t PumpNode::dataOutBaseCount(uint32_t group) const
+    uint32_t PumpNode::dataOutBaseCount(uint32_t group) const
     {
         return 1;
     }

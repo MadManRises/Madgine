@@ -111,17 +111,17 @@ namespace NodeGraph {
         return std::make_unique<LibraryNode>(*this, graph);
     }
 
-    size_t LibraryNode::flowInCount(uint32_t group) const
+    uint32_t LibraryNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t LibraryNode::flowOutBaseCount(uint32_t group) const
+    uint32_t LibraryNode::flowOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t LibraryNode::dataProviderBaseCount(uint32_t group) const
+    uint32_t LibraryNode::dataProviderBaseCount(uint32_t group) const
     {
         return mBehavior.resultTypes().size();
     }

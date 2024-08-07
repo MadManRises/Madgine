@@ -35,17 +35,17 @@ namespace NodeGraph {
     {
     }
 
-    size_t TestNode::flowInCount(uint32_t group) const
+    uint32_t TestNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t TestNode::flowOutBaseCount(uint32_t group) const
+    uint32_t TestNode::flowOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t TestNode::dataInBaseCount(uint32_t group) const
+    uint32_t TestNode::dataInBaseCount(uint32_t group) const
     {
         return 2;
     }
@@ -60,7 +60,7 @@ namespace NodeGraph {
         return { ValueTypeIndex { index == 0 ? ValueTypeEnum::IntValue : ValueTypeEnum::FloatValue } };
     }
 
-    size_t TestNode::dataOutBaseCount(uint32_t group) const
+    uint32_t TestNode::dataOutBaseCount(uint32_t group) const
     {
         return 1;
     }
