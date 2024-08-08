@@ -93,11 +93,11 @@ namespace Tools {
     {
         static_cast<ClientImRoot &>(mEditor->root()).removeRenderTarget(mRenderTarget.get());
 
-        mRenderTarget->removeRenderPass(&mIm3DRenderer);
+        mRenderTargetSampled->removeRenderPass(&mIm3DRenderer);
 
-        mRenderTarget->removeRenderPass(&mGridRenderer);
+        mRenderTargetSampled->removeRenderPass(&mGridRenderer);
 
-        mRenderTarget->removeRenderPass(&mSceneRenderer);
+        mRenderTargetSampled->removeRenderPass(&mSceneRenderer);
     }
 
     bool SceneView::render()
