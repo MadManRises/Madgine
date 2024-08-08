@@ -751,6 +751,7 @@ namespace Tools {
 
     void NodeGraphEditor::create()
     {
+        mEditor.reset();
         mGraph = {};
         mGraphHandle.reset();
         mFilePath.clear();
@@ -799,7 +800,7 @@ namespace Tools {
 
     void NodeGraphEditor::createEditor()
     {
-        mEditor.reset();
+        assert(!mEditor);
 
         ed::Config config;
 
