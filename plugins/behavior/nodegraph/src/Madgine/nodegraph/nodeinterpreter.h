@@ -137,6 +137,11 @@ namespace NodeGraph {
             return Execution::get_debug_location(mRec);
         }
 
+        Log::Log* log() override
+        {
+            return Log::get_log(mRec);
+        }
+
         Rec mRec;
     };
 

@@ -7,7 +7,7 @@ namespace Scripting {
     namespace Python3 {
 
         struct MADGINE_PYTHON3_EXPORT Python3Lock {
-            Python3Lock(Closure<void(std::string_view)> out = {}, std::stop_token st = {});
+            Python3Lock(Log::Log *log = nullptr, std::stop_token st = {});
             Python3Lock(const Python3Lock &) = delete;
             ~Python3Lock();
 
@@ -28,11 +28,12 @@ namespace Scripting {
             Python3Unlock(const Python3Unlock &) = delete;
             ~Python3Unlock();
 
-            Closure<void(std::string_view)> out();
+            Log::Log *log();
             std::stop_token st();
 
         private:
-            std::pair<Closure<void(std::string_view)>, std::stop_token> mState;
+            Log::Log *mLog;
+            std::stop_token mStopToken;
         };
     }
 }

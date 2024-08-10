@@ -21,6 +21,10 @@
 #    define PY_UNDEFFED_DEBUG
 #endif
 
+
+typedef struct _frame PyFrameObject;
+
+
 #include "Python.h"
 
 #ifdef PY_UNDEFFED_DEBUG

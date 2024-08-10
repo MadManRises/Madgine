@@ -19,22 +19,35 @@ namespace Scripting {
 
         bool stackUnwindable();
 
-        PyObject *evalFrame(PyFrameObject *frame, int throwExc);
+        
+        struct CodeObject {
+            PyObjectPtr mCode;
+            PyObjectPtr mGlobals;
+            PyObjectPtr mLocals;
+        };
+
+        using ExecutionData = std::variant<
+            CodeObject,
+            PyFramePtr,
+            BehaviorError>;
+
+
+        PyObject *evalFrame(PyThreadState *tstate, _PyInterpreterFrame *frame, int throwExc);
+        void evalCode(BehaviorReceiver &receiver, CodeObject code);
         void evalFrame(BehaviorReceiver &receiver, PyFramePtr frame);
         void evalFrames(BehaviorReceiver &receiver, std::vector<PyFramePtr> frames);
 
-        PyObject *suspend(Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Closure<void(std::string_view)>, std::stop_token)> callback);
+        PyObject *suspend(Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Log::Log*, std::stop_token)> callback);
 
-        BehaviorError fetchError();
+        MADGINE_PYTHON3_EXPORT BehaviorError fetchError();
 
         struct MADGINE_PYTHON3_EXPORT ExecutionState : BehaviorReceiver {
-            ExecutionState(PyFramePtr frame, Closure<void(std::string_view)> out);
+            ExecutionState(ExecutionData data);
             ~ExecutionState();
 
             void start();
 
-            PyFramePtr mFrame;
-            Closure<void(std::string_view)> mOut;
+            ExecutionData mData;
         };
 
         struct ExecutionSender : Execution::base_sender {
@@ -45,13 +58,12 @@ namespace Scripting {
             template <typename Rec>
             friend auto tag_invoke(Execution::connect_t, ExecutionSender &&sender, Rec &&rec)
             {
-                return VirtualBehaviorState<Rec, ExecutionState> { std::forward<Rec>(rec), std::move(sender.mFrame), std::move(sender.mOut) };
+                return VirtualBehaviorState<Rec, ExecutionState> { std::forward<Rec>(rec), std::move(sender.mData) };
             }
 
             MADGINE_PYTHON3_EXPORT friend void tag_invoke(Execution::visit_state_t, ExecutionSender &sender, CallableView<void(const Execution::StateDescriptor &)> visitor);
 
-            PyFramePtr mFrame;
-            Closure<void(std::string_view)> mOut;
+            ExecutionData mData;
         };
 
     }

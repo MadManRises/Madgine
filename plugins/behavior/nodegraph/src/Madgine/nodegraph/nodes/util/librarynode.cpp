@@ -74,6 +74,11 @@ namespace NodeGraph {
             return Execution::get_stop_token(*mReceiver);
         }
 
+        Log::Log* log() override
+        {
+            return Log::get_log(*mReceiver);
+        }
+
         Behavior::StatePtr mBehavior;
         std::optional<NodeReceiver<NodeBase>> mReceiver;
         ArgumentList mResult;

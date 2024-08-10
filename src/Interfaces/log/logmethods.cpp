@@ -18,7 +18,7 @@ namespace Log {
         sLog = log;
     }
 
-    void log(std::string_view msg, MessageType level, const char *file, size_t line)
+    void log(std::string_view msg, MessageType level, const char *file, size_t line, Log *log)
     {
 #if WINDOWS
         if (level == MessageType::FATAL_TYPE || level == MessageType::DEBUG_TYPE) {
@@ -26,19 +26,22 @@ namespace Log {
             OutputDebugStringA("\n");
         }
 #endif
-        sLog->log(msg, level, file, line);
+        if (!log)
+            log = sLog;
+        log->log(msg, level, file, line);
     }
 
-    LogDummy::LogDummy(MessageType lvl, const char *file, size_t line)
+    LogDummy::LogDummy(MessageType lvl, const char *file, size_t line, Log *log)
         : mLvl(lvl)
         , mFile(file)
         , mLine(line)
+        , mLog(log)
     {
     }
 
     LogDummy::~LogDummy()
     {
-        log(mStream.str(), mLvl, mFile, mLine);
+        log(mStream.str(), mLvl, mFile, mLine, mLog);
     }
 
 }

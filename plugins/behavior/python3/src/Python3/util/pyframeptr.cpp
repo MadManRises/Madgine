@@ -13,25 +13,30 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        PyFramePtr::PyFramePtr(PyFrameObject *frame)
+        PyFramePtr::PyFramePtr(_PyInterpreterFrame *frame)
             : PyObjectPtr((PyObject *)frame)
         {
         }
 
-        PyFramePtr PyFramePtr::fromBorrowed(PyFrameObject *frame)
+        PyFramePtr PyFramePtr::fromBorrowed(_PyInterpreterFrame *frame)
         {
             Py_INCREF(frame);
             return frame;
         }
 
-        PyFramePtr::operator PyFrameObject *() const
+        PyFramePtr::operator _PyInterpreterFrame *() const
         {
-            return (PyFrameObject *)(static_cast<PyObject *>(*this));
+            return (_PyInterpreterFrame *)(static_cast<PyObject *>(*this));
         }
 
-        PyFrameObject *PyFramePtr::release()
+        _PyInterpreterFrame *PyFramePtr::operator->() const
         {
-            return (PyFrameObject*)PyObjectPtr::release();
+            return (_PyInterpreterFrame *)(static_cast<PyObject *>(*this));
+        }
+
+        _PyInterpreterFrame *PyFramePtr::release()
+        {
+            return (_PyInterpreterFrame *)PyObjectPtr::release();
         }
 
     }

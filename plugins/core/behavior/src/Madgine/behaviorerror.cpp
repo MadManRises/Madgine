@@ -24,9 +24,9 @@ std::ostream &operator<<(std::ostream &out, const BehaviorError &error)
                << error.mNotes;
 }
 
-Log::LogDummy tag_invoke(Log::log_for_t, Log::MessageType lvl, BehaviorError &error)
+Log::LogDummy tag_invoke(Log::log_for_t, Log::MessageType lvl, BehaviorError &error, Log::Log *log)
 {
-    return Log::LogDummy { lvl, error.mFile, static_cast<size_t>(error.mLineNumber) };
+    return Log::LogDummy { lvl, error.mFile, static_cast<size_t>(error.mLineNumber), log };
 }
 
 BehaviorErrorBuilder::BehaviorErrorBuilder(BehaviorResult type, const char *file, size_t line)

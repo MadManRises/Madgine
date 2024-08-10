@@ -11,8 +11,8 @@ namespace Log {
             template <typename... R>
             void set_error(R &&...errors)
             {
-                ([](R &error) {
-                    LogDummy out = log_for(MessageType::ERROR_TYPE, error);
+                ([this](R &error) {
+                    LogDummy out = log_for(MessageType::ERROR_TYPE, error, get_log(this->mRec));
                     if constexpr (requires(std::ostream & o) { o << error; }) {
                         out << error;
                     } else {
@@ -57,5 +57,9 @@ namespace Log {
 
     inline constexpr log_error_t log_error;
 
+    inline constexpr auto with_log = [](Log *log) {
+        return Execution::with_query_value(get_log, std::move(log));
+    };
+    
 }
 }

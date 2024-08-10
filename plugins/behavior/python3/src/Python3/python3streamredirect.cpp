@@ -6,6 +6,8 @@
 
 #include "util/pyobjectutil.h"
 
+#include "Interfaces/log/log.h"
+
 METATABLE_BEGIN(Engine::Scripting::Python3::Python3StreamRedirect)
 FUNCTION(write, text)
 METATABLE_END(Engine::Scripting::Python3::Python3StreamRedirect)
@@ -14,8 +16,8 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        Python3StreamRedirect::Python3StreamRedirect(Closure<void(std::string_view)> out)
-            : mOut(std::move(out))
+        Python3StreamRedirect::Python3StreamRedirect(Log::Log *log)
+            : mLog(log)
         {
         }
 
@@ -47,25 +49,26 @@ namespace Scripting {
 
         int Python3StreamRedirect::write(std::string_view text)
         {
-            if (mOut) {
-                mOut(text);
+            if (text == "\n")
+                return 0;
+
+            if (mLog) {
+                mLog->log(text, Log::MessageType::INFO_TYPE);
                 return text.size();
             } else {
-                if (text == "\n")
-                    return 0;
                 LOG(text);
                 return text.size();
             }
         }
 
-        void Python3StreamRedirect::setOut(Closure<void(std::string_view)> out)
+        void Python3StreamRedirect::setLog(Log::Log *log)
         {
-            mOut = std::move(out);
+            mLog = log;
         }
 
-        Closure<void(std::string_view)> Python3StreamRedirect::out() 
+        Log::Log *Python3StreamRedirect::log()
         {
-            return std::move(mOut);
+            return mLog;
         }
 
     }

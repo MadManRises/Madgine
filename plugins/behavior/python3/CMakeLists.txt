@@ -1,5 +1,5 @@
 project(Python3)
-return()
+
 if (ANDROID)
 	return()
 endif()

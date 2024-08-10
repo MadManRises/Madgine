@@ -18,7 +18,7 @@ namespace Scripting {
             std::string module() const;
             size_t lineNr() const;
 
-            PyFrameObject *mFrame = nullptr;
+            _PyInterpreterFrame *mFrame = nullptr;
         };
 
         struct Python3Debugger {

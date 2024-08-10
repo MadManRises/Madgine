@@ -8,7 +8,7 @@ namespace Scripting {
 
         struct Python3StreamRedirect {
 
-            Python3StreamRedirect(Closure<void(std::string_view)> out = {});
+            Python3StreamRedirect(Log::Log *log = nullptr);
             Python3StreamRedirect(const Python3StreamRedirect &) = delete;
             ~Python3StreamRedirect();
 
@@ -17,11 +17,11 @@ namespace Scripting {
 
             int write(std::string_view text);
 
-            void setOut(Closure<void(std::string_view)> out);
-            Closure<void(std::string_view)> out();
+            void setLog(Log::Log *log);
+            Log::Log *log();
 
         private:
-            Closure<void(std::string_view)> mOut;
+            Log::Log *mLog;
             std::map<std::string_view, PyObject *> mOldStreams;
         };
 

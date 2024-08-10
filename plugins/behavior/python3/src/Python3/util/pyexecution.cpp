@@ -6,7 +6,7 @@
 
 #include "../python3debugger.h"
 
-#include <frameobject.h>
+#include <internal/pycore_frame.h>
 
 #include "pydictptr.h"
 #include "pyobjectutil.h"
@@ -21,10 +21,12 @@ namespace Scripting {
 
         static bool sUnwindable = false;
 
+        extern bool sSuspending;
+
         struct PySuspendException {
             PyObject **mStacktop;
             int mBlock;
-            Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Closure<void(std::string_view)>, std::stop_token)> mCallback;
+            Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Log::Log *, std::stop_token)> mCallback;
             std::vector<PyFramePtr> mFrames;
         };
 
@@ -48,7 +50,7 @@ namespace Scripting {
 
         struct PyBehaviorScope {
             BehaviorReceiver *mReceiver;
-            PyDictPtr mInner;
+            PyObjectPtr mInner;
         };
 
         struct PyBehaviorScopeObject {
@@ -59,6 +61,12 @@ namespace Scripting {
         static PyObject *
         PyBehaviorScope_subscript(PyBehaviorScopeObject *self, PyObject *key)
         {
+
+            PyObject *var = PyObject_GetItem(self->mScope.mInner, key);
+            if (var) {
+                return var;
+            }
+
             const char *name;
 
             if (!PyArg_Parse(key, "s", &name))
@@ -69,8 +77,14 @@ namespace Scripting {
             if (found) {
                 return toPyObject(v);
             } else {
-                return PyObject_GetItem(self->mScope.mInner, key);
+                return nullptr;
             }
+        }
+
+        static int
+        PyBehaviorScope_assign_subscript(PyBehaviorScopeObject *self, PyObject *key, PyObject *value)
+        {
+            return PyObject_SetItem(self->mScope.mInner, key, value);
         }
 
         /* static PyObject *OwnedScopePtr_iter(const ScopePtr &p)
@@ -98,6 +112,7 @@ namespace Scripting {
 
         static PyMappingMethods PyBehaviorScopeMethods = {
             .mp_subscript = (binaryfunc)&PyBehaviorScope_subscript,
+            .mp_ass_subscript = (objobjargproc)&PyBehaviorScope_assign_subscript,
         };
 
         PyTypeObject PyBehaviorScopeType = {
@@ -106,23 +121,22 @@ namespace Scripting {
             .tp_dealloc = &PyDealloc<PyBehaviorScopeObject, &PyBehaviorScopeObject::mScope>,
             //.tp_getattro = (getattrofunc)PyBehaviorScope_get,
             .tp_as_mapping = &PyBehaviorScopeMethods,
-            .tp_flags = Py_TPFLAGS_DEFAULT,            
+            .tp_flags = Py_TPFLAGS_DEFAULT,
             .tp_doc = "Scope wrapper to access Behavior scope variables",
-            //.tp_iter = (getiterfunc)PyOwnedScopePtr_iter,            
-            .tp_new = PyType_GenericNew,            
+            //.tp_iter = (getiterfunc)PyOwnedScopePtr_iter,
+            .tp_new = PyType_GenericNew,
         };
 
-        PyObject *evalFrame(PyFrameObject *frame, int throwExc)
+        PyObject *evalFrame(PyThreadState *tstate, _PyInterpreterFrame *frame, int throwExc)
         {
-            frame->f_trace_opcodes = true;
-            PyObject *result = _PyEval_EvalFrameDefault(frame, throwExc);
+            PyObject *result = _PyEval_EvalFrameDefault(tstate, frame, throwExc);
             if (!result && PyErr_ExceptionMatches((PyObject *)&PySuspendExceptionType)) {
                 PyObjectPtr type, value, traceback;
                 PyErr_Fetch(&type, &value, &traceback);
 
                 PySuspendException &suspend = reinterpret_cast<PySuspendExceptionObject *>(static_cast<PyObject *>(value))->mException;
-                frame->f_stacktop = suspend.mStacktop;
-                frame->f_iblock = suspend.mBlock;
+                // frame-> = suspend.mStacktop;
+                // frame-> f_iblock = suspend.mBlock;
                 suspend.mStacktop = nullptr;
                 suspend.mBlock = 0;
 
@@ -131,6 +145,48 @@ namespace Scripting {
                 return value.release();
             }
             return result;
+        }
+
+        static void handleResult(PyObject *result, BehaviorReceiver &receiver, std::vector<PyFramePtr> *frames = nullptr)
+        {
+            if (result && result->ob_type == &PySuspendExceptionType) {
+                PySuspendException &suspend = reinterpret_cast<PySuspendExceptionObject *>(result)->mException;
+
+                assert(suspend.mStacktop == nullptr);
+                assert(suspend.mBlock == 0);
+
+                Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Log::Log *, std::stop_token)> callback = std::move(suspend.mCallback);
+                std::vector<PyFramePtr> suspendedFrames = std::move(suspend.mFrames);
+
+                Py_DECREF(result);
+
+                sSuspending = false;
+
+                Python3Unlock unlock;
+
+                if (frames) {
+                    std::ranges::move(*frames, std::back_inserter(suspendedFrames));
+                    frames->clear();
+                }
+
+                callback(receiver, std::move(suspendedFrames), unlock.log(), unlock.st());
+
+            } else {
+                if (!frames || frames->empty()) {
+                    fromPyObject(receiver, result);
+                } else {
+                    _PyFrame_StackPush(frames->front(), result);
+                }
+            }
+        }
+
+        void evalCode(BehaviorReceiver &receiver, CodeObject code)
+        {
+            assert(sUnwindable == false);
+            sUnwindable = true;
+            PyObject *result = PyEval_EvalCode(code.mCode.release(), code.mGlobals.release(), code.mLocals.release());
+            handleResult(result, receiver);
+            sUnwindable = false;
         }
 
         void evalFrame(BehaviorReceiver &receiver, PyFramePtr frame)
@@ -148,32 +204,10 @@ namespace Scripting {
                 auto it = frames.begin();
                 PyFramePtr frame = std::move(*it);
                 frames.erase(it);
-                PyObject *result = PyEval_EvalFrame(frame);
-                if (result && result->ob_type == &PySuspendExceptionType) {
-                    PySuspendException &suspend = reinterpret_cast<PySuspendExceptionObject *>(result)->mException;
-
-                    assert(suspend.mStacktop == nullptr);
-                    assert(suspend.mBlock == 0);
-
-                    Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Closure<void(std::string_view)>, std::stop_token)> callback = std::move(suspend.mCallback);
-                    std::vector<PyFramePtr> suspendedFrames = std::move(suspend.mFrames);
-
-                    Py_DECREF(result);
-
-                    Python3Unlock unlock;
-
-                    std::ranges::move(frames, std::back_inserter(suspendedFrames));
-                    frames.clear();
-
-                    callback(receiver, std::move(suspendedFrames), unlock.out(), unlock.st());
-
-                } else {
-                    if (frames.empty()) {
-                        fromPyObject(receiver, result);
-                    } else {
-                        *static_cast<PyFrameObject *>(frames.front())->f_stacktop++ = result;
-                    }
-                }
+                PyFrameObject _frame;
+                _frame.f_frame = frame;
+                PyObject *result = PyEval_EvalFrame(&_frame);
+                handleResult(result, receiver, &frames);
             }
             sUnwindable = false;
         }
@@ -182,24 +216,19 @@ namespace Scripting {
         {
 
             if (event == PyTrace_OPCODE) {
-
-                if (frame->f_stacktop > frame->f_valuestack && frame->f_stacktop[-1]->ob_type == &PySuspendExceptionType) {
-                    PyObject *suspendEx = frame->f_stacktop[-1];
-                    --frame->f_stacktop;
+                if (frame->f_frame->stacktop > 0 && _PyFrame_StackPeek(frame->f_frame)->ob_type == &PySuspendExceptionType) {
+                    PyObject *suspendEx = _PyFrame_StackPop(frame->f_frame);
 
                     PySuspendException &suspend = reinterpret_cast<PySuspendExceptionObject *>(suspendEx)->mException;
 
                     assert(suspend.mStacktop == nullptr);
                     assert(suspend.mBlock == 0);
 
-                    if (frame->f_lasti == 0)
-                        frame->f_lasti = -1;
-                    else
-                        frame->f_lasti -= sizeof(_Py_CODEUNIT);
-                    suspend.mStacktop = frame->f_stacktop;
-                    frame->f_stacktop = frame->f_valuestack;
-                    suspend.mBlock = frame->f_iblock;
-                    frame->f_iblock = 0;
+                    //--frame->f_frame->prev_instr;
+                    // suspend.mStacktop = frame->f_stacktop;
+                    // frame->f_stacktop = frame->f_valuestack;
+                    // suspend.mBlock = frame->f_iblock;
+                    // frame->f_iblock = 0;
 
                     PyErr_SetObject((PyObject *)&PySuspendExceptionType, suspendEx);
                     Py_DECREF(suspendEx);
@@ -214,7 +243,7 @@ namespace Scripting {
             return sUnwindable;
         }
 
-        PyObject *suspend(Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Closure<void(std::string_view)>, std::stop_token)> callback)
+        PyObject *suspend(Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Log::Log *, std::stop_token)> callback)
         {
             assert(stackUnwindable());
 
@@ -240,8 +269,8 @@ namespace Scripting {
                 while (tb->tb_next)
                     tb = tb->tb_next;
 
-                filename = PyUnicode_AsUTF8(tb->tb_frame->f_code->co_filename);
-                line = tb->tb_frame->f_code->co_firstlineno;
+                filename = PyUnicode_AsUTF8(PyFrame_GetCode(tb->tb_frame)->co_filename);
+                line = PyFrame_GetCode(tb->tb_frame)->co_firstlineno;
             }
 
             PyObjectPtr str = PyObject_Str(value);
@@ -256,43 +285,71 @@ namespace Scripting {
 
         void setupExecution()
         {
-            PyGILState_GetThisThreadState()->interp->eval_frame = &evalFrame;
+            PyRun_SimpleString("import inspect");
+            PyRun_SimpleString("inspect.currentframe().f_trace_opcodes = True");
+
+            _PyInterpreterState_SetEvalFrameFunc(PyInterpreterState_Get(), &evalFrame);
 
             PyEval_SetTrace(&executionTrace, nullptr);
         }
 
-        ExecutionState::ExecutionState(PyFramePtr frame, Closure<void(std::string_view)> out)
-            : mFrame(std::move(frame))
-            , mOut(std::move(out))
+        ExecutionState::ExecutionState(ExecutionData data)
+            : mData(std::move(data))
         {
         }
 
         ExecutionState::~ExecutionState()
         {
-            if (mFrame) {
-                Python3Lock lock;
-                mFrame.reset();
-            }
+            std::visit(overloaded {
+                           [](CodeObject &code) {
+                               if (code.mCode || code.mGlobals || code.mLocals) {
+                                   Python3Lock lock;
+                                   code.mCode.reset();
+                                   code.mGlobals.reset();
+                                   code.mLocals.reset();
+                               }
+                           },
+                           [](PyFramePtr &frame) {
+                               if (frame) {
+                                   Python3Lock lock;
+                                   frame.reset();
+                               }
+                           },
+                           [](BehaviorError &error) {} },
+                mData);
         }
 
         void ExecutionState::start()
         {
-            Python3Lock lock { std::move(mOut), stopToken() };
+            Python3Lock lock { log(), stopToken() };
 
             Python3Debugger::Guard guard { debugLocation() };
 
-            PyObject *wrapped = PyObject_CallObject((PyObject *)&PyBehaviorScopeType, NULL);
-            new (&reinterpret_cast<PyBehaviorScopeObject *>(wrapped)->mScope) PyBehaviorScope { this, static_cast<PyFrameObject *>(mFrame)->f_globals };
-            static_cast<PyFrameObject *>(mFrame)->f_globals = wrapped;
+            std::visit(overloaded {
+                           [this](CodeObject code) {
+                               PyObject *wrapped = PyObject_CallObject((PyObject *)&PyBehaviorScopeType, NULL);
+                               new (&reinterpret_cast<PyBehaviorScopeObject *>(wrapped)->mScope) PyBehaviorScope { this, code.mLocals };
+                               code.mLocals = wrapped;
 
-            evalFrame(*this, std::move(mFrame));
+                               evalCode(*this, std::move(code));
+                           },
+                           [this](PyFramePtr frame) {
+                               PyObject *wrapped = PyObject_CallObject((PyObject *)&PyBehaviorScopeType, NULL);
+                               new (&reinterpret_cast<PyBehaviorScopeObject *>(wrapped)->mScope) PyBehaviorScope { this, frame->f_locals };
+                               frame->f_locals = wrapped;
+
+                               evalFrame(*this, std::move(frame));
+                           },
+                           [this](BehaviorError error) {
+                               set_error(std::move(error));
+                           } },
+                std::move(mData));
         }
 
         void tag_invoke(Execution::visit_state_t, ExecutionSender &sender, CallableView<void(const Execution::StateDescriptor &)> visitor)
         {
             visitor(Execution::State::SubLocation {});
         }
-
     }
 }
 }

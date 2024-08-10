@@ -504,7 +504,8 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = true;
 
-        io.AddInputCharacter(arg.text);
+        if (arg.text > 0)
+            io.AddInputCharacter(arg.text);
 
         io.KeyShift = arg.mControlKeys.mShift;
         io.KeyCtrl = arg.mControlKeys.mCtrl;

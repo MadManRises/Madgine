@@ -22,6 +22,7 @@ struct MADGINE_BEHAVIOR_EXPORT BehaviorReceiver : Execution::VirtualReceiverBase
     virtual bool resolveVar(std::string_view name, ValueType &out) = 0;
     virtual Debug::ParentLocation *debugLocation() = 0;
     virtual std::stop_token stopToken() = 0;
+    virtual Log::Log *log() = 0;
 
     bool resolveVarHelper(std::string_view name, void (*)(const ValueType &, void *), void *data);
 
@@ -48,6 +49,12 @@ struct MADGINE_BEHAVIOR_EXPORT BehaviorReceiver : Execution::VirtualReceiverBase
     {
         return rec.debugLocation();
     }
+
+    friend Log::Log* tag_invoke(Log::get_log_t, BehaviorReceiver& rec)
+    {
+        return rec.log();
+    }
+
 };
 
 template <typename Rec, typename Base = BehaviorReceiver>
@@ -69,6 +76,11 @@ struct VirtualBehaviorState : Execution::VirtualStateEx<Rec, Base, type_pack<Beh
     std::stop_token stopToken() override
     {
         return Execution::get_stop_token(this->mRec);
+    }
+
+    Log::Log* log() override
+    {
+        return Log::get_log(this->mRec);
     }
 };
 

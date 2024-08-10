@@ -148,7 +148,7 @@ namespace Execution {
         }
 
         template <typename Sender, typename T>
-        requires tag_invocable<then_t, Sender, T>
+            requires tag_invocable<then_t, Sender, T>
         auto operator()(Sender &&sender, T &&transform) const
             noexcept(is_nothrow_tag_invocable_v<then_t, Sender, T>)
                 -> tag_invoke_result_t<then_t, Sender, T>
@@ -165,7 +165,7 @@ namespace Execution {
         template <typename T>
         struct typed {
             template <typename Sender>
-            requires tag_invocable<then_t, Sender, T>
+                requires tag_invocable<then_t, Sender, T>
             auto operator()(Sender &&sender, T &&transform = {}) const
                 noexcept(is_nothrow_tag_invocable_v<then_t, Sender, T>)
                     -> tag_invoke_result_t<then_t, Sender, T>
@@ -182,8 +182,57 @@ namespace Execution {
 
     inline constexpr then_t then;
 
-    template <typename T>
-    inline constexpr then_t::typed<T> typed_then;
+    struct onError_t {
+
+        template <typename Rec, typename T>
+        struct receiver : algorithm_receiver<Rec> {
+
+            template <typename... R>
+            void set_error(R &&...error)
+            {
+                TupleUnpacker::invoke(mOnError, std::forward<R>(error)...);
+                this->mRec.set_error(std::forward<R>(error)...);
+            }
+
+            T mOnError;
+        };
+
+        template <typename Sender, typename T>
+        struct sender : algorithm_sender<Sender> {
+
+            template <typename Rec>
+            friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)
+            {
+                return algorithm_state<Sender, receiver<Rec, T>> { std::forward<Sender>(sender.mSender), std::forward<Rec>(rec), std::forward<T>(sender.mOnError) };
+            }
+
+            T mOnError;
+        };
+
+        template <typename Sender, typename T>
+        friend auto tag_invoke(onError_t, Sender &&inner, T &&onError)
+        {
+            return sender<Sender, T> { { {}, std::forward<Sender>(inner) }, std::forward<T>(onError) };
+        }
+
+        template <typename Sender, typename T>
+            requires tag_invocable<onError_t, Sender, T>
+        auto operator()(Sender &&sender, T &&onError) const
+            noexcept(is_nothrow_tag_invocable_v<onError_t, Sender, T>)
+                -> tag_invoke_result_t<onError_t, Sender, T>
+        {
+            return tag_invoke(*this, std::forward<Sender>(sender), std::forward<T>(onError));
+        }
+
+        template <typename T>
+        auto operator()(T &&onError) const
+        {
+            return pipable_from_right(*this, std::forward<T>(onError));
+        }
+
+    };
+
+    inline constexpr onError_t onError;
 
     struct reduce_stream_t {
 
@@ -274,7 +323,7 @@ namespace Execution {
         }
 
         template <typename Stream, typename T, typename F>
-        requires tag_invocable<reduce_stream_t, Stream, T, F>
+            requires tag_invocable<reduce_stream_t, Stream, T, F>
         auto operator()(Stream &&stream, T &&initial, F &&reducer) const
             noexcept(is_nothrow_tag_invocable_v<reduce_stream_t, Stream, T, F>)
                 -> tag_invoke_result_t<reduce_stream_t, Stream, T, F>
@@ -338,7 +387,7 @@ namespace Execution {
         }
 
         template <typename Sender, typename F>
-        requires tag_invocable<finally_t, Sender, F>
+            requires tag_invocable<finally_t, Sender, F>
         auto operator()(Sender &&sender, F &&finally) const
             noexcept(is_nothrow_tag_invocable_v<finally_t, Sender, F>)
                 -> tag_invoke_result_t<finally_t, Sender, F>
@@ -355,7 +404,7 @@ namespace Execution {
         template <typename F>
         struct typed {
             template <typename Sender>
-            requires tag_invocable<finally_t, Sender, F>
+                requires tag_invocable<finally_t, Sender, F>
             auto operator()(Sender &&sender, F &&finally = {}) const
                 noexcept(is_nothrow_tag_invocable_v<finally_t, Sender, F>)
                     -> tag_invoke_result_t<finally_t, Sender, F>
@@ -455,7 +504,7 @@ namespace Execution {
         }
 
         template <typename S, typename Rec1>
-        requires tag_invocable<then_receiver_t, S, Rec1>
+            requires tag_invocable<then_receiver_t, S, Rec1>
         auto operator()(S &&sender, Rec1 &&rec1) const
             noexcept(is_nothrow_tag_invocable_v<then_receiver_t, S, Rec1>)
                 -> tag_invoke_result_t<then_receiver_t, S, Rec1>
@@ -603,7 +652,7 @@ namespace Execution {
         }
 
         template <typename C, typename F>
-        requires tag_invocable<for_each_t, C, F>
+            requires tag_invocable<for_each_t, C, F>
         auto operator()(C &&container, F &&f) const
             noexcept(is_nothrow_tag_invocable_v<for_each_t, C, F>)
                 -> tag_invoke_result_t<for_each_t, C, F>
@@ -680,7 +729,7 @@ namespace Execution {
         }
 
         template <typename Sender>
-        requires tag_invocable<repeat_t, Sender>
+            requires tag_invocable<repeat_t, Sender>
         auto operator()(Sender &&sender) const
             noexcept(is_nothrow_tag_invocable_v<repeat_t, Sender>)
                 -> tag_invoke_result_t<repeat_t, Sender>
@@ -845,7 +894,7 @@ namespace Execution {
         }
 
         template <typename... S>
-        requires tag_invocable<when_all_t, S...>
+            requires tag_invocable<when_all_t, S...>
         auto operator()(S &&...senders) const
             noexcept(is_nothrow_tag_invocable_v<when_all_t, S...>)
                 -> tag_invoke_result_t<when_all_t, S...>
@@ -987,7 +1036,7 @@ namespace Execution {
         }
 
         template <typename... S>
-        requires tag_invocable<sequence_t, S...>
+            requires tag_invocable<sequence_t, S...>
         auto operator()(S &&...senders) const
             noexcept(is_nothrow_tag_invocable_v<sequence_t, S...>)
                 -> tag_invoke_result_t<sequence_t, S...>
@@ -1121,7 +1170,7 @@ namespace Execution {
         }
 
         template <typename Sender, typename F>
-        requires tag_invocable<let_value_t, Sender, F>
+            requires tag_invocable<let_value_t, Sender, F>
         auto operator()(Sender &&sender, F &&f) const
             noexcept(is_nothrow_tag_invocable_v<let_value_t, Sender, F>)
                 -> tag_invoke_result_t<let_value_t, Sender, F>
@@ -1138,7 +1187,7 @@ namespace Execution {
         template <typename F>
         struct typed {
             template <typename Sender>
-            requires tag_invocable<let_value_t, Sender, F>
+                requires tag_invocable<let_value_t, Sender, F>
             auto operator()(Sender &&sender, F &&finally = {}) const
                 noexcept(is_nothrow_tag_invocable_v<let_value_t, Sender, F>)
                     -> tag_invoke_result_t<let_value_t, Sender, F>
@@ -1365,7 +1414,7 @@ namespace Execution {
         }
 
         template <typename Sender, typename CPO, typename T>
-        requires tag_invocable<with_query_value_t, Sender, CPO, T>
+            requires tag_invocable<with_query_value_t, Sender, CPO, T>
         auto operator()(Sender &&sender, CPO cpo, T &&queryResult) const
             noexcept(is_nothrow_tag_invocable_v<with_query_value_t, Sender, CPO, T>)
                 -> tag_invoke_result_t<with_query_value_t, Sender, CPO, T>
@@ -1522,7 +1571,7 @@ namespace Execution {
             inner_state mInnerState;
             stop_state mStopState;
             std::stop_source mStopSource;
-            //stop_callback<> mPropagateCallback;
+            // stop_callback<> mPropagateCallback;
             std::atomic_flag mFinished;
         };
 
@@ -1548,7 +1597,7 @@ namespace Execution {
         }
 
         template <typename Inner, typename Trigger>
-        requires tag_invocable<stop_when_t, Inner, Trigger>
+            requires tag_invocable<stop_when_t, Inner, Trigger>
         auto operator()(Inner &&sender, Trigger &&trigger) const
             noexcept(is_nothrow_tag_invocable_v<stop_when_t, Inner, Trigger>)
                 -> tag_invoke_result_t<stop_when_t, Inner, Trigger>

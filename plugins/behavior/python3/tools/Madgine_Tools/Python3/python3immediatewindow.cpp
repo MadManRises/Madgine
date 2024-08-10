@@ -26,9 +26,11 @@
 
 #include "Madgine_Tools/debugger/debuggerview.h"
 
+#include "Interfaces/log/logsenders.h"
+
 #include "Python3/util/pylistptr.h"
 #include "Python3/util/pymoduleptr.h"
-#include <code.h>
+#include "internal/pycore_frame.h"
 #include <frameobject.h>
 
 METATABLE_BEGIN_BASE(Engine::Tools::Python3ImmediateWindow, Engine::Tools::ToolBase)
@@ -44,15 +46,14 @@ namespace Tools {
 
     const Debug::DebugLocation *visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const Scripting::Python3::Python3DebugLocation *location, bool isInline)
     {
-        ImGui::BeginGroupPanel(PyUnicode_AsUTF8((location->mFrame->f_code)->co_filename));
+        Scripting::Python3::Python3Lock lock;
+        ImGui::BeginGroupPanel(PyUnicode_AsUTF8(PyFrame_GetCode(location->mFrame->frame_obj)->co_filename));
         if (ImGui::TreeNode("Code")) {
 
             if (ImGui::BeginTable("Code", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_SizingFixedFit)) {
 
                 ImGui::TableSetupColumn("Line", 0);
                 ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch);
-
-                Scripting::Python3::Python3Lock lock;
 
                 Scripting::Python3::PyModulePtr inspect { "inspect" };
                 Scripting::Python3::PyObjectPtr sourcelines = PyObject_CallFunctionObjArgs(inspect.get("getsourcelines"), location->mFrame, NULL);
@@ -86,7 +87,7 @@ namespace Tools {
         }
 
         ImGui::EndGroupPanel();
-        
+
         return nullptr;
     }
 
@@ -135,12 +136,19 @@ namespace Tools {
         ImGui::End();
     }
 
+    std::string_view Python3ImmediateWindow::name()
+    {
+        return "Python3ImmediateWindow";
+    }
+
     bool Python3ImmediateWindow::pass(Debug::DebugLocation *location, Debug::ContinuationType type)
     {
 
         const Scripting::Python3::Python3DebugLocation *pyLocation = dynamic_cast<const Scripting::Python3::Python3DebugLocation *>(location);
 
         if (pyLocation) {
+            Scripting::Python3::Python3Unlock unlock;
+
             const Filesystem::Path &path = pyLocation->file();
 
             if (!path.empty()) {
@@ -171,10 +179,14 @@ namespace Tools {
 
     bool Python3ImmediateWindow::interpret(std::string_view command)
     {
-        Execution::detach(mEnv->execute(command, [this](std::string_view text) {
-            mPrompt->append(text);
-        }) | Execution::finally([this]() { mPrompt->resume(); })
-            | Execution::with_debug_location<Execution::SenderLocation>() | Execution::with_sub_debug_location(&Debug::Debugger::getSingleton().createContext()));
+        Execution::detach(mEnv->execute(command)
+            | Log::log_error()
+            | Execution::finally([this]() {
+                  mPrompt->resume();
+              })
+            | Log::with_log(mPrompt.get())
+            | Execution::with_debug_location<Execution::SenderLocation>()
+            | Execution::with_sub_debug_location(&Debug::Debugger::getSingleton().createContext()));
         return false;
     }
 

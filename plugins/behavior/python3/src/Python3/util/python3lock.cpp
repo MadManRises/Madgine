@@ -8,9 +8,9 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        Python3Lock::Python3Lock(Closure<void(std::string_view)> out, std::stop_token st)
+        Python3Lock::Python3Lock(Log::Log *log, std::stop_token st)
         {
-            Python3Environment::lock(std::move(out), std::move(st));
+            Python3Environment::lock(log, std::move(st));
         }
 
         Python3Lock::~Python3Lock()
@@ -35,23 +35,23 @@ namespace Scripting {
         }
 
         Python3Unlock::Python3Unlock()
-            : mState(Python3Environment::unlock())
         {
+            std::tie(mLog, mStopToken) = Python3Environment::unlock();
         }
 
         Python3Unlock::~Python3Unlock()
         {
-            Python3Environment::lock(std::move(mState.first), std::move(mState.second));
+            Python3Environment::lock(mLog, std::move(mStopToken));
         }
 
-        Closure<void(std::string_view)> Python3Unlock::out()
+        Log::Log *Python3Unlock::log()
         {
-            return std::move(mState.first);
+            return mLog;
         }
 
         std::stop_token Python3Unlock::st()
         {
-            return std::move(mState.second);
+            return std::move(mStopToken);
         }
 
     }

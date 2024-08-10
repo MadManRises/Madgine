@@ -12,7 +12,7 @@ struct MADGINE_BEHAVIOR_EXPORT BehaviorError {
 
     MADGINE_BEHAVIOR_EXPORT friend std::ostream &operator<<(std::ostream &out, const BehaviorError &error);
 
-    MADGINE_BEHAVIOR_EXPORT friend Log::LogDummy tag_invoke(Log::log_for_t, Log::MessageType lvl, BehaviorError &error);
+    MADGINE_BEHAVIOR_EXPORT friend Log::LogDummy tag_invoke(Log::log_for_t, Log::MessageType lvl, BehaviorError &error, Log::Log *log);
 
     BehaviorResult mResult;
     const char *mFile = nullptr;

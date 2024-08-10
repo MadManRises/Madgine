@@ -153,9 +153,19 @@ struct VirtualIterator {
         return ended();
     }
 
+    friend bool operator==(const VirtualSentinel &other, const VirtualIterator &it)
+    {
+        return it.ended();
+    }
+
     bool operator!=(const VirtualSentinel &other) const
     {
         return !ended();
+    }
+
+    friend bool operator!=(const VirtualSentinel &other, const VirtualIterator &it)
+    {
+        return !it.ended();
     }
 
     VirtualRange<RefT> range() const
@@ -202,8 +212,7 @@ namespace __generic_impl__ {
         using Sentinel = decltype(std::declval<C>().end());
         using IteratorImpl = __generic_impl__::VirtualIteratorImpl<RefT, It, Sentinel, Assign>;
 
-        static constexpr bool sCanInsert = requires(C & c)
-        {
+        static constexpr bool sCanInsert = requires(C &c) {
             emplace(c, c.end());
         };
 
@@ -274,7 +283,8 @@ template <typename RefT, typename AssignDefault>
 struct VirtualRange {
 
     template <typename C, typename Assign = AssignDefault>
-    requires(!std::same_as<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>) explicit VirtualRange(C &&c, type_holder_t<Assign> = {})
+        requires(!std::same_as<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>)
+    explicit VirtualRange(C &&c, type_holder_t<Assign> = {})
         : mRange(std::make_shared<__generic_impl__::VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c)))
     {
     }
@@ -294,9 +304,9 @@ struct VirtualRange {
     }
 
     template <typename C>
-    requires(!std::same_as<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>)
-        VirtualRange &
-        operator=(C &&c)
+        requires(!std::same_as<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>)
+    VirtualRange &
+    operator=(C &&c)
     {
         assign<AssignDefault>(std::forward<C>(c));
         return *this;
@@ -390,7 +400,7 @@ struct VirtualRange {
     {
         throw "TODO";
         return false;
-        //return std::equal(begin(), end(), other.begin(), other.end());
+        // return std::equal(begin(), end(), other.begin(), other.end());
     }
 
 private:

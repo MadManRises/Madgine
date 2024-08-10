@@ -8,10 +8,10 @@ namespace Engine {
 namespace Log {
 
     INTERFACES_EXPORT void setLog(Log *log = nullptr);
-    INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl, const char *file = nullptr, size_t line = 0);
+    INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl, const char *file = nullptr, size_t line = 0, Log *log = nullptr);
 
     struct INTERFACES_EXPORT LogDummy {
-        LogDummy(MessageType lvl, const char *file = nullptr, size_t line = 0);
+        LogDummy(MessageType lvl, const char *file = nullptr, size_t line = 0, Log *log = nullptr);
         ~LogDummy();
 
         template <typename T>
@@ -26,6 +26,7 @@ namespace Log {
         MessageType mLvl;
         const char *mFile;
         size_t mLine;
+        Log *mLog;
     };
 
 #if ENABLE_DEBUG_LOGGING
@@ -46,23 +47,43 @@ namespace Log {
 
     struct log_for_t {
         template <typename T>
-        friend auto tag_invoke(log_for_t, MessageType lvl, T &value)
+        friend auto tag_invoke(log_for_t, MessageType lvl, T &value, Log *log)
         {
-            return LogDummy { lvl };
+            return LogDummy { lvl, nullptr, 0, log };
         }
 
         template <typename T>
-        requires tag_invocable<log_for_t, MessageType, T&>
-        auto operator()(MessageType lvl, T &value) const
-            noexcept(is_nothrow_tag_invocable_v<log_for_t, MessageType, T&>)
-                -> tag_invoke_result_t<log_for_t, MessageType, T&>
+            requires tag_invocable<log_for_t, MessageType, T &, Log *>
+        auto operator()(MessageType lvl, T &value, Log *log = nullptr) const
+            noexcept(is_nothrow_tag_invocable_v<log_for_t, MessageType, T &, Log *>)
+                -> tag_invoke_result_t<log_for_t, MessageType, T &, Log *>
         {
-            return tag_invoke(*this, lvl, value);
+            return tag_invoke(*this, lvl, value, log);
         }
-
     };
 
     inline constexpr log_for_t log_for;
+
+    struct get_log_t {
+
+        template <typename T>
+            requires(!tag_invocable<get_log_t, T &>)
+        auto operator()(T &t) const
+        {
+            return nullptr;
+        }
+
+        template <typename T>
+            requires tag_invocable<get_log_t, T &>
+        auto operator()(T &t) const
+            noexcept(is_nothrow_tag_invocable_v<get_log_t, T &>)
+                -> tag_invoke_result_t<get_log_t, T &>
+        {
+            return tag_invoke(*this, t);
+        }
+    };
+
+    inline constexpr get_log_t get_log;
 
 }
 }

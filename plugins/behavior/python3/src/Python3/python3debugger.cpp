@@ -19,7 +19,7 @@
 
 #include "Interfaces/filesystem/path.h"
 
-#include <frameobject.h>
+#include <internal/pycore_frame.h>
 
 METATABLE_BEGIN(Engine::Scripting::Python3::Python3Debugger)
 METATABLE_END(Engine::Scripting::Python3::Python3Debugger)
@@ -27,6 +27,9 @@ METATABLE_END(Engine::Scripting::Python3::Python3Debugger)
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
+
+        bool sSuspending = false;
+        static bool sException = false;
 
         extern int executionTrace(PyObject *obj, PyFrameObject *frame, int event, PyObject *arg);
 
@@ -58,9 +61,7 @@ namespace Scripting {
 
         std::map<std::string_view, ValueType> Python3DebugLocation::localVariables() const
         {
-            if (!mFrame->f_locals)
-                return {};
-            PyDictPtr locals = PyDictPtr::fromBorrowed(mFrame->f_locals);
+            PyDictPtr locals = PyFrame_GetLocals(mFrame->frame_obj);
 
             std::map<std::string_view, ValueType> results;
 
@@ -73,22 +74,33 @@ namespace Scripting {
 
         bool Python3DebugLocation::wantsPause(Debug::ContinuationType type) const
         {
+            static bool b = false;
+            if (b) {
+                b = false;
+                return true;
+            }
             return type == Debug::ContinuationType::Error;
         }
 
         Filesystem::Path Python3DebugLocation::file() const
         {
-            return PyUnicode_AsUTF8(mFrame->f_code->co_filename);
+            return "";
+            Python3Lock lock;
+            return PyUnicode_AsUTF8(PyFrame_GetCode(mFrame->frame_obj)->co_filename);
         }
 
         std::string Python3DebugLocation::module() const
         {
-            return PyUnicode_AsUTF8(mFrame->f_code->co_name);
+            return "";
+            Python3Lock lock;
+            return PyUnicode_AsUTF8(PyFrame_GetCode(mFrame->frame_obj)->co_name);
         }
 
         size_t Python3DebugLocation::lineNr() const
         {
-            return PyCode_Addr2Line(mFrame->f_code, mFrame->f_lasti);
+            return 0;
+            Python3Lock lock;
+            return PyCode_Addr2Line(PyFrame_GetCode(mFrame->frame_obj), PyFrame_GetLasti(mFrame->frame_obj));
         }
 
         Python3Debugger::Guard::Guard(Debug::ParentLocation *parent)
@@ -113,63 +125,62 @@ namespace Scripting {
         {
             assert(stackUnwindable());
 
-            PyDebugLocationObject *location = reinterpret_cast<PyDebugLocationObject *>(obj);
+            if (!sSuspending) {
 
-            switch (event) {
-            default:
-                throw 0;
-            case PyTrace_CALL:
-                if (!location->mResume && !location->mSkipOnce) {
-                    if (!location->mLocation.mFrame)
-                        location->mLocation.stepInto(location->mParent);
-                    location->mLocation.mFrame = frame;
-                }
-                break;
+                PyDebugLocationObject *location = reinterpret_cast<PyDebugLocationObject *>(obj);
 
-            case PyTrace_RETURN:
-                if (arg) {
-                    location->mLocation.mFrame = frame->f_back;
-                    if (!location->mLocation.mFrame)
-                        location->mLocation.stepOut(location->mParent);
-                }
-                location->mResume = frame->f_back;
-                break;
-
-            case PyTrace_EXCEPTION:
-                if (PyTuple_GetItem(arg, 0) != (PyObject *)&PySuspendExceptionType) {
-                    location->mLocation.mFrame = frame->f_back;
-                    if (!location->mLocation.mFrame)
-                        location->mLocation.stepOut(location->mParent);
-                }
-                location->mResume = frame->f_back;
-                break;
-
-            case PyTrace_LINE:
-                if (location->mSkipOnce) {
-                    location->mSkipOnce = false;
+                switch (event) {
+                default:
+                    throw 0;
+                case PyTrace_CALL:
+                    frame->f_trace_opcodes = true;
+                    if (!location->mResume && !location->mSkipOnce) {
+                        if (!location->mLocation.mFrame)
+                            location->mLocation.stepInto(location->mParent);
+                        location->mLocation.mFrame = frame->f_frame;
+                    }
                     break;
-                }
-                if (!location->mLocation.pass(Debug::ContinuationType::Flow)) {
-                    *frame->f_stacktop++ = suspend(
-                        [frame, location](BehaviorReceiver &receiver, std::vector<PyFramePtr> frames, Closure<void(std::string_view)> out, std::stop_token st) {
-                            PyFrameObject *frame = frames.front();
-                            if (frame->f_lasti == -1)
-                                frame->f_lasti = 0;
-                            else
-                                frame->f_lasti += sizeof(_Py_CODEUNIT);
-                            location->mLocation.yield([location, out { std::move(out) }, &receiver, st](Debug::ContinuationMode mode, std::vector<PyFramePtr> frames) mutable {
-                                Python3Lock lock { std::move(out), std::move(st) };
+
+                case PyTrace_RETURN:
+                    if (sException) {
+                        sException = false;
+                    } else {
+                        location->mLocation.mFrame = frame->f_frame->previous->previous;
+                        if (!location->mLocation.mFrame)
+                            location->mLocation.stepOut(location->mParent);
+                    }
+                    location->mResume = frame->f_back;
+                    break;
+
+                case PyTrace_EXCEPTION:
+                    if (PyTuple_GetItem(arg, 0) != (PyObject *)&PySuspendExceptionType) {
+                        location->mLocation.mFrame = frame->f_frame->previous->previous;
+                        if (!location->mLocation.mFrame)
+                            location->mLocation.stepOut(location->mParent);
+                    }
+                    sException = true;
+                    location->mResume = frame->f_back;
+                    break;
+
+                case PyTrace_LINE:
+                    if (location->mSkipOnce) {
+                        location->mSkipOnce = false;
+                        break;
+                    }
+                    if (!location->mLocation.pass(Debug::ContinuationType::Flow)) {
+                        PyObject *suspendEx = suspend([frame, location](BehaviorReceiver &receiver, std::vector<PyFramePtr> frames, Log::Log *log, std::stop_token st) {
+                            _PyInterpreterFrame *frame = frames.front();
+                            //++frame->prev_instr;
+                            location->mLocation.yield([location, log, &receiver, st](Debug::ContinuationMode mode, std::vector<PyFramePtr> frames) mutable {
+                                Python3Lock lock { log, std::move(st) };
                                 Guard guard { PyObjectPtr::fromBorrowed(reinterpret_cast<PyObject *>(location)) };
                                 switch (mode) {
                                 case Debug::ContinuationMode::Step:
                                 case Debug::ContinuationMode::Resume:
                                     location->mSkipOnce = true;
                                     {
-                                        PyFrameObject *frame = frames.front();
-                                        if (frame->f_lasti == 0)
-                                            frame->f_lasti = -1;
-                                        else
-                                            frame->f_lasti -= sizeof(_Py_CODEUNIT);
+                                        _PyInterpreterFrame *frame = frames.front();
+                                        //--frame->prev_instr;
                                     }
                                     evalFrames(receiver, std::move(frames));
                                     break;
@@ -181,13 +192,18 @@ namespace Scripting {
                             },
                                 st, Debug::ContinuationType::Flow, std::move(frames));
                         });
+                        //_PyFrame_StackPush(frame->f_frame, suspendEx);
+                        PyErr_SetObject((PyObject *)&PySuspendExceptionType, suspendEx);
+                        Py_DECREF(suspendEx);
+                        return -1;
+                    }
+
+                    break;
+
+                case PyTrace_OPCODE:
+                    location->mResume = false;
+                    break;
                 }
-
-                break;
-
-            case PyTrace_OPCODE:
-                location->mResume = false;
-                break;
             }
 
             return executionTrace(obj, frame, event, arg);

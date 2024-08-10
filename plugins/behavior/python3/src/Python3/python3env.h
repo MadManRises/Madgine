@@ -26,12 +26,12 @@ namespace Scripting {
 
             std::string_view key() const override;
 
-            ExecutionSender execute(std::string_view command, Closure<void(std::string_view)> out = {});
+            ExecutionSender execute(std::string_view command);
 
             static PyGILState_STATE lock();
-            static Closure<void(std::string_view)> unlock(PyGILState_STATE state);
-            static void lock(Closure<void(std::string_view)> out, std::stop_token st);
-            static std::pair<Closure<void(std::string_view)>, std::stop_token> unlock();
+            static Log::Log *unlock(PyGILState_STATE state);
+            static void lock(Log::Log *log, std::stop_token st);
+            static std::pair<Log::Log *, std::stop_token> unlock();
 
             static size_t totalRefCount();
 

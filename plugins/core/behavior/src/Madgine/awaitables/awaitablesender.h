@@ -8,8 +8,6 @@
 
 #include "Madgine/debug/debuggablesender.h"
 
-
-
 namespace Engine {
 
 template <typename Sender>
@@ -88,7 +86,7 @@ struct BehaviorAwaitableSender {
         if (mFlag.test_and_set()) {
             if (mResult.is_value()) {
                 return false;
-            } else if (mResult.is_error()){
+            } else if (mResult.is_error()) {
                 mResult.reproduce_error(mBehavior.promise());
             } else {
                 mBehavior.promise().set_done();
@@ -104,7 +102,7 @@ struct BehaviorAwaitableSender {
     }
 
     template <typename... V>
-    void set_value(V &&... v)
+    void set_value(V &&...v)
     {
         mResult.set_value(std::forward<V>(v)...);
         if (mFlag.test_and_set())
@@ -115,11 +113,11 @@ struct BehaviorAwaitableSender {
     {
         mResult.set_done();
         if (mFlag.test_and_set())
-            mBehavior.promise().set_done();            
+            mBehavior.promise().set_done();
     }
 
     template <typename... R>
-    void set_error(R &&... error)
+    void set_error(R &&...error)
     {
         mResult.set_error(std::forward<R>(error)...);
         if (mFlag.test_and_set())

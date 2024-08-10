@@ -2,23 +2,22 @@
 
 #include "pyobjectptr.h"
 
-typedef struct _frame PyFrameObject;
-
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
         struct MADGINE_PYTHON3_EXPORT PyFramePtr : PyObjectPtr {
             PyFramePtr() = default;
-            PyFramePtr(PyFrameObject *frame);
+            PyFramePtr(_PyInterpreterFrame *frame);
 
-            static PyFramePtr fromBorrowed(PyFrameObject *frame);
+            static PyFramePtr fromBorrowed(_PyInterpreterFrame *frame);
 
             using PyObjectPtr::operator=;
 
-            operator PyFrameObject *() const;
+            operator _PyInterpreterFrame *() const;
+            _PyInterpreterFrame *operator->() const;
 
-            PyFrameObject *release();
+            _PyInterpreterFrame *release();
 
         };
 

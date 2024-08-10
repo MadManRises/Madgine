@@ -20,7 +20,7 @@ namespace Scripting {
 
         PyTypeObject PyVirtualSequenceRangeType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
-                .tp_name
+                           .tp_name
             = "Engine.VirtualSequenceRange",
             .tp_basicsize = sizeof(PyVirtualSequenceRange),
             .tp_itemsize = 0,
@@ -40,8 +40,8 @@ namespace Scripting {
         static PyObject *
         PyVirtualAssociativeRange_subscript(PyVirtualAssociativeRange *self, PyObject *key)
         {
-            ValueType val = fromPyObject(key);            
-            
+            ValueType val = fromPyObject(key);
+
             auto it = std::ranges::find(self->mRange, val, &KeyValuePair::mKey);
             if (it == self->mRange.end()) {
                 PyErr_Format(PyExc_KeyError, "No key %R in %R!", key, self);
@@ -56,14 +56,14 @@ namespace Scripting {
 
         PyTypeObject PyVirtualAssociativeRangeType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
-                .tp_name
+                           .tp_name
             = "Engine.VirtualAssociativeRange",
             .tp_basicsize = sizeof(PyVirtualAssociativeRange),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyVirtualAssociativeRange, &PyVirtualAssociativeRange::mRange>,
             .tp_as_mapping = &PyVirtualAssociativeRangeMapping,
             .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_doc = "Python implementation of KeyValueVirtualAssociativeRange",            
+            .tp_doc = "Python implementation of KeyValueVirtualAssociativeRange",
             .tp_iter = (getiterfunc)PyVirtualAssociativeRange_iter,
             .tp_new = PyType_GenericNew
         };

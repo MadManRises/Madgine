@@ -22,11 +22,14 @@ namespace Tools {
 
         virtual void render() override;
 
+        std::string_view name() override;
+
     protected:
         bool pass(Debug::DebugLocation *location, Debug::ContinuationType type) override;
         void onSuspend(Debug::ContextInfo &context, Debug::ContinuationType type) override;
 
         bool interpret(std::string_view command) override;
+        Behavior run(std::string_view command);
 
     private:
         std::string mCommandBuffer;

@@ -102,15 +102,7 @@ namespace Scripting {
 
         ExecutionSender PyObjectPtr::callAsync() const
         {
-            PyDictPtr locals = PyDict_New();
-
-            PyFramePtr frame = PyFrame_New(
-                PyThreadState_Get(),
-                reinterpret_cast<PyCodeObject *>(PyFunction_GetCode(mObject)),
-                PyFunction_GetGlobals(mObject),
-                locals);
-
-            return { {}, std::move(frame) };
+            return { {}, CodeObject { PyFunction_GetCode(mObject), PyFunction_GetGlobals(mObject), PyDict_New() } };
         }
 
         PyObjectFieldAccessor PyObjectPtr::operator[](const PyObjectPtr &name) const

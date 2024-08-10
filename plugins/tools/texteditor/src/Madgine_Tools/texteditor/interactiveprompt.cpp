@@ -28,7 +28,7 @@ namespace Tools {
         display.SetFont(Zep::ZepTextType::Heading2, std::make_shared<Zep::ZepFont_ImGui>(display, font, int(fontPixelHeight * 1.5)));
         display.SetFont(Zep::ZepTextType::Heading3, std::make_shared<Zep::ZepFont_ImGui>(display, font, int(fontPixelHeight * 1.25)));
 
-        mBuffer = mEditor.InitWithText("Python3 Prompt", "");
+        mBuffer = mEditor.InitWithText(std::string { mInterpreter->name() }, "");
         mBuffer->SetBufferType(Zep::BufferType::Repl);
         mBuffer->SetPostKeyNotifier([this](uint32_t key, uint32_t modifier) {
             return handleKeyPress(key, modifier);
@@ -113,17 +113,20 @@ namespace Tools {
         mStartLocation = mWindow->GetBufferCursor();
     }
 
-    void InteractivePrompt::append(std::string_view s)
-    {
-        Zep::ChangeRecord changeRecord;
-        mBuffer->Insert(mBuffer->End(), std::string { s }, changeRecord);
-    }
-
     void InteractivePrompt::resume()
     {
-        Zep::ChangeRecord changeRecord;
-        mBuffer->Insert(mBuffer->End(), "Done\n", changeRecord);
         prompt();
+    }
+
+    std::string InteractivePrompt::getName()
+    {
+        return std::string{ mInterpreter->name() };
+    }
+
+    void InteractivePrompt::log(std::string_view msg, Engine::Log::MessageType lvl, const char *file, size_t line)
+    {
+        Zep::ChangeRecord changeRecord;
+        mBuffer->Insert(mBuffer->End(), std::string { msg } + "\n", changeRecord);
     }
 
 }
