@@ -21,8 +21,7 @@ namespace Scripting {
     namespace Python3 {
 
         struct MADGINE_PYTHON3_EXPORT Python3Environment : Root::RootComponent<Python3Environment> {
-            Python3Environment(Root::Root &root);
-            ~Python3Environment();
+            Python3Environment(Root::Root &root);            
 
             std::string_view key() const override;
 

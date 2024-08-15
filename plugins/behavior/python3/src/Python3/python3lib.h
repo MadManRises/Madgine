@@ -22,13 +22,12 @@
 #endif
 
 
-typedef struct _frame PyFrameObject;
-
-
 #include "Python.h"
 
 #ifdef PY_UNDEFFED_DEBUG
 #    define _DEBUG
 #endif
+
+#include "python3compat.h"
 
 #include "python3forward.h"

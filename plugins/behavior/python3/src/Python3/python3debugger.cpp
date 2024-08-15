@@ -19,7 +19,11 @@
 
 #include "Interfaces/filesystem/path.h"
 
-#include <internal/pycore_frame.h>
+#if PY_MINOR_VERSION < 11
+#    include <frameobject.h>
+#else
+#    include <internal/pycore_frame.h>
+#endif
 
 METATABLE_BEGIN(Engine::Scripting::Python3::Python3Debugger)
 METATABLE_END(Engine::Scripting::Python3::Python3Debugger)
@@ -61,7 +65,13 @@ namespace Scripting {
 
         std::map<std::string_view, ValueType> Python3DebugLocation::localVariables() const
         {
+#if PY_MINOR_VERSION < 11
+            if (!mFrame->f_locals)
+                return {};
+            PyDictPtr locals = PyDictPtr::fromBorrowed(mFrame->f_locals);
+#else
             PyDictPtr locals = PyFrame_GetLocals(mFrame->frame_obj);
+#endif
 
             std::map<std::string_view, ValueType> results;
 
@@ -74,33 +84,28 @@ namespace Scripting {
 
         bool Python3DebugLocation::wantsPause(Debug::ContinuationType type) const
         {
-            static bool b = false;
-            if (b) {
-                b = false;
-                return true;
-            }
             return type == Debug::ContinuationType::Error;
         }
 
         Filesystem::Path Python3DebugLocation::file() const
         {
-            return "";
+            return ""; //TODO
             Python3Lock lock;
-            return PyUnicode_AsUTF8(PyFrame_GetCode(mFrame->frame_obj)->co_filename);
+            //return PyUnicode_AsUTF8(PyFrame_GetCode(mFrame->frame_obj)->co_filename);
         }
 
         std::string Python3DebugLocation::module() const
         {
-            return "";
+            return ""; //TODO
             Python3Lock lock;
-            return PyUnicode_AsUTF8(PyFrame_GetCode(mFrame->frame_obj)->co_name);
+            //return PyUnicode_AsUTF8(PyFrame_GetCode(mFrame->frame_obj)->co_name);
         }
 
         size_t Python3DebugLocation::lineNr() const
         {
             return 0;
             Python3Lock lock;
-            return PyCode_Addr2Line(PyFrame_GetCode(mFrame->frame_obj), PyFrame_GetLasti(mFrame->frame_obj));
+            //return PyCode_Addr2Line(PyFrame_GetCode(mFrame->frame_obj), PyFrame_GetLasti(mFrame->frame_obj));
         }
 
         Python3Debugger::Guard::Guard(Debug::ParentLocation *parent)
@@ -137,7 +142,12 @@ namespace Scripting {
                     if (!location->mResume && !location->mSkipOnce) {
                         if (!location->mLocation.mFrame)
                             location->mLocation.stepInto(location->mParent);
-                        location->mLocation.mFrame = frame->f_frame;
+                        location->mLocation.mFrame =
+#if PY_MINOR_VERSION < 11
+                            frame;
+#else
+                            frame->f_frame;
+#endif
                     }
                     break;
 
@@ -145,7 +155,12 @@ namespace Scripting {
                     if (sException) {
                         sException = false;
                     } else {
-                        location->mLocation.mFrame = frame->f_frame->previous->previous;
+                        location->mLocation.mFrame =
+#if PY_MINOR_VERSION < 11
+                            frame->f_back;
+#else
+                            frame->f_frame->previous->previous;
+#endif
                         if (!location->mLocation.mFrame)
                             location->mLocation.stepOut(location->mParent);
                     }
@@ -154,7 +169,12 @@ namespace Scripting {
 
                 case PyTrace_EXCEPTION:
                     if (PyTuple_GetItem(arg, 0) != (PyObject *)&PySuspendExceptionType) {
-                        location->mLocation.mFrame = frame->f_frame->previous->previous;
+                        location->mLocation.mFrame =
+#if PY_MINOR_VERSION < 11
+                            frame->f_back;
+#else
+                            frame->f_frame->previous->previous;
+#endif
                         if (!location->mLocation.mFrame)
                             location->mLocation.stepOut(location->mParent);
                     }

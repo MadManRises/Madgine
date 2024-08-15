@@ -5,6 +5,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "Madgine/root/keyvalueregistry.h"
+#include "Madgine/root/root.h"
 
 #include "util/math/pymatrix3.h"
 #include "util/math/pymatrix4.h"
@@ -32,8 +33,11 @@
 
 #include "Generic/cowstring.h"
 
-#include "internal/pycore_frame.h"
-#include <frameobject.h>
+#if PY_MINOR_VERSION < 11
+#    include <frameobject.h>
+#else
+#    include "internal/pycore_frame.h"
+#endif
 
 UNIQUECOMPONENT(Engine::Scripting::Python3::Python3Environment)
 
@@ -196,57 +200,57 @@ namespace Scripting {
         Python3Environment::Python3Environment(Root::Root &root)
             : RootComponent(root)
         {
-            wchar_t *program = Py_DecodeLocale("Madgine-Python3-Env", NULL);
 
-            Py_SetProgramName(program);
+            root.taskQueue()->addSetupSteps([this]() {
+                wchar_t *program = Py_DecodeLocale("Madgine-Python3-Env", NULL);
 
-            /* Add a built-in module, before Py_Initialize */
-            if (PyImport_AppendInittab("Engine", PyInit_Engine) == -1) {
-                LOG("Error: could not extend built-in modules table");
-                mErrorCode = -1;
-                return;
-            }
+                Py_SetProgramName(program);
 
-            /* Add a built-in module, before Py_Initialize */
-            if (PyImport_AppendInittab("Environment", PyInit_Environment) == -1) {
-                LOG("Error: could not extend built-in modules table");
-                mErrorCode = -1;
-                return;
-            }
+                /* Add a built-in module, before Py_Initialize */
+                if (PyImport_AppendInittab("Engine", PyInit_Engine) == -1) {
+                    LOG("Error: could not extend built-in modules table");
+                    mErrorCode = -1;
+                    return false;
+                }
 
-            Py_InitializeEx(0);
+                /* Add a built-in module, before Py_Initialize */
+                if (PyImport_AppendInittab("Environment", PyInit_Environment) == -1) {
+                    LOG("Error: could not extend built-in modules table");
+                    mErrorCode = -1;
+                    return false;
+                }
 
-            setupExecution();
+                Py_InitializeEx(0);
 
-            PyRun_SimpleString("import Environment");
-            PyRun_SimpleString("import Engine");
-            sStream.redirect("stdout");
-            sStream.redirect("stderr");
+                setupExecution();
 
-            Python3FileLoader::getSingleton().setup();
+                PyRun_SimpleString("import Environment");
+                PyRun_SimpleString("import Engine");
+                sStream.redirect("stdout");
+                sStream.redirect("stderr");
 
-            PyEval_SaveThread();
+                Python3FileLoader::getSingleton().setup();
 
-            /*Python3FileLoader::load("dump");
-                Python3FileLoader::load("signature");
-                Python3FileLoader::load("testnode");
+                PyEval_SaveThread();
 
-                lock(std::cout.rdbuf());
-                PyRun_SimpleString("from dump import dump");
-                unlock();*/
-        }
+                return true; },
+                []() -> Threading::Task<void> {
+                    Python3FileLoader &loader = Python3FileLoader::getSingleton();
 
-        Python3Environment::~Python3Environment()
-        {
-            lock(nullptr, Execution::unstoppable_token {});
+                    for (std::pair<const std::string, Python3FileLoader::Resource> &res : loader) {
+                        co_await res.second.forceUnload();
+                    }
 
-            Python3FileLoader::getSingleton().cleanup();
+                    lock(nullptr, Execution::unstoppable_token {});
 
-            sStream.reset("stdout");
-            sStream.reset("stderr");
+                    loader.cleanup();
 
-            auto result = Py_FinalizeEx();
-            assert(result == 0);
+                    sStream.reset("stdout");
+                    sStream.reset("stderr");
+
+                    auto result = Py_FinalizeEx();
+                    assert(result == 0);
+                });
         }
 
         std::string_view Python3Environment::key() const
@@ -298,9 +302,9 @@ namespace Scripting {
             sStopToken = std::move(st);
         }
 
-        std::pair<Log::Log*, std::stop_token> Python3Environment::unlock()
+        std::pair<Log::Log *, std::stop_token> Python3Environment::unlock()
         {
-            std::pair<Log::Log*, std::stop_token> result { sStream.log(), std::move(sStopToken) };
+            std::pair<Log::Log *, std::stop_token> result { sStream.log(), std::move(sStopToken) };
             sStream.setLog({});
             assert(PyGILState_Check() == 1);
             PyGILState_Release(PyGILState_UNLOCKED);

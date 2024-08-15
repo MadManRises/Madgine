@@ -6,7 +6,11 @@
 
 #include "../python3debugger.h"
 
-#include <internal/pycore_frame.h>
+#if PY_MINOR_VERSION < 11
+#    include <frameobject.h>
+#else
+#    include <internal/pycore_frame.h>
+#endif
 
 #include "pydictptr.h"
 #include "pyobjectutil.h"
@@ -127,9 +131,17 @@ namespace Scripting {
             .tp_new = PyType_GenericNew,
         };
 
-        PyObject *evalFrame(PyThreadState *tstate, _PyInterpreterFrame *frame, int throwExc)
+        PyObject *evalFrame(
+#if PY_MINOR_VERSION >= 11
+            PyThreadState *tstate,
+#endif
+            _PyInterpreterFrame *frame, int throwExc)
         {
-            PyObject *result = _PyEval_EvalFrameDefault(tstate, frame, throwExc);
+            PyObject *result = _PyEval_EvalFrameDefault(
+#if PY_MINOR_VERSION >= 11
+                tstate,
+#endif
+                frame, throwExc);
             if (!result && PyErr_ExceptionMatches((PyObject *)&PySuspendExceptionType)) {
                 PyObjectPtr type, value, traceback;
                 PyErr_Fetch(&type, &value, &traceback);
@@ -175,7 +187,7 @@ namespace Scripting {
                 if (!frames || frames->empty()) {
                     fromPyObject(receiver, result);
                 } else {
-                    _PyFrame_StackPush(frames->front(), result);
+                    PyFrame_StackPush(frames->front(), result);
                 }
             }
         }
@@ -204,9 +216,13 @@ namespace Scripting {
                 auto it = frames.begin();
                 PyFramePtr frame = std::move(*it);
                 frames.erase(it);
+#if PY_MINOR_VERSION < 11
+                PyObject *result = PyEval_EvalFrame(frame);
+#else
                 PyFrameObject _frame;
                 _frame.f_frame = frame;
                 PyObject *result = PyEval_EvalFrame(&_frame);
+#endif
                 handleResult(result, receiver, &frames);
             }
             sUnwindable = false;
@@ -216,8 +232,8 @@ namespace Scripting {
         {
 
             if (event == PyTrace_OPCODE) {
-                if (frame->f_frame->stacktop > 0 && _PyFrame_StackPeek(frame->f_frame)->ob_type == &PySuspendExceptionType) {
-                    PyObject *suspendEx = _PyFrame_StackPop(frame->f_frame);
+                if (PyFrame_StackSize(frame) > 0 && PyFrame_StackPeek(frame)->ob_type == &PySuspendExceptionType) {
+                    PyObject *suspendEx = PyFrame_StackPop(frame);
 
                     PySuspendException &suspend = reinterpret_cast<PySuspendExceptionObject *>(suspendEx)->mException;
 
@@ -269,8 +285,8 @@ namespace Scripting {
                 while (tb->tb_next)
                     tb = tb->tb_next;
 
-                filename = PyUnicode_AsUTF8(PyFrame_GetCode(tb->tb_frame)->co_filename);
-                line = PyFrame_GetCode(tb->tb_frame)->co_firstlineno;
+                filename = PyUnicode_AsUTF8(PyFrame_GetCode2(tb->tb_frame)->co_filename);
+                line = PyFrame_GetCode2(tb->tb_frame)->co_firstlineno;
             }
 
             PyObjectPtr str = PyObject_Str(value);
@@ -285,10 +301,14 @@ namespace Scripting {
 
         void setupExecution()
         {
+#if PY_MINOR_VERSION < 11
+            PyGILState_GetThisThreadState()->interp->eval_frame = &evalFrame;
+#else
             PyRun_SimpleString("import inspect");
             PyRun_SimpleString("inspect.currentframe().f_trace_opcodes = True");
 
             _PyInterpreterState_SetEvalFrameFunc(PyInterpreterState_Get(), &evalFrame);
+#endif
 
             PyEval_SetTrace(&executionTrace, nullptr);
         }

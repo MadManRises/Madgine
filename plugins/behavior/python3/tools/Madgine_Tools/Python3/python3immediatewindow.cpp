@@ -30,8 +30,12 @@
 
 #include "Python3/util/pylistptr.h"
 #include "Python3/util/pymoduleptr.h"
-#include "internal/pycore_frame.h"
-#include <frameobject.h>
+
+#if PY_MINOR_VERSION < 11
+#    include <frameobject.h>
+#else
+#    include "internal/pycore_frame.h"
+#endif
 
 METATABLE_BEGIN_BASE(Engine::Tools::Python3ImmediateWindow, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Python3ImmediateWindow)
@@ -47,7 +51,7 @@ namespace Tools {
     const Debug::DebugLocation *visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const Scripting::Python3::Python3DebugLocation *location, bool isInline)
     {
         Scripting::Python3::Python3Lock lock;
-        ImGui::BeginGroupPanel(PyUnicode_AsUTF8(PyFrame_GetCode(location->mFrame->frame_obj)->co_filename));
+        ImGui::BeginGroupPanel(PyUnicode_AsUTF8(PyFrame_GetCode2(location->mFrame)->co_filename));
         if (ImGui::TreeNode("Code")) {
 
             if (ImGui::BeginTable("Code", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_SizingFixedFit)) {
@@ -147,8 +151,6 @@ namespace Tools {
         const Scripting::Python3::Python3DebugLocation *pyLocation = dynamic_cast<const Scripting::Python3::Python3DebugLocation *>(location);
 
         if (pyLocation) {
-            Scripting::Python3::Python3Unlock unlock;
-
             const Filesystem::Path &path = pyLocation->file();
 
             if (!path.empty()) {
