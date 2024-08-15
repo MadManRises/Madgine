@@ -19,6 +19,12 @@ target_link_libraries(DirectX12 PRIVATE d3d12 dxgi dxguid Client dxcompiler)
 
 add_custom_command(TARGET DirectX12 POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PROPERTY:ShaderGen,BINARY_DIR>/shadergen/dxcompiler.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
+
+#Very hacky, but best solution I found
+cmake_path(GET CMAKE_RC_COMPILER PARENT_PATH windows_sdk_dir)
+
+add_custom_command(TARGET DirectX12 POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${windows_sdk_dir}/dxil.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools DirectX12_Tools directx12rendercontexttool.cpp directx12rendercontexttool.h directx12toolsforward.h directx12toolslib.h)
