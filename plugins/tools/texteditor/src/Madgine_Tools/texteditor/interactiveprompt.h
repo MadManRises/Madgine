@@ -16,6 +16,8 @@ namespace Tools {
         virtual bool interpret(std::string_view command) = 0;
     };
 
+    struct Highlighter;
+
     struct MADGINE_TEXTEDITOR_EXPORT InteractivePrompt : Log::Log {
 
         InteractivePrompt(TextEditor *editor, Interpreter *interpreter);
@@ -41,6 +43,8 @@ namespace Tools {
         Zep::GlyphIterator mStartLocation;
 
         Interpreter *mInterpreter;
+
+        std::shared_ptr<Highlighter> mHighlighter;
     };
 
 }

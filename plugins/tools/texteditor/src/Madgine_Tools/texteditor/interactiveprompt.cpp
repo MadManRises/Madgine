@@ -13,6 +13,61 @@
 namespace Engine {
 namespace Tools {
 
+    struct Highlighter : Zep::ZepSyntax {
+
+        using Zep::ZepSyntax::ZepSyntax;
+                
+        void UpdateSyntax() override
+        {
+            auto &buffer = m_buffer.GetWorkingBuffer();
+            auto itrCurrent = buffer.begin();
+            auto itrEnd = buffer.end();
+
+            assert(std::distance(itrCurrent, itrEnd) <= int(m_syntax.size()));
+            assert(m_syntax.size() == buffer.size());
+
+            // Mark a region of the syntax buffer with the correct marker
+            auto mark = [&](GapBuffer<uint8_t>::const_iterator itrA, GapBuffer<uint8_t>::const_iterator itrB, Zep::ThemeColor type, Zep::ThemeColor background) {
+                std::fill(m_syntax.begin() + (itrA - buffer.begin()), m_syntax.begin() + (itrB - buffer.begin()), Zep::SyntaxData { type, background });
+            };
+
+            auto markSingle = [&](GapBuffer<uint8_t>::const_iterator itrA, Zep::ThemeColor type, Zep::ThemeColor background) {
+                (m_syntax.begin() + (itrA - buffer.begin()))->foreground = type;
+                (m_syntax.begin() + (itrA - buffer.begin()))->background = background;
+            };
+
+            for (const Zep::ByteRange& errorRange : mErrors) {
+                m_processedChar = long(itrCurrent - buffer.begin());
+                if (m_processedChar >= errorRange.second)
+                    continue;
+
+                if (m_processedChar < errorRange.first) {
+                    mark(itrCurrent, buffer.begin() + errorRange.first, Zep::ThemeColor::Normal, Zep::ThemeColor::None);
+                    itrCurrent = buffer.begin() + errorRange.first;
+                }
+
+                mark(itrCurrent, buffer.begin() + errorRange.second, Zep::ThemeColor::Error, Zep::ThemeColor::None);
+                itrCurrent = buffer.begin() + errorRange.second;
+            }
+
+            if (itrCurrent < itrEnd) {
+                mark(itrCurrent, itrEnd, Zep::ThemeColor::Normal, Zep::ThemeColor::None);
+            }
+
+            // If we got here, we sucessfully completed
+            // Reset the target to the beginning
+            m_targetChar = long(0);
+            m_processedChar = long(buffer.size() - 1);
+        }
+
+        void addError(Zep::ByteRange range) {
+            mErrors.insert(std::ranges::upper_bound(mErrors, range.first, {}, & Zep::ByteRange::first), range);
+        }
+
+        std::vector<Zep::ByteRange> mErrors;
+
+    };
+
     InteractivePrompt::InteractivePrompt(TextEditor *editor, Interpreter *interpreter)
         : mEditor(Resources::ResourceManager::getSingleton().findResourceFile("repl.cfg").str(), sPixelScale())
         , mInterpreter(interpreter)
@@ -38,6 +93,10 @@ namespace Tools {
         mEditor.SetGlobalMode(Zep::ZepMode_Standard::StaticName());
 
         mEditor.GetConfig().autoHideCommandRegion = false;
+
+        mHighlighter = std::make_shared<Highlighter>(*mBuffer);
+
+        mBuffer->SetSyntax(mHighlighter);
 
         prompt();
     }
@@ -125,8 +184,12 @@ namespace Tools {
 
     void InteractivePrompt::log(std::string_view msg, Engine::Log::MessageType lvl, const char *file, size_t line)
     {
+        auto it = mBuffer->End();
         Zep::ChangeRecord changeRecord;
-        mBuffer->Insert(mBuffer->End(), std::string { msg } + "\n", changeRecord);
+        mBuffer->Insert(it, std::string { msg } + "\n", changeRecord);
+        if (lvl == Engine::Log::MessageType::ERROR_TYPE) {
+            mHighlighter->addError({ it.Index(), mBuffer->End().Index() });
+        }
     }
 
 }
