@@ -139,7 +139,7 @@ namespace NodeGraph {
 
         Log::Log* log() override
         {
-            return Log::get_log(mRec);
+            return Engine::Log::get_log(mRec);
         }
 
         Rec mRec;

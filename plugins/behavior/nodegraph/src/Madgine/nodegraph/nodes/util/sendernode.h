@@ -137,9 +137,7 @@ namespace NodeGraph {
         ExtendedValueTypeDesc signature_type(uint32_t index) const
         {
             return [this, index]<typename... T>(type_pack<T...>) {
-                std::array<ExtendedValueTypeDesc, Signature::size> types {
-                    resolveType<T>()...
-                };
+                ExtendedValueTypeDesc types[] = { resolveType<T>()... };
                 return types[index];
             }(Signature {});
         }
