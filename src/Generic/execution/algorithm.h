@@ -1566,6 +1566,11 @@ namespace Execution {
                 }
             }
 
+            friend const Rec &tag_invoke(get_receiver_t, const state &state)
+            {
+                return state.mRec;
+            }
+
             ResultStorage<Inner> mResult;
             Rec mRec;
             std::stop_source mStopSource;

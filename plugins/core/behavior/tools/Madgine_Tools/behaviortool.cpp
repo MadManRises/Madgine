@@ -33,7 +33,7 @@ SERIALIZETABLE_END(Engine::Tools::BehaviorTool)
 namespace Engine {
 namespace Tools {
 
-    const Debug::DebugLocation *visualizeCoroutineLocation(DebuggerView *view, const Debug::ContextInfo *context, const CoroutineLocation *location, bool isInline)
+    const Debug::DebugLocation *visualizeCoroutineLocation(DebuggerView *view, const Debug::ContextInfo *context, const CoroutineLocation *location, const Debug::DebugLocation *inlineLocation)
     {
         const char *name;
         Debug::FullStackTrace trace = location->mStacktrace.calculateReadable();
@@ -43,7 +43,7 @@ namespace Tools {
             name = trace[0].mFunction;
         }
         ImGui::BeginGroupPanel(name);
-        const Debug::DebugLocation *content = view->visualizeDebugLocation(context, location->mChild, isInline);
+        const Debug::DebugLocation *content = view->visualizeDebugLocation(context, location->mChild, inlineLocation);
         ImGui::EndGroupPanel();
 
         return content == location->mChild ? location : content;

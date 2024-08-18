@@ -52,7 +52,7 @@ namespace Tools {
         co_await ToolBase::finalize();
     }
 
-    const Debug::DebugLocation *DebuggerView::visualizeDebugLocation(const Debug::ContextInfo *context, const Debug::DebugLocation *location, bool isInline)
+    const Debug::DebugLocation *DebuggerView::visualizeDebugLocation(const Debug::ContextInfo *context, const Debug::DebugLocation *location, const Debug::DebugLocation *inlineLocation)
     {
         if (!location)
             return nullptr;
@@ -61,7 +61,7 @@ namespace Tools {
             const Debug::DebugLocation *subLocation = nullptr;
 
             CallableView<void(const Execution::StateDescriptor &, const void *)> visitorView;
-            auto visitor = [this, context, location, isInline, &visitorView, &subLocation](const Execution::StateDescriptor &desc, const void *contextData) {
+            auto visitor = [this, context, location, inlineLocation, &visitorView, &subLocation](const Execution::StateDescriptor &desc, const void *contextData) {
                 std::visit(overloaded { [](const Execution::State::Text &text) {
                                            ImGui::Text(text.mText);
                                        },
@@ -80,8 +80,8 @@ namespace Tools {
                                [](const Execution::State::PopDisabled &) {
                                    ImGui::EndDisabled();
                                },
-                               [this, context, location, isInline, &subLocation](const Execution::State::SubLocation &) {
-                                   subLocation = visualizeDebugLocation(context, location->mChild, isInline);
+                               [this, context, location, inlineLocation, &subLocation](const Execution::State::SubLocation &) {
+                                   subLocation = visualizeDebugLocation(context, location->mChild, inlineLocation);
                                },
                                [contextData, &visitorView](const Execution::State::Contextual &contextual) mutable {
                                    visitorView(contextual.mMapping(contextData), std::move(contextData));
@@ -101,7 +101,7 @@ namespace Tools {
             return subLocation;
         } else {
             for (auto debugVisualizer : mDebugLocationVisualizers) {
-                auto [matched, child] = debugVisualizer(this, context, location, isInline);
+                auto [matched, child] = debugVisualizer(this, context, location, inlineLocation);
                 if (matched)
                     return child;
             }

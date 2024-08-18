@@ -48,7 +48,7 @@ UNIQUECOMPONENT(Engine::Tools::Python3ImmediateWindow)
 namespace Engine {
 namespace Tools {
 
-    const Debug::DebugLocation *visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const Scripting::Python3::Python3DebugLocation *location, bool isInline)
+    const Debug::DebugLocation *visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const Scripting::Python3::Python3DebugLocation *location, const Debug::DebugLocation *inlineLocation)
     {
         Scripting::Python3::Python3Lock lock;
         ImGui::BeginGroupPanel(PyUnicode_AsUTF8(PyFrame_GetCode2(location->mFrame)->co_filename));

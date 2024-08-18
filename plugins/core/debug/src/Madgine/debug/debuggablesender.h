@@ -279,7 +279,7 @@ namespace Execution {
             {
                 if constexpr (operation_increment == 0 && stop_increment == 0) {
                     this->mRec.set_done();
-                } else {                    
+                } else {
                     SenderLocation *location = get_debug_location(this->mRec);
 
                     location->mIndex += operation_increment;
@@ -334,15 +334,16 @@ namespace Execution {
 
             void start()
             {
+                auto location = get_debug_location(get_receiver(mState));
+                if constexpr (std::same_as<SenderLocation *, decltype(location)>)
+                    location->mContextData = get_debug_data(mState);
+
                 constexpr size_t increment = get_debug_start_increment<Sender>();
                 if constexpr (increment == 0) {
                     mState.start();
-                } else {                    
-                    SenderLocation *location = get_debug_location(get_receiver(mState));
-
+                } else {
                     location->pass([=](Debug::ContinuationMode mode) {
                         location->mIndex += increment;
-                        location->mContextData = get_debug_data(mState);
                         mState.start();
                     },
                         get_stop_token(get_receiver(mState)), Debug::ContinuationType::Flow);
