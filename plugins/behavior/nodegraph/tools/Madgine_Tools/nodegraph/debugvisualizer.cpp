@@ -73,6 +73,9 @@ namespace Tools {
 
             ImRect oldViewport = BeginNodeEditor(location->mEditorContext.get(), { 0, 250 });
 
+            ed::NodeId selectedNodes[256];
+            auto selectedNodesCount = ed::GetSelectedNodes(selectedNodes, 256);
+            assert(selectedNodesCount < 255);
             ed::ClearSelection();
 
             if (location->mNode) {
@@ -86,11 +89,13 @@ namespace Tools {
                 EndNode();
 
                 ed::SelectNode(60000 * nodeId, true);
+
+ 
             }
 
             ed::NodeId ids[256];
-            auto result = ed::GetOrderedNodeIds(ids, 256);
-            assert(result < 255);
+            auto handledNodesCount = ed::GetOrderedNodeIds(ids, 256);
+            assert(handledNodesCount < 255);
             uint32_t handledIndex = 0;
 
             uint32_t nodeId = 1;
@@ -113,7 +118,27 @@ namespace Tools {
                 ++nodeId;
             }
 
-            ed::NavigateToSelection(true);
+
+            ed::NodeId newSelectedNodes[256];
+            auto newSelectedNodesCount = ed::GetSelectedNodes(newSelectedNodes, 256);
+            assert(newSelectedNodesCount < 255);
+
+            bool recenter = newSelectedNodesCount != selectedNodesCount;
+            
+            for (uint32_t i = 0; i < newSelectedNodesCount; ++i) {
+                if (!recenter && selectedNodes[i] != newSelectedNodes[i])
+                    recenter = true;
+                uint32_t nodeId = static_cast<size_t>(newSelectedNodes[i]) / 60000;
+                const NodeGraph::NodeBase *node = graph.node(nodeId);
+                if (node && node->flowInGroupCount() > 0 && node->flowInCount(0) > 0) {
+                    for (NodeGraph::Pin pin : node->flowInSources(0, 0)) {
+                        ed::Flow(60000 * pin.mNode + 6000 * pin.mGroup + 1001 + pin.mIndex);
+                    }
+                }
+            }
+           
+            if (recenter)
+                ed::NavigateToSelection(true);
 
             EndNodeEditor(oldViewport);
 

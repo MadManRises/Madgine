@@ -252,6 +252,7 @@ namespace Tools {
 
         ImFontConfig defaultConfig {};
         defaultConfig.SizePixels = 13.0f * Window::platformCapabilities.mScalingFactor;
+        defaultConfig.RasterizerDensity = 2.0f;
         io.FontDefault = io.Fonts->AddFontDefault(&defaultConfig);
 
         static const ImWchar icons_ranges[] = { 0xf100, 0xf1ff, 0 };
