@@ -581,12 +581,12 @@ namespace Tools {
     void SceneEditor::handleInputs()
     {
         return;
-        if (ImGui::IsKeyPressed(Input::Key::Delete)) {
+        /* if (ImGui::IsKeyPressed(Input::Key::Delete)) {
             if (mSelectedEntity) {
                 mSelectedEntity->remove();
                 mSelectedEntity.reset();
             }
-        }
+        }*/
     }
 
     void SceneEditor::updateEntityCache()

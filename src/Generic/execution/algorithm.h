@@ -1568,9 +1568,9 @@ namespace Execution {
 
             ResultStorage<Inner> mResult;
             Rec mRec;
-            inner_state mInnerState;
-            stop_state mStopState;
             std::stop_source mStopSource;
+            inner_state mInnerState;
+            stop_state mStopState;            
             // stop_callback<> mPropagateCallback;
             std::atomic_flag mFinished;
         };

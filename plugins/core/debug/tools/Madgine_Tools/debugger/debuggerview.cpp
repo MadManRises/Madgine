@@ -66,7 +66,7 @@ namespace Tools {
                                            ImGui::Text(text.mText);
                                        },
                                [](const Execution::State::Progress &progress) {
-                                   ImGui::ProgressBar(progress.mRatio, ImVec2 { -1.0f, 10.0f }, "");
+                                   ImGui::ProgressBar(progress.mRatio, ImVec2 { 100.0f, 10.0f }, "");
                                },
                                [](const Execution::State::BeginBlock &begin) {
                                    ImGui::BeginGroupPanel(begin.mName.data());

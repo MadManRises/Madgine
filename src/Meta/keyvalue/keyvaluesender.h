@@ -7,24 +7,24 @@
 namespace Engine {
 
 struct KeyValueSenderStateBase {
-    virtual void connect(Execution::VirtualReceiverBase<GenericResult, const ArgumentList &> &receiver) = 0;
+    virtual void connect(Execution::VirtualStoppableReceiverBase<GenericResult, const ArgumentList &> &receiver) = 0;
     virtual void start() = 0;
 };
 
 template <typename Sender>
 struct KeyValueSenderState : KeyValueSenderStateBase {
 
-    using State = Execution::connect_result_t<Sender, Execution::VirtualReceiverBase<GenericResult, const ArgumentList &> &>;
+    using State = Execution::connect_result_t<Sender, Execution::VirtualStoppableReceiverBase<GenericResult, const ArgumentList &> &>;
 
     KeyValueSenderState(Sender &&sender)
         : mState(std::forward<Sender>(sender))
     {
     }
 
-    virtual void connect(Execution::VirtualReceiverBase<GenericResult, const ArgumentList &> &receiver) override
+    virtual void connect(Execution::VirtualStoppableReceiverBase<GenericResult, const ArgumentList &> &receiver) override
     {
         mState.emplace<State>(DelayedConstruct<State> {
-            [&]() { return Execution::connect(std::forward<Sender>(std::get<Sender>(mState)), receiver); } });
+            [&, sender { std::forward<Sender>(std::get<Sender>(mState)) }]() mutable { return Execution::connect(std::move(sender), receiver); } });
     }
 
     virtual void start() override
@@ -57,9 +57,9 @@ struct KeyValueSender {
     KeyValueSender &operator=(KeyValueSender &&) = default;
 
     template <typename Rec>
-    struct state : Execution::VirtualState<Rec, GenericResult, const ArgumentList &> {
+    struct state : Execution::VirtualStoppableState<Rec, GenericResult, const ArgumentList &> {
         state(Rec &&rec, std::shared_ptr<KeyValueSenderStateBase> state)
-            : Execution::VirtualState<Rec, GenericResult, const ArgumentList &>(std::forward<Rec>(rec))
+            : Execution::VirtualStoppableState<Rec, GenericResult, const ArgumentList &>(std::forward<Rec>(rec))
             , mState(std::move(state))
         {
             mState->connect(*this);

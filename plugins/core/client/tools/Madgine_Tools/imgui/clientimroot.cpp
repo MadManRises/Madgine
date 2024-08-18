@@ -284,9 +284,11 @@ namespace Tools {
 
     Threading::Task<void> ClientImRoot::finalize()
     {
-        ImGui::SaveIniSettingsToDisk(ImGui::GetIO().IniFilename);
+        ImGuiIO &io = ImGui::GetIO();
 
-        ImGui::GetIO().IniFilename = nullptr;
+        ImGui::SaveIniSettingsToDisk(io.IniFilename);
+
+        io.IniFilename = nullptr;
 
         co_await ImRoot::finalize();
 
@@ -378,6 +380,8 @@ namespace Tools {
             }
 
             renderViewport(target, main_viewport);
+
+            io.BackendPlatformUserData = nullptr;
         } else {
             renderViewport(target, mViewportMappings.at(target));
         }

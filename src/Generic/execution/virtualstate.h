@@ -27,6 +27,16 @@ namespace Execution {
     template <typename R, typename... V>
     using VirtualReceiverBase = VirtualReceiverBaseEx<make_type_pack_t<R>, V...>;
 
+    template <typename R, typename... V>
+    struct VirtualStoppableReceiverBase : VirtualReceiverBase<R, V...> {
+        virtual std::stop_token stopToken() = 0;
+
+        friend std::stop_token tag_invoke(get_stop_token_t, VirtualStoppableReceiverBase &rec)
+        {
+            return rec.stopToken();
+        }
+    };
+
     template <typename Rec, typename Base, typename R, typename... V>
     struct VirtualStateEx;
 
@@ -34,7 +44,7 @@ namespace Execution {
     struct VirtualStateEx<_Rec, Base, type_pack<>, V...> : Base {
 
         using Rec = _Rec;
-        
+
         template <typename... Args>
         VirtualStateEx(Rec &&rec, Args &&...args)
             : Base(std::forward<Args>(args)...)
@@ -50,7 +60,8 @@ namespace Execution {
             this->mRec.set_value(std::forward<V>(v)...);
         }
 
-        friend Rec& tag_invoke(Execution::get_receiver_t, VirtualStateEx& state) {
+        friend Rec &tag_invoke(Execution::get_receiver_t, VirtualStateEx &state)
+        {
             return state.mRec;
         }
 
@@ -59,7 +70,7 @@ namespace Execution {
 
     template <typename Rec, typename Base, typename R, typename... ExtraR, typename... V>
     struct VirtualStateEx<Rec, Base, type_pack<R, ExtraR...>, V...> : VirtualStateEx<Rec, Base, type_pack<ExtraR...>, V...> {
-        
+
         using VirtualStateEx<Rec, Base, type_pack<ExtraR...>, V...>::VirtualStateEx;
 
         using result_type = R;
@@ -70,8 +81,21 @@ namespace Execution {
         }
     };
 
+    template <typename Rec, typename Base, typename R, typename... V>
+    struct VirtualStoppableStateEx : VirtualStateEx<Rec, Base, R, V...> {
+        using VirtualStateEx<Rec, Base, R, V...>::VirtualStateEx;
+
+        std::stop_token stopToken() override
+        {
+            return get_stop_token(this->mRec);
+        }
+    };
+
     template <typename Rec, typename R, typename... V>
     using VirtualState = VirtualStateEx<Rec, VirtualReceiverBase<R, V...>, make_type_pack_t<R>, V...>;
+
+    template <typename Rec, typename R, typename... V>
+    using VirtualStoppableState = VirtualStoppableStateEx<Rec, VirtualStoppableReceiverBase<R, V...>, make_type_pack_t<R>, V...>;
 
 }
 }

@@ -54,7 +54,6 @@ add_notices(ImGui
 
 
 add_subdirectory(NodeEditor)
-set_target_properties(imgui_node_editor imgui_canvas PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_notices(imgui_node_editor 
 	READABLE_NAME "ImGui Node Editor" 
