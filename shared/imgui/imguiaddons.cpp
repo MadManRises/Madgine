@@ -1,9 +1,10 @@
 #include "Meta/metalib.h"
 #include "Modules/moduleslib.h"
 
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imguiaddons.h"
 
-#define IMGUI_DEFINE_MATH_OPERATORS
+
 #include "../imgui/imgui_internal.h"
 
 #include "Meta/math/matrix3.h"
@@ -1406,5 +1407,6 @@ void MakeTabVisible(const char *name)
         return;
     window->DockNode->TabBar->NextSelectedTabId = window->TabId;
 }
+
 
 }
