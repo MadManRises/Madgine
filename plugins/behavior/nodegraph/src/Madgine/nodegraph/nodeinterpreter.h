@@ -9,6 +9,14 @@
 
 #include "Meta/keyvalue/argumentlist.h"
 
+namespace ax {
+namespace NodeEditor {
+    struct EditorContext;
+}
+}
+
+namespace ed = ax::NodeEditor;
+
 namespace Engine {
 namespace NodeGraph {
 
@@ -24,6 +32,7 @@ namespace NodeGraph {
 
         const NodeBase *mNode = nullptr;
         NodeInterpreterStateBase *mInterpreter;
+        mutable std::unique_ptr<ed::EditorContext, void (*)(ed::EditorContext *)> mEditorContext = { nullptr, nullptr };
     };
 
     struct NodeInterpreterData {

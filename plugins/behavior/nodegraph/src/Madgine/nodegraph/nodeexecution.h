@@ -75,12 +75,10 @@ namespace NodeGraph {
         }
         void set_done()
         {
-            mDebugLocation.stepOut(mReceiver.debugLocation());
             mReceiver.set_done();
         }
         void set_error(BehaviorError result)
         {
-            mDebugLocation.stepOut(mReceiver.debugLocation());
             mReceiver.set_error(result);
         }
 
@@ -116,6 +114,23 @@ namespace NodeGraph {
             mDebugLocation.stepInto(Execution::get_debug_location(this->mRec));
             auto &handle = Execution::get_context(this->mRec);
             handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(0, flowOutIndex), mDebugLocation);
+        }
+
+        void set_value(ArgumentList args) override {
+            mDebugLocation.stepOut(Execution::get_debug_location(this->mRec));
+            VirtualBehaviorState<Rec>::set_value(std::move(args));
+        }
+
+        void set_error(BehaviorError error) override
+        {
+            mDebugLocation.stepOut(Execution::get_debug_location(this->mRec));
+            VirtualBehaviorState<Rec>::set_error(std::move(error));
+        }
+
+        void set_done() override
+        {
+            mDebugLocation.stepOut(Execution::get_debug_location(this->mRec));
+            VirtualBehaviorState<Rec>::set_done();
         }
 
         NodeDebugLocation mDebugLocation = &Execution::get_context(this->mRec).mInterpreter;

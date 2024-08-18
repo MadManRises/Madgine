@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Madgine/nodegraph/pins.h"
+
+struct ImRect;
+
 namespace Engine {
 namespace Tools {
 
@@ -31,8 +35,22 @@ namespace Tools {
 
     void HoverPin(ExtendedValueTypeDesc type);
 
-    bool BeginNode(const NodeGraph::NodeBase *node);
+    ImRect BeginNodeEditor(ed::EditorContext *editor, const ImVec2 &size = ImVec2(0, 0));
+    void EndNodeEditor(ImRect oldViewport);
+
+    std::optional<ExtendedValueTypeDesc> BeginNode(const NodeGraph::NodeBase *node, uint32_t nodeId, std::optional<NodeGraph::PinDesc> dragPin = {}, std::optional<ExtendedValueTypeDesc> dragType = {});
     void EndNode();
+
+    void NodeLinks(const NodeGraph::NodeBase *node, uint32_t nodeId);
+
+    enum class IconType : ImU32 { Flow,
+        Circle,
+        Square,
+        Grid,
+        RoundSquare,
+        Diamond };
+
+    void Icon(const ImVec2 &size, IconType type, bool filled, const ImVec4 &color = ImVec4(1, 1, 1, 1), const ImVec4 &innerColor = ImVec4(0, 0, 0, 0));
 
 }
 }

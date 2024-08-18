@@ -11,7 +11,6 @@
 #include "Madgine/nodegraph/nodecollector.h"
 #include "nodegrapheditor.h"
 
-#include "NodeEditor/ax/Widgets.h"
 #include "NodeEditor/imgui_node_editor.h"
 
 #include "Interfaces/filesystem/fsapi.h"
@@ -120,25 +119,16 @@ namespace Tools {
 
             ImVec2 topLeftScreen = ImGui::GetCursorScreenPos();
 
-            //Probably set this in the implementation to the exact Canvas-View area
-            ImVec2 oldViewportPos = ImGui::GetCurrentContext()->MouseViewport->Pos;
-            ImVec2 oldViewportSize = ImGui::GetCurrentContext()->MouseViewport->Size;
-
-            ImGui::GetCurrentContext()->MouseViewport->Pos = { -10000, -10000 };
-            ImGui::GetCurrentContext()->MouseViewport->Size = { 20000, 20000 };
-
-            ed::SetCurrentEditor(mEditor.get());
+            ImRect oldViewport = BeginNodeEditor(mEditor.get());
 
             std::optional<ExtendedValueTypeDesc> hoveredPin;
 
-            ed::Begin("Node editor");
-
-            auto alpha = ImGui::GetStyle().Alpha;
-
             ed::PushStyleVar(ed::StyleVar_NodePadding, { 0, 0, 0, 0 });
             ImVec2 specialPosition = ed::ScreenToCanvas(topLeftScreen);
+            
             ed::SetNodePosition(std::numeric_limits<int>::max() - 1, { floorf(specialPosition.x), floorf(specialPosition.y) });
             ed::BeginNode(std::numeric_limits<int>::max() - 1);
+            ImGui::BeginVertical("inputPins", ImVec2(0, 0), 0.0f);
             ImGui::Dummy({ sPinIconSize, 10 });
             uint32_t pinId = 0;
             for (NodeGraph::FlowOutPinPrototype &flowPin : mGraph.mFlowOutPins) {
@@ -170,11 +160,13 @@ namespace Tools {
             if (mDragPin && mDragPin->mDir == NodeGraph::PinDir::In && mDragPin->mType == NodeGraph::PinType::Data) {
                 DataProviderPin(nullptr, 0, pinId, 0, *mDragType, mDragMask, false);
             }
+            ImGui::EndVertical();
             ed::EndNode();
 
             specialPosition = ed::ScreenToCanvas({ topLeftScreen.x + ed::GetScreenSize().x - sPinIconSize / ed::GetCurrentZoom(), topLeftScreen.y });
             ed::SetNodePosition(std::numeric_limits<int>::max() - 2, { floorf(specialPosition.x), floorf(specialPosition.y) });
             ed::BeginNode(std::numeric_limits<int>::max() - 2);
+            ImGui::BeginVertical("outputPins", ImVec2(0, 0), 0.0f);
             ImGui::Dummy({ sPinIconSize, 10 });
             pinId = 0;
             for (NodeGraph::FlowInPinPrototype &flowPin : mGraph.mFlowInPins) {
@@ -209,141 +201,21 @@ namespace Tools {
             if (mDragPin && mDragPin->mDir == NodeGraph::PinDir::Out && mDragPin->mType == NodeGraph::PinType::Data) {
                 DataReceiverPin(nullptr, 0, pinId, 0, *mDragType, mDragMask, false);
             }
+            ImGui::EndVertical();
             ed::EndNode();
             ed::PopStyleVar();
 
             uint32_t nodeId = 1;
             NodeGraph::NodeBase *hoveredNode = nullptr;
             for (NodeGraph::NodeBase *node : mGraph.nodes() | std::views::transform(projectionUniquePtrToPtr)) {
+                
+                if (std::optional<ExtendedValueTypeDesc> hovered = BeginNode(node, nodeId, mDragPin, mDragType))
+                    hoveredPin = hovered;
 
-                /* auto it = mNodeMessages.find(node);
-                if (it != mNodeMessages.end()) {
-                    bool first = true;
-                    if (!it->second.mErrorMessages.empty()) {
-                        if (first)
-                            first = false;
-                        else
-                            ImGui::SameLine();
-                        ImGui::TextColored({ 1, 0, 0, 1 }, "%zu", it->second.mErrorMessages.size());
-                    }
-                    if (!it->second.mWarningMessages.empty()) {
-                        if (first)
-                            first = false;
-                        else
-                            ImGui::SameLine();
-                        ImGui::TextColored({ 1, 1, 0, 1 }, "%zu", it->second.mWarningMessages.size());
-                    }
-                }*/
-
-                ed::BeginNode(60000 * nodeId);
-
-                if (BeginNode(node)) {
-
-                    //ImGui::SetColumnWidth(0, 100.0f);
-                    //ImGui::SetColumnWidth(1, 100.0f);
-
-                    uint32_t maxGroupCount = max(max(max(node->flowInGroupCount(), node->flowOutGroupCount()), max(node->dataInGroupCount(), node->dataOutGroupCount())), max(node->dataReceiverGroupCount(), node->dataProviderGroupCount()));
-                    for (uint32_t group = 0; group < maxGroupCount; ++group) {
-
-                        uint32_t inFlowCount = group < node->flowInGroupCount() ? node->flowInCount(group) : 0;
-                        uint32_t outFlowCount = group < node->flowOutGroupCount() ? node->flowOutCount(group) : 0;
-                        for (uint32_t flowIndex = 0; flowIndex < max(inFlowCount, outFlowCount); ++flowIndex) {
-                            ImGui::TableNextColumn();
-                            if (flowIndex < inFlowCount)
-                                FlowInPin(node->flowInName(flowIndex, group).data(), nodeId, flowIndex, group, node->flowInMask(flowIndex, group), !node->flowInSources(flowIndex, group).empty());
-
-                            ImGui::TableNextColumn();
-                            if (flowIndex < outFlowCount)
-                                FlowOutPin(node->flowOutName(flowIndex, group).data(), nodeId, flowIndex, group, node->flowOutMask(flowIndex, group), static_cast<bool>(node->flowOutTarget(flowIndex, group)));
-                        }
-                        if (mDragPin && mDragPin->mType == NodeGraph::PinType::Flow && (node->flowOutVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::In)) {
-
-                            ImGui::TableNextColumn();
-
-                            ImGui::TableNextColumn();
-                            uint32_t index = node->flowOutCount(group);
-                            FlowOutPin(node->flowOutName(index).data(), nodeId, index, group, node->dataInMask(index, group), false);
-                        }
-
-                        uint32_t inDataCount = group < node->dataInGroupCount() ? node->dataInCount(group) : 0;
-                        uint32_t outDataCount = group < node->dataOutGroupCount() ? node->dataOutCount(group) : 0;
-                        for (uint32_t dataIndex = 0; dataIndex < max(inDataCount, outDataCount); ++dataIndex) {
-                            ImGui::TableNextColumn();
-                            if (dataIndex < inDataCount) {
-                                NodeGraph::Pin source = node->dataInSource(dataIndex, group);
-
-                                ExtendedValueTypeDesc type = node->dataInType(dataIndex, group);
-
-                                if (DataInPin(node->dataInName(dataIndex, group).data(), nodeId, dataIndex, group, type, node->dataInMask(dataIndex, group), static_cast<bool>(source)))
-                                    hoveredPin = type;
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (dataIndex < outDataCount) {
-                                NodeGraph::Pin target = node->dataOutTarget(dataIndex, group);
-
-                                ExtendedValueTypeDesc type = node->dataOutType(dataIndex, group);
-
-                                if (DataOutPin(node->dataOutName(dataIndex, group).data(), nodeId, dataIndex, group, type, node->dataOutMask(dataIndex, group), static_cast<bool>(target)))
-                                    hoveredPin = type;
-                            }
-                        }
-                        if (mDragPin && mDragPin->mType == NodeGraph::PinType::DataInstance && ((group < node->dataInGroupCount() && node->dataInVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::Out) || (group < node->dataOutGroupCount() && node->dataOutVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::In))) {
-                            ImGui::TableNextColumn();
-                            if (node->dataInVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::Out) {
-                                uint32_t index = node->dataInCount(group);
-
-                                if (DataInPin(node->dataInName(index).data(), nodeId, index, group, *mDragType, node->dataInMask(index, group), {}))
-                                    hoveredPin = *mDragType;
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (node->dataOutVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::In) {
-                            }
-                        }
-
-                        uint32_t dataReceiverCount = group < node->dataReceiverGroupCount() ? node->dataReceiverCount(group) : 0;
-                        uint32_t dataProviderCount = group < node->dataProviderGroupCount() ? node->dataProviderCount(group) : 0;
-                        for (uint32_t dataInstanceIndex = 0; dataInstanceIndex < max(dataReceiverCount, dataProviderCount); ++dataInstanceIndex) {
-                            ImGui::TableNextColumn();
-                            if (dataInstanceIndex < dataReceiverCount) {
-                                ExtendedValueTypeDesc type = node->dataReceiverType(dataInstanceIndex, group);
-
-                                if (DataReceiverPin(node->dataReceiverName(dataInstanceIndex, group).data(), nodeId, dataInstanceIndex, group, type, node->dataReceiverMask(dataInstanceIndex, group), !node->dataReceiverSources(dataInstanceIndex, group).empty()))
-                                    hoveredPin = type;
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (dataInstanceIndex < dataProviderCount) {
-                                ExtendedValueTypeDesc type = node->dataProviderType(dataInstanceIndex, group);
-
-                                if (DataProviderPin(node->dataProviderName(dataInstanceIndex, group).data(), nodeId, dataInstanceIndex, group, type, node->dataProviderMask(dataInstanceIndex, group), !node->dataProviderTargets(dataInstanceIndex, group).empty()))
-                                    hoveredPin = type;
-                            }
-                        }
-                        if (mDragPin && mDragPin->mType == NodeGraph::PinType::Data && ((node->dataReceiverVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::Out) || (node->dataProviderVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::In))) {
-                            ImGui::TableNextColumn();
-                            if (node->dataReceiverVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::Out) {
-                                uint32_t index = node->dataReceiverCount(group);
-
-                                if (DataReceiverPin(node->dataReceiverName(index, group).data(), nodeId, index, group, *mDragType, node->dataReceiverMask(index, group), false))
-                                    hoveredPin = *mDragType;
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (node->dataProviderVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::In) {
-                            }
-                        }
-                    }
-                    EndNode();
-                }
-
-                ed::EndNode();
+                EndNode();
 
                 if (ImGui::IsItemHovered()) {
-                    //if (it != mNodeMessages.end()) {
-                    hoveredNode = node;
-                    //}
+                    hoveredNode = node;                    
                 }
 
                 ++nodeId;
@@ -372,32 +244,7 @@ namespace Tools {
             }
             nodeId = 1;
             for (NodeGraph::NodeBase *node : mGraph.nodes() | std::views::transform(projectionUniquePtrToPtr)) {
-                uint32_t maxGroupCount = max(node->flowOutGroupCount(), max(node->dataInGroupCount(), node->dataOutGroupCount()));
-                for (uint32_t group = 0; group < maxGroupCount; ++group) {
-
-                    uint32_t outFlowCount = group < node->flowOutGroupCount() ? node->flowOutCount(group) : 0;
-                    for (uint32_t flowIndex = 0; flowIndex < outFlowCount; ++flowIndex) {
-                        if (NodeGraph::Pin target = node->flowOutTarget(flowIndex, group)) {
-                            uint32_t id = 60000 * nodeId + NodeGraph::NodeBase::flowOutId(flowIndex, group);
-                            ed::Link(id, id, 60000 * target.mNode + NodeGraph::NodeBase::flowInId(target.mIndex, target.mGroup), FlowColor(node->flowOutMask(flowIndex, group)));
-                        }
-                    }
-                    uint32_t inDataCount = group < node->dataInGroupCount() ? node->dataInCount(group) : 0;
-                    for (uint32_t dataIndex = 0; dataIndex < inDataCount; ++dataIndex) {
-                        if (NodeGraph::Pin source = node->dataInSource(dataIndex, group)) {
-                            uint32_t id = 60000 * nodeId + NodeGraph::NodeBase::dataInId(dataIndex, group);
-                            ed::Link(id, 60000 * source.mNode + NodeGraph::NodeBase::dataProviderId(source.mIndex, source.mGroup), id, DataColor(node->dataInMask(dataIndex, group)));
-                        }
-                    }
-                    uint32_t outDataCount = group < node->dataOutGroupCount() ? node->dataOutCount(group) : 0;
-                    for (uint32_t dataIndex = 0; dataIndex < outDataCount; ++dataIndex) {
-                        if (NodeGraph::Pin target = node->dataOutTarget(dataIndex, group)) {
-                            uint32_t id = 60000 * nodeId + NodeGraph::NodeBase::dataOutId(dataIndex, group);
-                            ed::Link(id, id, 60000 * target.mNode + NodeGraph::NodeBase::dataReceiverId(target.mIndex, target.mGroup), DataColor(node->dataOutMask(dataIndex, group)));
-                        }
-                    }
-                }
-
+                NodeLinks(node, nodeId);
                 ++nodeId;
             }
 
@@ -535,29 +382,11 @@ namespace Tools {
 
             ed::Resume();
 
-            ed::End();
-
-            ed::SetCurrentEditor(nullptr);
+            EndNodeEditor(oldViewport);
 
             if (hoveredPin)
                 HoverPin(*hoveredPin);
-
-            ImGui::GetCurrentContext()->MouseViewport->Pos = oldViewportPos;
-            ImGui::GetCurrentContext()->MouseViewport->Size = oldViewportSize;
-
-            if (hoveredNode) {
-                auto it = mNodeMessages.find(hoveredNode);
-                if (it != mNodeMessages.end()) {
-                    ImGui::BeginTooltip();
-                    for (const std::string &msg : it->second.mErrorMessages) {
-                        ImGui::TextColored({ 1, 0, 0, 1 }, "%s", msg.c_str());
-                    }
-                    for (const std::string &msg : it->second.mWarningMessages) {
-                        ImGui::TextColored({ 1, 1, 0, 1 }, "%s", msg.c_str());
-                    }
-                    ImGui::EndTooltip();
-                }
-            }
+  
         }
         ImGui::End();
 
@@ -902,7 +731,7 @@ namespace Tools {
 
     void NodeGraphEditor::verify()
     {
-        for (const std::unique_ptr<NodeGraph::NodeBase> &node : mGraph.nodes()) {
+        /* for (const std::unique_ptr<NodeGraph::NodeBase> &node : mGraph.nodes()) {
             NodeMessages messages;
 
             for (uint32_t i = 0; i < node->dataInCount(); ++i) {
@@ -920,7 +749,7 @@ namespace Tools {
                 if (!pib.second)
                     pib.first->second = std::move(messages);
             }
-        }
+        }*/
     }
 
 }

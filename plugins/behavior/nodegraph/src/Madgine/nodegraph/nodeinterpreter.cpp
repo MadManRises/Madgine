@@ -59,7 +59,6 @@ namespace NodeGraph {
             if (pin && pin.mNode) {
                 node->interpret({ *this, *node, receiver, location }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
             } else {
-                location.stepOut(receiver.debugLocation());
                 receiver.set_value();
             }
         },

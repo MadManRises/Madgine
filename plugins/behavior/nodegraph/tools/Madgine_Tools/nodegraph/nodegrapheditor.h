@@ -61,7 +61,6 @@ namespace Tools {
             std::vector<std::string> mErrorMessages;
             std::vector<std::string> mWarningMessages;
         };
-        std::map<NodeGraph::NodeBase *, NodeMessages> mNodeMessages;
 
         IndexType<uint32_t> mSelectedNodeIndex;
 
