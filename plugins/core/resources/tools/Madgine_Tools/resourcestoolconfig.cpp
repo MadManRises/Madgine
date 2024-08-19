@@ -18,9 +18,6 @@
 
 #include "imgui/imgui.h"
 
-#include "Madgine/audioloader/audioloader.h"
-#include "Madgine/meshloader/gpumeshloader.h"
-
 #include "Generic/projections.h"
 
 #include "Meta/keyvalue/valuetype.h"

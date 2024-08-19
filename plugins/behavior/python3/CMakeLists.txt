@@ -11,10 +11,19 @@ if (NOT Python3_Development.Embed_FOUND OR NOT PYTHON_EXECUTABLE)
 	return()
 endif()
 
+find_file (python_license NAMES LICENSE.txt PATHS ${Python3_LIBRARY_DIRS}/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR} NO_DEFAULT_PATH)
+
+if (NOT python_license)
+	MESSAGE(STATUS "Failed to find Python3 License - Skipping plugin")
+	return()
+endif()
+
 add_notices(Python3::Python 
 	READABLE_NAME Python3
-	LICENSE_FILE ${PYTHON_EXECUTABLE}/../LICENSE.txt
+	LICENSE_FILE ${python_license}
 	CREDITS "Scripting-Language: Python3 - https://www.python.org/")
+
+
 
 
 set(sources "")

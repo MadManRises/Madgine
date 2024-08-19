@@ -23,7 +23,7 @@ FolderSources(sources "" tools)
 
 add_tools(Resources ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/resourcestoolslib.h)
 
-target_link_plugins(ResourcesTools Tools AudioLoader MeshLoader)
+target_link_plugins(ResourcesTools Tools)
 
 if (MADGINE_CONFIGURATION)
 	set(local_lists ${MADGINE_DATA_LISTS})
