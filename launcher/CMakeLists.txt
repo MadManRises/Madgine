@@ -6,7 +6,7 @@ set(MADGINE_LAUNCHER_WINDOW_TITLE "" CACHE STRING "Title of the Main window of t
 set(MADGINE_LAUNCHER_ICON "${CMAKE_CURRENT_SOURCE_DIR}/madgineIcon.ico" CACHE FILEPATH "Path to an image file for the applications tray icon")
 
 set(sources "")
-FolderSources(sources "" "" launcher.cpp main.cpp server.cpp terminate_handler.cpp)
+FolderSources(sources "" "" launcher.cpp main.cpp terminate_handler.cpp)
 if (EMSCRIPTEN)
 	FolderSources(sources "" emscripten emscripten_main.cpp)
 endif(EMSCRIPTEN)
@@ -35,7 +35,11 @@ set_target_properties(${MADGINE_BINARY_NAME} PROPERTIES
 		PLUGIN_BASE Madgine
 		)
 
-target_link_plugins(${MADGINE_BINARY_NAME} App Client UI Root Server)
+target_link_plugins(${MADGINE_BINARY_NAME} App Client UI Root)
+if (MADGINE_SERVER)
+	target_sources(${MADGINE_BINARY_NAME} PRIVATE server.cpp)
+	target_link_plugins(${MADGINE_BINARY_NAME} Server)
+endif()
 
 if (EMSCRIPTEN)
 	_target_link_libraries(${MADGINE_BINARY_NAME} PRIVATE "--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/template.html")

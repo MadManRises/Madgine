@@ -104,7 +104,9 @@ endfunction()
 if (NOT MADGINE_AS_SDK)
 	add_subdirectory(docs)
 	create_launcher(MadgineLauncher)
-	create_server(MadgineServer)
+	if (MODULES_ENABLE_PLUGINS OR PLUGINSELECTION_Core_Server)		
+		create_server(MadgineServer)
+	endif()
 endif()
 
 

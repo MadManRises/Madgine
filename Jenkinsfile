@@ -70,14 +70,14 @@ def staticTask = {
     def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name
 	def parentName = toolchain.name + '-' + configuration.name  
 
-	def staticConfigFile = "../../test/configs/${staticConfig.name}_base.cfg"	
+	def configPath = "../../test/configs/${staticConfig.name}/"	
 
 	def archivePattern = toolchain.artifacts.collect{"build/" + name + "/" + it}.join(",")
 
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
-			stage("generate config") {				
+			stage("cmake") {
 				sh """
 				mkdir -p build
 				cd build
@@ -86,30 +86,12 @@ def staticTask = {
 						rm -Rf ${name};
 					fi
 				fi
-				mkdir -p ${name}
-				cd ${name}
-				mkdir -p config
-				rsync -ur ../../test/configs/${staticConfig.name}/ config
-				if ../${parentName}/bin/MadgineLauncher -t \
-					--load-plugins ${staticConfigFile} \
-					--export-plugins config \
-					--export-resources config/resources.list \
-					--no-plugin-cache \
-				; then
-					echo "Generated config"
-				else
-					echo "Generating failed! Falling back to repository version"					
-				fi
-				"""
-			}
-			stage("cmake") {
-				sh """
-				cd build
 				cd ${name}
 				cmake ../.. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
-				-DMADGINE_CONFIGURATION=config \
+				-DMADGINE_CONFIGURATION=${configPath} \
 				-DBUILD_SHARED_LIBS=OFF \
+				-DMADGINE_TOOLING_PRESET=${parentName} \
 				${toolchain.args} \
 				${cmake_args}
 				"""						
