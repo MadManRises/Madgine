@@ -201,10 +201,11 @@ namespace Render {
         if (instanceData.mSize > 0) {
             Block block = VulkanRenderContext::getSingleton().mTempAllocator.allocate(instanceData.mSize);
             auto [buffer, offset] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+            VkDeviceSize vOffset = offset;
 
             std::memcpy(block.mAddress, instanceData.mData, instanceData.mSize);
 
-            vkCmdBindVertexBuffers(commandList, 1, 1, &buffer, &offset);
+            vkCmdBindVertexBuffers(commandList, 1, 1, &buffer, &vOffset);
         }
 
         VulkanRenderContext::getSingleton().mConstantBuffer.bindVertex(commandList, 2);
@@ -226,8 +227,9 @@ namespace Render {
 
         Block block = VulkanRenderContext::getSingleton().mTempAllocator.allocate(format.stride() * count);
         auto [buffer, offset] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+        VkDeviceSize vOffset = offset;
 
-        vkCmdBindVertexBuffers(commandList, 0, 1, &buffer, &offset);
+        vkCmdBindVertexBuffers(commandList, 0, 1, &buffer, &vOffset);
 
         VulkanRenderContext::getSingleton().mConstantBuffer.bindVertex(commandList, 2);
 

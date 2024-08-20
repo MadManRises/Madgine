@@ -75,17 +75,17 @@ struct NativeBehavior : NativeBehaviorComponent<T, NativeBehaviorInfo> {
         return std::make_tuple();
     }
 
-    template <uint32_t I, typename... Vs, typename T, typename... Ts>
-    static auto buildArgs(std::tuple<Vs...> &&parameters, type_pack<T, Ts...> args)
+    template <uint32_t I, typename... Vs, typename U, typename... Us>
+    static auto buildArgs(std::tuple<Vs...> &&parameters, type_pack<U, Us...> args)
     {
-        if constexpr (is_value<T>::value) {
+        if constexpr (is_value<U>::value) {
             return std::tuple_cat(
-                std::make_tuple(T {}),
-                buildArgs<I>(std::move(parameters), type_pack<Ts...> {}));
+                std::make_tuple(U {}),
+                buildArgs<I>(std::move(parameters), type_pack<Us...> {}));
         } else {
             return TupleUnpacker::prepend<decayed_t<first_t<Vs...>>>(
                 std::get<0>(std::move(parameters)),
-                buildArgs<I>(TupleUnpacker::popFront(std::move(parameters)), type_pack<Ts...> {}));
+                buildArgs<I>(TupleUnpacker::popFront(std::move(parameters)), type_pack<Us...> {}));
         }
     }
 

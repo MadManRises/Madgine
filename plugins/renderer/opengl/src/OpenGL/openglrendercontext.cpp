@@ -414,7 +414,7 @@ namespace Render {
         if (reusedContext) {
             context = reusedContext;
         } else {
-            context = OSXBridge::createContext(window);
+            context = OSXBridge::createContext(surface);
         }
 
 #elif IOS
@@ -543,7 +543,7 @@ namespace Render {
 #    elif LINUX
                 SurfaceHandle surface = tmp->mHandle;
 #    elif OSX
-                SurfaceHandle surface = mOsWindow;
+                SurfaceHandle surface = tmp;
 #    else
 #        error "Unsupported Platform!"
 #    endif

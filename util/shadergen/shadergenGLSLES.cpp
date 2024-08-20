@@ -18,6 +18,8 @@
 
 #include <fstream>
 
+#include <codecvt>
+
 struct ReleaseDeleter {
     template <typename T>
     void operator()(T *ptr)
@@ -146,7 +148,9 @@ int transpileGLSLES(const std::wstring &fileName, const std::wstring &outFolder,
     auto fileNameBegin = fileName.rfind('/');
     std::wstring outputFile = outFolder + L"/" + (fileName.substr(fileNameBegin + 1, extIt - fileNameBegin - 1) + extension);
 
-    std::ofstream of { outputFile };
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+
+    std::ofstream of { converter.to_bytes( outputFile ) };
 
     of << shaderCode << std::endl;
 

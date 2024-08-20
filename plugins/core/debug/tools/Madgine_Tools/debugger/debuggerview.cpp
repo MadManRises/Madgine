@@ -209,7 +209,7 @@ namespace Tools {
     {
         std::unique_lock guard { context->mMutex };
         if (BeginDebuggablePanel("Debug Context")) {
-            const Debug::DebugLocation *child = visualizeDebugLocation(context, context->mChild, false);
+            const Debug::DebugLocation *child = visualizeDebugLocation(context, context->mChild, nullptr);
             assert(!child); //Parents that allow inline rendering need to take care of child rendering.
             EndDebuggablePanel();
         }

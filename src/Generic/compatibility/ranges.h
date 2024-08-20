@@ -135,7 +135,7 @@ namespace ranges {
     inline constexpr __contains_fn contains {};
 #endif
 
-#if __cpp_lib_ranges < 202207L
+#if __cpp_lib_ranges < 202300L
     template <range R>
     using const_iterator_t = decltype(cbegin(std::declval<R &>()));
 #endif

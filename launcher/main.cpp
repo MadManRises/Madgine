@@ -14,6 +14,12 @@
 #include "server.h"
 
 #include "main.h"
+#include "main_compat.h"
+
+int desktopMain_compat(int argc, char **argv)
+{
+    return desktopMain(argc, argv);
+}
 
 int desktopMain(int argc, char **argv, Engine::Closure<void(Engine::App::Application &, Engine::Window::MainWindow &)> callback)
 {

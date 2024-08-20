@@ -102,12 +102,12 @@ typedef EGLSurface SurfaceHandle;
 #elif OSX
 
 typedef void *ContextHandle;
-typedef Window::OSWindow *SurfaceHandle;
+typedef Engine::Window::OSWindow *SurfaceHandle;
 
 #elif IOS
 
 typedef void *ContextHandle;
-typedef Window::OSWindow *SurfaceHandle;
+typedef Engine::Window::OSWindow *SurfaceHandle;
 
 #else
 

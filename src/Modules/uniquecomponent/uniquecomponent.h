@@ -9,6 +9,9 @@
 namespace Engine {
 namespace UniqueComponent {
 
+    DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder, _reg, typename T);
+    DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder *, _preg, typename T);
+
     template <typename _T, typename _Base, typename _VBase>
     struct VirtualComponentImpl : _Base {
         using VBase = _VBase;
@@ -75,9 +78,6 @@ namespace UniqueComponent {
         template <typename Col>
         using Registrator = typename Col::template ComponentRegistrator<T>;
     };
-
-    DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder, _reg, typename T);
-    DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder *, _preg, typename T);
 
 #    define UNIQUECOMPONENT(Type) DLL_EXPORT_VARIABLE3(, Engine::UniqueComponent::IndexHolder, Type::Registrator<Type::Collector>, Engine::UniqueComponent::, _reg, , {}, Type)
 #    define UNIQUECOMPONENT2(Type, ext) DLL_EXPORT_VARIABLE3(, Engine::UniqueComponent::IndexHolder, Type::Collector::ComponentRegistrator<Type>, Engine::UniqueComponent::, _reg, ext, {}, Type)

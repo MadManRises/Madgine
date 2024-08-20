@@ -132,13 +132,13 @@ namespace Scripting {
         };
 
         PyObject *evalFrame(
-#if PY_MINOR_VERSION >= 11
+#if PY_MINOR_VERSION >= 9
             PyThreadState *tstate,
 #endif
             _PyInterpreterFrame *frame, int throwExc)
         {
             PyObject *result = _PyEval_EvalFrameDefault(
-#if PY_MINOR_VERSION >= 11
+#if PY_MINOR_VERSION >= 9
                 tstate,
 #endif
                 frame, throwExc);
@@ -301,7 +301,7 @@ namespace Scripting {
 
         void setupExecution()
         {
-#if PY_MINOR_VERSION < 11
+#if PY_MINOR_VERSION < 9
             PyGILState_GetThisThreadState()->interp->eval_frame = &evalFrame;
 #else
             PyRun_SimpleString("import inspect");

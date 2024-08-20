@@ -77,7 +77,7 @@ static std::map<std::string, uint32_t> sSemanticLocationMappings {
     { "INSTANCEDATA6", std::numeric_limits<uint32_t>::max() }
 };
 
-int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring &outFolder, IDxcResult *result, bool debug, const std::vector<LPCWSTR> &includes)
+int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring &outFolder, IDxcResult *result, bool debug, const std::vector<std::wstring> &includes)
 {
 
     std::cout << "HLSL (DX" << apilevel << ") ... ";
@@ -99,9 +99,9 @@ int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring
 
         arguments.push_back(L"-P");
 
-        for (LPCWSTR include : includes) {
+        for (const std::wstring &include : includes) {
             arguments.push_back(L"-I");
-            arguments.push_back(include);
+            arguments.push_back(include.c_str());
         }
 
         DxcBuffer sourceBuffer;
@@ -174,7 +174,9 @@ int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring
     auto fileNameBegin = fileName.rfind('/');
     std::wstring outputFile = outFolder + L"/" + fileName.substr(fileNameBegin + 1) + std::to_wstring(apilevel);
 
-    std::ofstream of { outputFile };
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+
+    std::ofstream of { converter.to_bytes( outputFile ) };
 
     of << shaderCode << std::endl;
 

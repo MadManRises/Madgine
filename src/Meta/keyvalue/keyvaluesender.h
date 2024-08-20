@@ -23,7 +23,7 @@ struct KeyValueSenderState : KeyValueSenderStateBase {
 
     virtual void connect(Execution::VirtualStoppableReceiverBase<GenericResult, const ArgumentList &> &receiver) override
     {
-        mState.emplace<State>(DelayedConstruct<State> {
+        mState.template emplace<State>(DelayedConstruct<State> {
             [&, sender { std::forward<Sender>(std::get<Sender>(mState)) }]() mutable { return Execution::connect(std::move(sender), receiver); } });
     }
 

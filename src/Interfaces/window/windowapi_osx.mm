@@ -168,12 +168,7 @@ namespace Window {
     {
         return false;
     }
-    
-        bool OSWindow::isFullscreen()
-    {
-        return false;
-    }
-    
+
         void OSWindow::update()
     {
         NSEvent* ev;

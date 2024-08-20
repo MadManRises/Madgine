@@ -67,31 +67,45 @@ int usage()
 
 int transpileGLSL(const std::wstring &fileName, const std::wstring &outFolder, IDxcResult *result);
 int transpileGLSLES(const std::wstring &fileName, const std::wstring &outFolder, IDxcResult *result);
-int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring &outFolder, IDxcResult *result, bool debug, const std::vector<LPCWSTR> &includes);
+int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring &outFolder, IDxcResult *result, bool debug, const std::vector<std::wstring> &includes);
 int transpileSPIRV(const std::wstring &fileName, const std::wstring &outFolder, std::vector<LPCWSTR> arguments, IDxcBlobEncoding *pSource);
 
+#if WINDOWS
+#define ARGV_CMP(i, s) (wcscmp(argv[i], L#s) == 0)
+#define CONVERT(s) s
+#else
+#define ARGV_CMP(i, s) (strcmp(argv[i], #s) == 0)
+#define CONVERT(s) converter.from_bytes(s)
+#endif
+
+#if WINDOWS
 int wmain(int argc, wchar_t **argv)
+#else
+int main(int argc, char **argv)
+#endif
 {
     if (argc < 4) {
         return usage();
     }
 
-    std::wstring sourceFile = argv[1];
-    std::wstring outputFile = argv[2];
-    std::wstring dataFolder = argv[3];
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 
-    std::vector<LPCWSTR> includes;
+    std::wstring sourceFile = CONVERT(argv[1]);
+    std::wstring outputFile = CONVERT(argv[2]);
+    std::wstring dataFolder = CONVERT(argv[3]);
+
+    std::vector<std::wstring> includes;
 
     bool debug = false;
     for (int i = 4; i < argc; ++i) {
-        if (wcscmp(argv[i], L"-g") == 0) {
+        if (ARGV_CMP(i, -g)) {
             debug = true;
-        } else if (wcscmp(argv[i], L"-I") == 0) {
+        } else if (ARGV_CMP(i, -I)) {
             ++i;
             if (i == argc)
                 return usage();
-            includes.push_back(argv[i]);
-        } else if (wcscmp(argv[i], L"-P") == 0) {
+            includes.push_back(CONVERT(argv[i]));
+        } else if (ARGV_CMP(i, -P)) {
             int i;
             std::cin >> i;
         }
@@ -135,9 +149,9 @@ int wmain(int argc, wchar_t **argv)
     arguments.push_back(L"-HV");
     arguments.push_back(L"2021");
 
-    for (LPCWSTR include : includes) {
+    for (const std::wstring &include : includes) {
         arguments.push_back(L"-I");
-        arguments.push_back(include);
+        arguments.push_back(include.c_str());
     }
 
     DxcBuffer sourceBuffer;
@@ -163,35 +177,36 @@ int wmain(int argc, wchar_t **argv)
     hr = pCompileResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pSpirv), nullptr);
     CHECK_HR(GetOutput / Spirv)
 
-    std::ofstream of { outputFile, std::ios::binary };
+    std::ofstream of { converter.to_bytes( outputFile ),  std::ios::binary };
+
     of.write(static_cast<char *>(pSpirv->GetBufferPointer()), pSpirv->GetBufferSize());
 
     int result = 0;
 
     for (int i = 4; i < argc; ++i) {
-        if (wcscmp(argv[i], L"-HLSL11") == 0) {
+        if (ARGV_CMP(i, -HLSL11)) {
             int hlsl_result = transpileHLSL(11, sourceFile, dataFolder, pCompileResult, debug, includes);
             if (hlsl_result != 0)
                 result = hlsl_result;
-        } else if (wcscmp(argv[i], L"-HLSL12") == 0) {
+        } else if (ARGV_CMP(i, -HLSL12)) {
             int hlsl_result = transpileHLSL(12, sourceFile, dataFolder, pCompileResult, debug, includes);
             if (hlsl_result != 0)
                 result = hlsl_result;
-        } else if (wcscmp(argv[i], L"-GLSL") == 0) {
+        } else if (ARGV_CMP(i, -GLSL)) {
             int glsl_result = transpileGLSL(sourceFile, dataFolder, pCompileResult);
             if (glsl_result != 0)
                 result = glsl_result;
-        } else if (wcscmp(argv[i], L"-GLSLES") == 0) {
+        } else if (ARGV_CMP(i, -GLSLES)) {
             int glsles_result = transpileGLSLES(sourceFile, dataFolder, pCompileResult);
             if (glsles_result != 0)
                 result = glsles_result;
-        } else if (wcscmp(argv[i], L"-SPIRV") == 0) {
+        } else if (ARGV_CMP(i, -SPIRV)) {
             int spirv_result = transpileSPIRV(sourceFile, dataFolder, std::move(arguments), pSource);
             if (spirv_result != 0)
                 result = spirv_result;
-        } else if (wcscmp(argv[i], L"-I") == 0) {
+        } else if (ARGV_CMP(i, -I)) {
             ++i;
-        } else if (wcscmp(argv[i], L"-g") != 0 && wcscmp(argv[i], L"-P")) {
+        } else if (!ARGV_CMP(i, -g) && !ARGV_CMP(i, -P)) {
             std::wcerr << L"Unknown target language: " << argv[i] << std::endl;
             result = -1;
         }

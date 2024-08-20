@@ -125,20 +125,20 @@ namespace Execution {
         void set_value(V &&...v)
         {
             assert(std::holds_alternative<NullStorage>(mState));
-            mState.emplace<ValueStorage<Sender>>(std::forward<V>(v)...);
+            mState.template emplace<ValueStorage<Sender>>(std::forward<V>(v)...);
         }
 
         template <typename... R>
         void set_error(R &&...r)
         {
             assert(std::holds_alternative<NullStorage>(mState));
-            mState.emplace<ErrorStorage<Sender>>(std::forward<R>(r)...);
+            mState.template emplace<ErrorStorage<Sender>>(std::forward<R>(r)...);
         }
 
         void set_done()
         {
             assert(std::holds_alternative<NullStorage>(mState));
-            mState.emplace<DoneStorage>();
+            mState.template emplace<DoneStorage>();
         }
 
         ValueStorage<Sender> value() &&

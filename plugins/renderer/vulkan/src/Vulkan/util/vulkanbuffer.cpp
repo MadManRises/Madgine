@@ -42,7 +42,8 @@ namespace Render {
     void VulkanBuffer::bindVertex(VkCommandBuffer commandList, size_t index) const
     {
         auto [buffer, offset] = VulkanRenderContext::getSingleton().mConstantMemoryHeap.resolve(mBlock.mAddress);
-        vkCmdBindVertexBuffers(commandList, index, 1, &buffer, &offset);
+        VkDeviceSize vOffset = offset;
+        vkCmdBindVertexBuffers(commandList, index, 1, &buffer, &vOffset);
     }
 
     void VulkanBuffer::bindIndex(VkCommandBuffer commandList) const
