@@ -245,13 +245,15 @@ pipeline {
 			}
 	    }
 		stage("cleanup") {
-			sh """
-				if ${params.fullBuild}; then
-					if [ -d "util" ]; then 
-						rm -Rf util;
+			steps{
+				sh """
+					if ${params.fullBuild}; then
+						if [ -d "util" ]; then 
+							rm -Rf util;
+						fi
 					fi
-				fi
-			"""
+				"""
+			}
 		}
         stage ("Multiconfiguration Parallel Tasks") {
 	        steps {
