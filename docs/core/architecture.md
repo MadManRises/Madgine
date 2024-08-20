@@ -1,11 +1,7 @@
-\page Core Core Overview
+\page Architecture Architecture Overview
 
-\subpage Generic
-\subpage Interfaces
-\subpage Meta
-\subpage Modules
 
-# Core Overview
+# Architecture Overview
 
 ## Folder hierarchy
 
@@ -22,10 +18,11 @@
 ## Core Libraries
 
 The framework is strongly plugin-oriented. It contains a set of core libraries that provide the necessary generic functionality needed in a working Madgine-Application:
-- [Generic](@ref Generic): header-only library. Mostly template code, including container traits
-- [Interfaces](@ref Interfaces): hardware/platform abstractions
-- [Meta](@ref Meta): reflection and serialization/synchronization library
-- [Modules](@ref Modules): threading and plugin functionality
+- \subpage Generic : header-only library. Mostly template code, including container traits
+- \subpage Interfaces : hardware/platform abstractions
+- \subpage Meta : reflection and serialization/synchronization library
+- \subpage Modules : threading and plugin functionality
+
 
 This keeps the minimal footprint of the framework low and allows customizations to as much parts of the code as possible.
 

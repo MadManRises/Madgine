@@ -1,4 +1,4 @@
-\page Workgroup Workgroups, Threads & TaskQueues
+\page Threading Threading
 
 # Overview
 

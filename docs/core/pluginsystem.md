@@ -1,5 +1,8 @@
 \page Pluginsystem Plugins & Unique Components
 
+\subpage FirstUniqueComponent
+\subpage PluginManagerManual
+
 # Plugins & Unique Components
 
 Plugins are one of the core features that the whole framework is built around. They are located in the [Modules][] library. Unique Components are a concept that is integrated with the classic notion of plugins to extend their functionality even more and making them easier to use.

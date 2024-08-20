@@ -48,3 +48,8 @@ Congratulations, you successfully compiled the Madgine Framework.
 ## Working With The Engine
 
 Once the engine successfully built, there are two possible ways of action. If you intend to work in the engine and start familiarizing yourself with it, please refer to the [User Manual](@ref Manual). If you want to learn how to write game code for the engine, please refer to [Writing your first UniqueComponent](@ref FirstUniqueComponent).
+
+
+\addtogroup Howtos
+\ref Build
+

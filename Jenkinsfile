@@ -5,7 +5,7 @@ def axisList = [
 		[
 			name : "clang-windows",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.cmake",
+			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/mingw.cmake",
 			artifacts : ['bin/*', 'data/*']
 		],
 		[
@@ -17,7 +17,7 @@ def axisList = [
 		[
 			name : "clang-ios",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
+			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
 			artifacts : ['bin/**']
 		],
 		[
@@ -29,13 +29,13 @@ def axisList = [
 		[
 			name : "clang-android",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64",
+			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64",
 			artifacts : ['bin/*']
 		],
 		[
 			name : "clang-emscripten",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/emscripten-wasm.cmake",
+			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/emscripten-wasm.cmake",
 			artifacts : ['bin/*']
 		]
 	],           
@@ -70,15 +70,17 @@ def staticTask = {
     def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name
 	def parentName = toolchain.name + '-' + configuration.name  
 
-	def staticConfigFile = "../test/configs/${staticConfig.name}_base.cfg"	
+	def staticConfigFile = "../../test/configs/${staticConfig.name}_base.cfg"	
 
-	def archivePattern = toolchain.artifacts.collect{name + "/" + it}.join(",")
+	def archivePattern = toolchain.artifacts.collect{"build/" + name + "/" + it}.join(",")
 
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
 			stage("generate config") {				
 				sh """
+				mkdir -p build
+				cd build
 				if ${params.fullBuild}; then
 					if [ -d "${name}" ]; then 
 						rm -Rf ${name};
@@ -87,7 +89,7 @@ def staticTask = {
 				mkdir -p ${name}
 				cd ${name}
 				mkdir -p config
-				rsync -ur ../test/configs/${staticConfig.name}/ config
+				rsync -ur ../../test/configs/${staticConfig.name}/ config
 				if ../${parentName}/bin/MadgineLauncher -t \
 					--load-plugins ${staticConfigFile} \
 					--export-plugins config \
@@ -102,8 +104,9 @@ def staticTask = {
 			}
 			stage("cmake") {
 				sh """
+				cd build
 				cd ${name}
-				cmake .. \
+				cmake ../.. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
 				-DMADGINE_CONFIGURATION=config \
 				-DBUILD_SHARED_LIBS=OFF \
@@ -113,6 +116,7 @@ def staticTask = {
 			}
 			stage("build") {				
 				sh """
+				cd build
 				cd ${name}
 				make all
 				"""				
@@ -151,6 +155,8 @@ def task = {
 			if (toolchain.name != "clang-emscripten" && toolchain.name != "clang-ios" && toolchain.name != "clang-android") {
 				stage("cmake") {
 					sh """
+					mkdir -p build
+					cd build
 					if ${params.fullBuild}; then
 						if [ -d "${name}" ]; then 
 							rm -Rf ${name};
@@ -158,7 +164,7 @@ def task = {
 					fi
 					mkdir -p ${name}
 					cd ${name}
-					cmake .. \
+					cmake ../.. \
 					-DCMAKE_BUILD_TYPE=${configuration.name} \
 					-DBUILD_SHARED_LIBS=ON \
 					${toolchain.args} \
@@ -167,6 +173,7 @@ def task = {
 				}
 				stage("build") {				
 					sh """
+					cd build
 					cd ${name}
 					make all
 					"""				
@@ -247,6 +254,8 @@ pipeline {
 		stage("cleanup") {
 			steps{
 				sh """
+					mkdir -p build
+					cd build
 					if ${params.fullBuild}; then
 						if [ -d "util" ]; then 
 							rm -Rf util;
@@ -275,6 +284,7 @@ pipeline {
 		stage ("Doxygen") {
 			steps {
 				sh """
+					cd build
 					cd clang-osx-Debug
 
 					make doxygen
@@ -297,7 +307,7 @@ pipeline {
 
 				mkdir -p /opt/homebrew/var/www/${env.BRANCH_NAME}/live
 
-				cp clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/${env.BRANCH_NAME}/live
+				cp build/clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/${env.BRANCH_NAME}/live
 			"""
 		}
     }
