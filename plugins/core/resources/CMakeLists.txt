@@ -26,11 +26,12 @@ add_tools(Resources ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/resourcest
 target_link_plugins(ResourcesTools Tools)
 
 if (MADGINE_CONFIGURATION)
-	set(local_lists ${MADGINE_DATA_LISTS})
-	list(FILTER MADGINE_DATA_LISTS EXCLUDE REGEX ".*resources\.list")
+	get_target_property(data_lists copy_data DATA_LISTS)
+	set(local_lists ${data_lists})
+	list(FILTER data_lists EXCLUDE REGEX ".*resources\.list")
 	list(FILTER local_lists INCLUDE REGEX ".*resources\.list")
 
-	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/resources.list
+	add_custom_target(bake_resource_lists
 		COMMAND ./${MADGINE_TOOLING_BINARY} 
 					-t
 					-npc
@@ -39,9 +40,12 @@ if (MADGINE_CONFIGURATION)
 					--bake-output-list ${CMAKE_BINARY_DIR}/resources.list
 		WORKING_DIRECTORY ${MADGINE_TOOLING_WORKING_DIRECTORY}
 		DEPENDS MadgineTooling ${local_lists})
-	add_custom_target(__unnamed_helper DEPENDS ${CMAKE_BINARY_DIR}/resources.list)
 
-	list(APPEND MADGINE_DATA_LISTS ${CMAKE_BINARY_DIR}/resources.list)
+	add_dependencies(copy_data bake_resource_lists)
+
+	list(APPEND data_lists ${CMAKE_BINARY_DIR}/resources.list)
 	
-	set(MADGINE_DATA_LISTS ${MADGINE_DATA_LISTS} CACHE INTERNAL "")
+	set_target_properties(copy_data
+		PROPERTIES
+		DATA_LISTS "${data_lists}")
 endif()

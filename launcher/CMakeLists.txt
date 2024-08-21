@@ -86,7 +86,7 @@ install_to_workspace(Madgine TARGETS ${MADGINE_BINARY_NAME})
 
 write_notices(${MADGINE_BINARY_NAME})
 
-collect_data_lists()
+
 if (TARGET copy_data)
 	add_dependencies(${MADGINE_BINARY_NAME} copy_data)
 endif()

@@ -12,7 +12,17 @@ include(GetPrerequisites)
 
 if (MADGINE_CONFIGURATION)
 	file(GLOB lists "${MADGINE_CONFIGURATION}/*.list")
-	set(MADGINE_DATA_LISTS "${lists}" CACHE INTERNAL "")	
+
+	add_custom_target(
+		copy_data ALL
+		COMMAND ${CMAKE_COMMAND} "-DLISTS=\"$<TARGET_PROPERTY:copy_data,DATA_LISTS>\"" -DTARGET=${CMAKE_BINARY_DIR}/data -DBINARY_DIR=${CMAKE_BINARY_DIR} -P ${workspace_file_dir}/util/listcopy.cmake
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	)
+
+	set_target_properties(copy_data
+		PROPERTIES
+		DATA_LISTS "${lists}")
+
 endif ()
 
 macro(enable_packaging)
@@ -98,21 +108,4 @@ macro(collect_data target)
 		endif()
 	endif()
 
-endmacro()
-
-macro(collect_data_lists)
-	if (MADGINE_CONFIGURATION AND NOT TARGET copy_data)
-		foreach (list ${MADGINE_DATA_LISTS})
-			cmake_path(IS_PREFIX CMAKE_BINARY_DIR ${list} NORMALIZE is_generated)
-			if (is_generated)
-				set_property(SOURCE ${list} PROPERTY GENERATED 1)
-			endif()
-		endforeach()
-		add_custom_target(
-			copy_data ALL
-			COMMAND ${CMAKE_COMMAND} "-DLISTS=\"${MADGINE_DATA_LISTS}\"" -DTARGET=${CMAKE_BINARY_DIR}/data -DBINARY_DIR=${CMAKE_BINARY_DIR} -P ${workspace_file_dir}/util/listcopy.cmake
-			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-			DEPENDS ${MADGINE_DATA_LISTS}
-		)
-	endif()
 endmacro()
