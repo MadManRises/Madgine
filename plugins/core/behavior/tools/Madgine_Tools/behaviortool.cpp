@@ -35,13 +35,13 @@ namespace Tools {
 
     const Debug::DebugLocation *visualizeCoroutineLocation(DebuggerView *view, const Debug::ContextInfo *context, const CoroutineLocation *location, const Debug::DebugLocation *inlineLocation)
     {
-        const char *name;
+        const char *name = "<unknown>";
+#ifndef NDEBUG
         Debug::FullStackTrace trace = location->mStacktrace.calculateReadable();
-        if (trace.empty()) {
-            name = "<unknown>";
-        } else {
+        if (!trace.empty()) {
             name = trace[0].mFunction;
         }
+#endif
         ImGui::BeginGroupPanel(name);
         const Debug::DebugLocation *content = view->visualizeDebugLocation(context, location->mChild, inlineLocation);
         ImGui::EndGroupPanel();

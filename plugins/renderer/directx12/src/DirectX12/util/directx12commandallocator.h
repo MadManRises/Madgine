@@ -6,7 +6,9 @@
 
 #include "Modules/debug/profiler/profilerthread.h"
 
-#include "Modules/debug/tasktracking/tasktracker.h"
+#if ENABLE_TASK_TRACKING
+#    include "Modules/debug/tasktracking/tasktracker.h"
+#endif
 
 namespace Engine {
 namespace Render {
