@@ -86,6 +86,7 @@ def staticTask = {
 						rm -Rf ${name};
 					fi
 				fi
+				mkdir -p ${name}
 				cd ${name}
 				cmake ../.. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
