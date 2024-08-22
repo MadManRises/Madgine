@@ -30,11 +30,11 @@ namespace UniqueComponent {
 
         void operator=(const Collector &) = delete;
 
-        static Collector &sInstance();
+        static Collector &PLUGIN_LOCAL(sInstance)();
 
         size_t size() const
         {
-            return sInstance().mInfo.mComponents.size();
+            return PLUGIN_LOCAL(sInstance)().mInfo.mComponents.size();
         }
 
     private:
@@ -44,19 +44,19 @@ namespace UniqueComponent {
         template <typename T>
         struct ComponentRegistrator : IndexHolder {
             ComponentRegistrator()
-                : IndexHolder { sInstance().mInfo.template registerComponent<T>(), sInstance().mInfo.mBaseIndex }
+                : IndexHolder { PLUGIN_LOCAL(sInstance)().mInfo.template registerComponent<T>(), PLUGIN_LOCAL(sInstance)().mInfo.mBaseIndex }
             {
             }
 
             ~ComponentRegistrator()
             {
-                sInstance().mInfo.unregisterComponent(mIndex);
+                PLUGIN_LOCAL(sInstance)().mInfo.unregisterComponent(mIndex);
             }
         };
     };
 
     template <typename Registry>
-    Collector<Registry> &Collector<Registry>::sInstance()
+    Collector<Registry> &Collector<Registry>::PLUGIN_LOCAL(sInstance)()
     {
         static Collector dummy;
         return dummy;
