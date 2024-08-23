@@ -67,8 +67,7 @@ def staticTask = {
     def configuration = it[1]
     def staticConfig = it[2]
 	
-    def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name
-	def parentName = toolchain.name + '-' + configuration.name  
+    def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name	
 
 	def configPath = "../../test/configs/${staticConfig.name}/"	
 
@@ -92,7 +91,7 @@ def staticTask = {
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
 				-DMADGINE_CONFIGURATION=${configPath} \
 				-DBUILD_SHARED_LIBS=OFF \
-				-DMADGINE_TOOLING_PRESET=${parentName} \
+				-DMADGINE_TOOLING_PRESET=clang-osx-debug \
 				${toolchain.args} \
 				${cmake_args}
 				"""						
