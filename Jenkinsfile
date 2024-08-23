@@ -289,7 +289,7 @@ pipeline {
 
 				mkdir -p /opt/homebrew/var/www/${env.BRANCH_NAME}/live
 
-				cp build/clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/${env.BRANCH_NAME}/live
+				#cp build/clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/${env.BRANCH_NAME}/live
 			"""
 		}
     }
