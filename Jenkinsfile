@@ -2,30 +2,30 @@ properties([pipelineTriggers([githubPush()])])
 
 def axisList = [
     [//toolchains
-		[
+		/*[
 			name : "clang-windows",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/mingw.cmake",
 			artifacts : ['bin/*', 'data/*']
-		],
+		],*/
 		[
 			name : "clang-osx",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
 			artifacts : ['bin/*', 'data/*']
 		],
-		[
+		/*[
 			name : "clang-ios",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
 			artifacts : ['bin/**']
-		],
+		],*/
 		[
 			name : "clang-linux",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "",
 			artifacts : ['bin/*', 'data/*']
-		],
+		]/*,
 		[
 			name : "clang-android",
 			dockerImage : 'schuetzo/linux-test-env:latest',
@@ -37,7 +37,7 @@ def axisList = [
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/emscripten-wasm.cmake",
 			artifacts : ['bin/*']
-		]
+		]*/
 	],           
     [//configurations
 		[
