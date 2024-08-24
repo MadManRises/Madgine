@@ -35,7 +35,7 @@ if (MADGINE_CONFIGURATION)
 		COMMAND ./${MADGINE_TOOLING_BINARY} 
 					-t
 					-npc
-					-lp ${PLUGIN_DEFINITION_FILE}
+					-lp ${MADGINE_CONFIGURATION}/plugins.ini
 					--bake ${local_lists}
 					--bake-output-list ${CMAKE_BINARY_DIR}/resources.list
 		WORKING_DIRECTORY ${MADGINE_TOOLING_WORKING_DIRECTORY}

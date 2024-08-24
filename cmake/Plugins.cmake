@@ -8,45 +8,37 @@ include(Packaging)
 include(Shaders)
 include(Tooling)
 
-set (PLUGIN_DEFINITION_FILE)
+set(MODULES_ENABLE_PLUGINS ON CACHE INTERNAL "")
 
 if (MADGINE_CONFIGURATION)	
-	if (NOT EXISTS ${MADGINE_CONFIGURATION}/plugins.cfg)
-		MESSAGE(WARNING "You provided a configuration directory without a plugins.cfg in it. If this was intended, ignore this warning.")
+	if (NOT EXISTS ${MADGINE_CONFIGURATION}/plugins.ini)
+		MESSAGE(WARNING "You provided a configuration directory without a plugins.ini in it. If this was intended, ignore this warning.")
 	else()
-		set(PLUGIN_DEFINITION_FILE ${MADGINE_CONFIGURATION}/plugins.cfg)
+		set(MODULES_ENABLE_PLUGINS OFF CACHE INTERNAL "")
 		
-		MESSAGE(STATUS "Using ${PLUGIN_DEFINITION_FILE} for plugin selection.")
+		MESSAGE(STATUS "Using ${MADGINE_CONFIGURATION}/plugins.ini for plugin selection.")
 	endif()
 endif ()
 
-set(MODULES_ENABLE_PLUGINS ON CACHE INTERNAL "")
-if (PLUGIN_DEFINITION_FILE)
-	set(MODULES_ENABLE_PLUGINS OFF CACHE INTERNAL "")
-	set(BUILD_SHARED_LIBS OFF CACHE BOOL "") #Provide default value OFF for given plugin config
-else()
-	set(BUILD_SHARED_LIBS ON CACHE BOOL "") #Provide default value ON without given plugin config
-endif()
+
+set(BUILD_SHARED_LIBS ${MODULES_ENABLE_PLUGINS} CACHE BOOL "") #Provide default value OFF for given plugin config
 
 if (MODULES_ENABLE_PLUGINS AND NOT BUILD_SHARED_LIBS)
 	MESSAGE(FATAL_ERROR "Currently static builds with plugins are not supported!")
 endif()
 
 set(PLUGIN_LIST "" CACHE INTERNAL "")
-#set(PROJECTS_DEPENDING_ON_ALL_PLUGINS "" CACHE INTERNAL "")
 
 if (NOT MODULES_ENABLE_PLUGINS)
-
-	read_ini_file(${PLUGIN_DEFINITION_FILE} PLUGINSELECTION)
 
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/components.cpp 
 		COMMAND ./${MADGINE_TOOLING_BINARY} 
 					-t
 					-npc
-					-lp ${PLUGIN_DEFINITION_FILE}
+					-lp ${MADGINE_CONFIGURATION}/plugins.ini
 					-epc ${CMAKE_BINARY_DIR}/components.cpp
 		WORKING_DIRECTORY ${MADGINE_TOOLING_WORKING_DIRECTORY}
-		DEPENDS MadgineTooling ${PLUGIN_DEFINITION_FILE})
+		DEPENDS MadgineTooling ${MADGINE_CONFIGURATION}/plugins.ini)
 	add_custom_target(GenerateComponentsSource DEPENDS ${CMAKE_BINARY_DIR}/components.cpp)
 
 	function(patch_toplevel_target target)
@@ -87,7 +79,7 @@ macro(add_plugin name base type)
 
 	set(installPlugin TRUE)
 
-	if (NOT MODULES_ENABLE_PLUGINS AND NOT PLUGINSELECTION_${type}_${name})		
+	if (NOT MODULES_ENABLE_PLUGINS AND NOT PLUGINS_${type}_${name})		
 		MESSAGE (STATUS "Excluding Plugin '${name}' from ALL build.")
 		set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
 		set(installPlugin FALSE)

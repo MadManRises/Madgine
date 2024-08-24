@@ -67,7 +67,7 @@ namespace Tools {
 
     void PluginManager::loadConfiguration(const Filesystem::Path &config)
     {
-        mCurrentConfiguration.loadFromDisk(config / "plugins.cfg");
+        mCurrentConfiguration.loadFromDisk(config / "plugins.ini");
         for (auto &[sectionName, section] : mCurrentConfiguration) {
             if (!mManager.hasSection(sectionName))
                 continue;
@@ -82,7 +82,7 @@ namespace Tools {
 
     void PluginManager::saveConfiguration(const Filesystem::Path &config)
     {
-        mCurrentConfiguration.saveToDisk(config / "plugins.cfg");
+        mCurrentConfiguration.saveToDisk(config / "plugins.ini");
     }
 
     bool PluginManager::renderPluginSelection(bool isConfiguration)

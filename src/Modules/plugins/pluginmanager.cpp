@@ -27,7 +27,7 @@ namespace Plugins {
 
     static Filesystem::Path cacheFileName()
     {
-        return Filesystem::appDataPath() / ("plugins.cfg");
+        return Filesystem::appDataPath() / ("plugins.ini");
     }
 
     static PluginManager *sSingleton = nullptr;
