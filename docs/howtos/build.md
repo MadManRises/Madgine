@@ -35,19 +35,21 @@ create_launcher(<name>)
 
 ## Generating Project Files
 
-Generate the build files using CMake for your preferred compiler/IDE. 
+Generate the build files using CMake for your preferred compiler/IDE or open the folder in IDEs that have direct CMake integration. 
 
-### Generating Using Visual Studio
+## Build Configurations
 
-Starting with Visual Studio 2019 the IDE has its own CMake tools. If you installed the plugin you can simply use "File > Open > Folder..." and select the project folder. After that 'MadgineLauncher.exe' should be the startup project by default. If you do not have the plugin installed you can use the standalone CMake installation to generate a solution file. 
+The default build settings lead to a project with the following properties:
+- Tools are included
+- Plugins are built as dynamic libraries
+- Plugin selection can be changed at any time
 
-There are no additional CMake settings necessary. Build the solution and start the executable (it is called what you provided to `create_launcher` or MadgineLauncher if building from the repository itself), which can be found in the `bin` folder of your build directory. 
-Congratulations, you successfully compiled the Madgine Framework. 
+Once a project needs to be destributed it is likely that some of those properties need to be changed. To do so the Madgine provides a configuration system. Build configurations are folders, that contain all configuration files for a specific build type. The type of files is not restricted and some plugins define their own rules and configuration options. The most common configuration file types are:
+- `.ini` files will be converted into CMake variables `<filename without extension>_<ini group>_<ini field name>`
+- `.cmake` files will be executed at CMake startup
+- `.list` files contain a list of paths to files that will be included in the packaged build
 
-
-## Working With The Engine
-
-Once the engine successfully built, there are two possible ways of action. If you intend to work in the engine and start familiarizing yourself with it, please refer to the [User Manual](@ref Manual). If you want to learn how to write game code for the engine, please refer to [Writing your first UniqueComponent](@ref FirstUniqueComponent).
+To provide a configuration to CMake, set `MADGINE_CONFIGURATION` to the path of the desired configuration. Most plugins provide a built-in tool that allows to modify configurations through a UI.
 
 
 \addtogroup Howtos

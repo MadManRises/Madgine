@@ -2,8 +2,6 @@
 
 # Madgine - Build your own game engine
 
-[![Build Status](http://madmanrises.hopto.org:8080/buildStatus/icon?job=Madgine%2Fmaster)](http://madmanrises.hopto.org:8080/job/Madgine/job/master/)
-
 ## Description
 
 The Madgine is a game engine consisting of libraries and utilities that can improve game development drastically. The combination of all provided libraries can be used to create an empty real-time application template with lots of tools and features already provided. It is written purely in C++ and uses the C++20-Standard, however at the moment does not contain the rich feature set that popular game engines provide. Its main focus is to provide minimal basic building blocks, which can be easily adjusted or even replaced. This leaves developers with the freedom to spend time on the parts of the game they want to invest in and not loosing time creating e.g. platform abstractions.

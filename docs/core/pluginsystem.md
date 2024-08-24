@@ -1,11 +1,10 @@
 \page Pluginsystem Plugins & Unique Components
 
-\subpage FirstUniqueComponent
-\subpage PluginManagerManual
+
 
 # Plugins & Unique Components
 
-Plugins are one of the core features that the whole framework is built around. They are located in the [Modules][] library. Unique Components are a concept that is integrated with the classic notion of plugins to extend their functionality even more and making them easier to use.
+Plugins are one of the core features that the whole framework is built around. Unique Components are a concept that is integrated with the classic notion of plugins to extend their functionality even more and making them easier to use.
 
 ## Plugins
 
@@ -13,7 +12,7 @@ Plugins are implemented traditionally using shared libraries. Changes in the plu
 
 ### Plugin Definition Files
 
-The framework allows to provide a `PLUGIN_DEFINITION_FILE`, an ini-format file describing which plugins should be enabled. If it is set, all dynamic plugin loading code will be excluded from the build and instead the provided configuration will be statically applied. Due to its static linking nature this option currently is only supported with the CMake option [`BUILD_SHARED_LIBS`][] being disabled.
+When providing a `MADGINE_CONFIGURATION` folder (see /ref Build) a `plugins.ini` file can be put in that folder to determine which plugins should be enabled. If it is present, all dynamic plugin loading code will be excluded from the build and instead the provided configuration will be statically applied. Due to its static linking nature this option currently is only supported with the CMake option [`BUILD_SHARED_LIBS`][] being disabled. The easiest way to modify the plugin selection and any plugin configuration files is by using the \subpage PluginManagerManual Tool.
 
 ## Unique Components
 
@@ -21,7 +20,7 @@ Unique Components are a way to avoid using possibly mangled name lookup on share
 
 ### How it works
 
-First of all a type of Unique Component has to be defined. This is done by defining a base class and registering this base class to the system. (e.g. the SceneManager registers SceneComponentBase to the system). By implementing a class derived from this base in a different plugin it will be registered to the Collector of the respective plugin. When the plugin is loaded, the derived class will be automatically added to a list if all classes inheriting the base class. This way you have at all times an up-to-date list of implementations of your Unique Component type.
+First of all a type of Unique Component has to be defined. This is done by defining a base class and registering this base class to the system. (e.g. the SceneManager registers SceneComponentBase to the system). By implementing a class derived from this base in a different plugin it will be registered to the Collector of the respective plugin. When the plugin is loaded, the derived class will be automatically added to a list if all classes inheriting the base class. This way you have at all times an up-to-date list of implementations of your Unique Component type. See \subpage FirstUniqueComponent for more details.
 
 ### How to use it
 
