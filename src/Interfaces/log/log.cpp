@@ -6,21 +6,23 @@
 namespace Engine {
 namespace Log {
 
+    std::list<LogListener *> sListeners;
+
     void Log::log(std::string_view msg, MessageType lvl, const char *file, size_t line)
     {
-        for (LogListener *listener : mListeners) {
+        for (LogListener *listener : sListeners) {
             listener->messageLogged(msg, lvl, file, line, this);
         }
     }
 
     void Log::addListener(LogListener *listener)
     {
-        mListeners.push_back(listener);
+        sListeners.push_back(listener);
     }
 
     void Log::removeListener(LogListener *listener)
     {
-        mListeners.remove(listener);
+        sListeners.remove(listener);
     }
 
 }

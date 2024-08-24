@@ -72,12 +72,12 @@ namespace Tools {
             mMsgCounts[type] = 0;
             mMsgFilters[type] = true;
         }
-        Log::StandardLog::getSingleton().addListener(this);
+        Log::Log::addListener(this);
     }
 
     LogViewer::~LogViewer()
     {
-        Log::StandardLog::getSingleton().removeListener(this);
+        Log::Log::removeListener(this);
     }
 
     void LogViewer::render()
@@ -100,11 +100,12 @@ namespace Tools {
 
             std::lock_guard guard { mMutex };
 
-            if (ImGui::BeginTable("Messages", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable | ImGuiTableFlags_SizingFixedFit)) {
+            if (ImGui::BeginTable("Messages", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable | ImGuiTableFlags_SizingFixedFit)) {
 
                 ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 12.0f);
                 ImGui::TableSetupColumn("Message", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide);
-                ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+                ImGui::TableSetupColumn("Log", ImGuiTableColumnFlags_WidthStretch, 0.1f);
+                ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch, 0.3f);                
                 ImGui::TableSetupColumn("Line", ImGuiTableColumnFlags_WidthFixed);
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableHeadersRow();
@@ -169,6 +170,8 @@ namespace Tools {
                                 ImGui::TableNextColumn();
                                 ImGui::TextWrapped("%s", entry.mMsg.c_str());
                                 ImGui::TableNextColumn();
+                                ImGui::TextWrapped("%s", entry.mLog->getName().c_str());
+                                ImGui::TableNextColumn();
                                 if (entry.mFile) {
                                     Filesystem::Path file = entry.mFile;
                                     ImGui::TextWrapped("%s", file.c_str());
@@ -206,7 +209,7 @@ namespace Tools {
             return;
         ++mMsgCounts[lml];
         std::lock_guard guard { mMutex };
-        if (filter(mEntries.emplace_back(std::string { message }, lml, file, line)))
+        if (filter(mEntries.emplace_back(std::string { message }, lml, file, line, log)))
             addFilteredMessage(mEntries.size() - 1, message);
     }
 

@@ -23,11 +23,12 @@ namespace Tools {
 
     protected:
         struct LogEntry {
-            LogEntry(std::string msg, Log::MessageType type, const char *file, size_t line)
+            LogEntry(std::string msg, Log::MessageType type, const char *file, size_t line, Log::Log *log)
                 : mMsg(msg)
                 , mType(type)
                 , mFile(file)
                 , mLine(line)
+                , mLog(log)
             {
             }
 
@@ -35,6 +36,7 @@ namespace Tools {
             Log::MessageType mType;
             const char *mFile;
             size_t mLine;
+            Log::Log *mLog;
         };
 
         bool filter(const LogEntry &entry);

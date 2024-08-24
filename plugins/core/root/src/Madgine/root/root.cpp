@@ -51,7 +51,7 @@ namespace Root {
 
         Log::StandardLog::setLogLevel(logLevel);
         if (!logFile->empty())
-            Log::StandardLog::getSingleton().addListener(&mFileLogListener);
+            Log::Log::addListener(&mFileLogListener);
 
 #if ENABLE_PLUGINS
         mPluginManager = std::make_unique<Plugins::PluginManager>();

@@ -14,7 +14,7 @@ namespace Log {
     MessageType sLogLevel = MessageType::DEBUG_TYPE;
     extern Log *sLog;
 
-    static StandardLog sGlobalLog {""};
+    StandardLog sGlobalLog {"Default"};
 
     StandardLog::StandardLog(const std::string &name)
         : mName(name)
@@ -102,8 +102,5 @@ namespace Log {
         return mName;
     }
 
-    StandardLog& StandardLog::getSingleton() {
-        return sGlobalLog;
-    }
 }
 }

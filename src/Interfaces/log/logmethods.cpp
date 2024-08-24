@@ -11,7 +11,9 @@
 namespace Engine {
 namespace Log {
 
-    Log *sLog = &StandardLog::getSingleton();
+    extern StandardLog sGlobalLog;
+
+    Log *sLog = &sGlobalLog;
 
     void setLog(Log *log)
     {
