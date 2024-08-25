@@ -87,20 +87,21 @@ def staticTask = {
 				fi
 				mkdir -p ${name}
 				cd ${name}
-				cmake ../.. \
+				cmake ../.. > cmake.txt \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
 				-DMADGINE_CONFIGURATION=${configPath} \
 				-DBUILD_SHARED_LIBS=OFF \
 				-DMADGINE_TOOLING_PRESET=clang-osx-debug \
 				${toolchain.args} \
 				${cmake_args}
+				cat cmake.txt
 				"""						
 			}
 			stage("build") {				
 				sh """
 				cd build
 				cd ${name}
-				make all --output-sync
+				make all
 				"""				
 			}
 			stage("Test") {
@@ -146,18 +147,19 @@ def task = {
 					fi
 					mkdir -p ${name}
 					cd ${name}
-					cmake ../.. \
+					cmake ../.. > cmake.txt \
 					-DCMAKE_BUILD_TYPE=${configuration.name} \
 					-DBUILD_SHARED_LIBS=ON \
 					${toolchain.args} \
 					${cmake_args}
+					cat cmake.txt
 					"""
 				}
 				stage("build") {				
 					sh """
 					cd build
 					cd ${name}
-					make all --output-sync
+					make all
 					"""				
 				}
 				stage("Test") {
