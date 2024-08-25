@@ -100,7 +100,7 @@ def staticTask = {
 				sh """
 				cd build
 				cd ${name}
-				make all
+				make all --output-sync
 				"""				
 			}
 			stage("Test") {
@@ -157,7 +157,7 @@ def task = {
 					sh """
 					cd build
 					cd ${name}
-					make all
+					make all --output-sync
 					"""				
 				}
 				stage("Test") {
