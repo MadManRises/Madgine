@@ -2,10 +2,6 @@
 
 #include "../pipable.h"
 
-#if ANDROID
-#    define __cpp_lib_ranges 202110L
-#endif
-
 #if __cpp_lib_ranges >= 201911L
 #    include <ranges>
 #endif
@@ -135,7 +131,7 @@ namespace ranges {
     inline constexpr __contains_fn contains {};
 #endif
 
-#if __cpp_lib_ranges < 202300L
+#if __cpp_lib_ranges < 202207L
     template <range R>
     using const_iterator_t = decltype(cbegin(std::declval<R &>()));
 #endif

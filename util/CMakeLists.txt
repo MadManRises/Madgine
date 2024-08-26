@@ -7,22 +7,26 @@ if (MADGINE_CONFIGURATION)
 	set (DEPENDS MadgineTooling)
 endif ()
 
-ExternalProject_Add(ShaderGenExt
-	PREFIX shadergen 
-	BINARY_DIR ${shadergenBinaryDir}/build
-	SOURCE_DIR ${shadergenSourceDir}
-	CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
-	BUILD_BYPRODUCTS ${shadergenBinaryDir}/ShaderGen${HOST_EXECUTABLE_SUFFIX}
-	BUILD_COMMAND ${CMAKE_COMMAND} --build . --target ShaderGen
-	BUILD_ALWAYS true
-	INSTALL_COMMAND ""
-	DEPENDS ${DEPENDS}
-	USES_TERMINAL_CONFIGURE true
-	USES_TERMINAL_BUILD true)
-
-	
 add_executable(ShaderGen IMPORTED GLOBAL)
-add_dependencies(ShaderGen ShaderGenExt)
+
+if (NOT SKIP_UTIL_BUILD)
+	ExternalProject_Add(ShaderGenExt
+		PREFIX shadergen 
+		BINARY_DIR ${shadergenBinaryDir}/build
+		SOURCE_DIR ${shadergenSourceDir}
+		CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
+		BUILD_BYPRODUCTS ${shadergenBinaryDir}/ShaderGen${HOST_EXECUTABLE_SUFFIX}
+		BUILD_COMMAND ${CMAKE_COMMAND} --build . --target ShaderGen
+		BUILD_ALWAYS true
+		INSTALL_COMMAND ""
+		DEPENDS ${DEPENDS}
+		USES_TERMINAL_CONFIGURE true
+		USES_TERMINAL_BUILD true)
+
+	add_dependencies(ShaderGen ShaderGenExt)	
+endif()
+
+
 set_target_properties(ShaderGen 
 	PROPERTIES ShaderGenTargets ""
 	IMPORTED_LOCATION ${shadergenBinaryDir}/ShaderGen${HOST_EXECUTABLE_SUFFIX})
