@@ -2,30 +2,30 @@ properties([pipelineTriggers([githubPush()])])
 
 def axisList = [
     [//toolchains
-		/*[
+		[
 			name : "clang-windows",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/mingw.cmake",
 			artifacts : ['bin/*', 'data/*']
-		],*/
+		],
 		[
 			name : "clang-osx",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
 			artifacts : ['bin/*', 'data/*']
 		],
-		/*[
+		[
 			name : "clang-ios",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
 			artifacts : ['bin/**']
-		],*/
+		],
 		[
 			name : "clang-linux",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "",
 			artifacts : ['bin/*', 'data/*']
-		]/*,
+		],
 		[
 			name : "clang-android",
 			dockerImage : 'schuetzo/linux-test-env:latest',
@@ -37,7 +37,7 @@ def axisList = [
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/emscripten-wasm.cmake",
 			artifacts : ['bin/*']
-		]*/
+		]
 	],           
     [//configurations
 		[
@@ -87,13 +87,13 @@ def staticTask = {
 				fi
 				mkdir -p ${name}
 				cd ${name}
-				cmake ../.. > cmake.txt \
+				cmake ../.. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
 				-DMADGINE_CONFIGURATION=${configPath} \
 				-DBUILD_SHARED_LIBS=OFF \
 				-DMADGINE_TOOLING_PRESET=clang-osx-debug \
 				${toolchain.args} \
-				${cmake_args}
+				${cmake_args} > cmake.txt
 				cat cmake.txt
 				"""						
 			}
@@ -147,11 +147,11 @@ def task = {
 					fi
 					mkdir -p ${name}
 					cd ${name}
-					cmake ../.. > cmake.txt \
+					cmake ../.. \
 					-DCMAKE_BUILD_TYPE=${configuration.name} \
 					-DBUILD_SHARED_LIBS=ON \
 					${toolchain.args} \
-					${cmake_args}
+					${cmake_args} > cmake.txt
 					cat cmake.txt
 					"""
 				}
