@@ -154,7 +154,7 @@ namespace Widgets {
             sizes[i] = handle->mSize + Vector2i { 2, 2 };
             ++i;
         }
-        std::vector<Atlas2::Entry> entries = mAtlas.insert(sizes, [this]() { expand(); });
+        std::vector<Atlas2::Entry> entries = mAtlas.insert({sizes.data(), sizes.size()}, [this]() { expand(); });
         i = 0;
         for (const auto &[name, handle] : images) {
             mEntries[name] = entries[i];

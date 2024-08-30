@@ -187,7 +187,7 @@ namespace Scene {
         container_api<RefcountedContainer<std::deque<Serialize::NoParent<Entity::Entity>>>> mLocalEntities;
 
         struct EntityHelper {
-            Entity::EntityPtr operator()(Entity::Entity &ref)
+            Entity::EntityPtr operator()(Entity::Entity &ref) const
             {
                 return { &ref };
             }

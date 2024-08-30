@@ -20,7 +20,7 @@ namespace ed = ax::NodeEditor;
 namespace Engine {
 namespace NodeGraph {
 
-    struct NodeDebugLocation : Debug::DebugLocation {
+    struct MADGINE_NODEGRAPH_EXPORT NodeDebugLocation : Debug::DebugLocation {
         NodeDebugLocation(NodeInterpreterStateBase *interpreter)
             : mInterpreter(interpreter)
         {

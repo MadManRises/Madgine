@@ -15,7 +15,7 @@ namespace UniqueComponent {
         typedef typename Registry::Base Base;
 
         template <typename... Args>
-        requires requires(Registry::Annotations &a, Args&&... args) {
+        requires requires(typename Registry::Annotations &a, Args&&... args) {
             a.construct(args...);
         }
         Container(Args&&... arg)

@@ -6,6 +6,10 @@
 #    endif
 #endif
 
+#ifdef COMPATIBILITY_CONFIG_HEADER
+#include COMPATIBILITY_CONFIG_HEADER
+#endif
+
 
 #include "concepts.h"
 #include "spaceship.h"

@@ -103,7 +103,7 @@ struct BehaviorStateBase {
 template <typename Sender>
 struct BehaviorAwaitableSender;
 
-struct CoroutineLocation : Debug::DebugLocation {
+struct MADGINE_BEHAVIOR_EXPORT CoroutineLocation : Debug::DebugLocation {
 
     std::string toString() const override;
     std::map<std::string_view, ValueType> localVariables() const override;

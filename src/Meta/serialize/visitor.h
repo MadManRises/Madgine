@@ -57,6 +57,8 @@ namespace Serialize {
             }
         }
 
+        using StreamVisitor::visit;
+
         F mF;
     };
 
@@ -78,6 +80,8 @@ namespace Serialize {
                 return visitSkipPrimitive<T>(in, name);
             }
         }
+
+        using StreamVisitorImplHelper<F, Ty...>::visit;
     };
 
     template <typename F>

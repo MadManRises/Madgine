@@ -48,7 +48,7 @@ namespace Render {
 
             static constexpr void (*fs[])(uint16_t &, OffsetPtr &) = { [](uint16_t &format, OffsetPtr &ptr) {
                 //Can't be select<Is> because MSVC
-                using T = VertexElements::helpers::template recurse<Is>::type;
+                using T = typename VertexElements::helpers::template recurse<Is>::type;
                 if constexpr (VertexType::template holds<T>) {
                     format += (1 << Is);
                     OffsetPtr nextPtr = OffsetPtr { type_holder<VertexType>, type_holder<T> };
