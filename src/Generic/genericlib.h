@@ -4,6 +4,8 @@
 
 #include "commonlib.h"
 
+#include "genericconfig.h"
+
 #include <algorithm>
 #include <array>
 #include <chrono>

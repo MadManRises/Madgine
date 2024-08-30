@@ -3,12 +3,12 @@ properties([pipelineTriggers([githubPush()])])
 def toolchains = [
     "windows": [
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/mingw.cmake",
+			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/mingw.cmake -DGENERIC_COMPATIBILITY_CONFIG_HEADER=/Users/madman/compat/windows.h",
 			artifacts : ['bin/*', 'data/*']
 		],
 	"osx": [			
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
+			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0 -DGENERIC_COMPATIBILITY_CONFIG_HEADER=/Users/madman/compat/osx.h",
 			artifacts : ['bin/*', 'data/*']
 		],
 	"ios": [
@@ -18,7 +18,7 @@ def toolchains = [
 		],
 	"linux": [
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "",
+			args : "-DGENERIC_COMPATIBILITY_CONFIG_HEADER=/Users/madman/compat/linux.h",
 			artifacts : ['bin/*', 'data/*']
 		],
 	"android": [
