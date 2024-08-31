@@ -38,7 +38,7 @@ def configs = [
 			args: "-DBUILD_SHARED_LIBS=ON"
 	],
 	"OpenGL": [
-			args: "-DMADGINE_CONFIGURATION=../../test/configs/OpenGL/ -DBUILD_SHARED_LIBS=OFF"
+			args: "-DMADGINE_CONFIGURATION=../../test/configs/OpenGL/ -DBUILD_SHARED_LIBS=OFF -DMADGINE_TOOLING_PRESET=clang-osx-Debug-Plugins"
 	]
 ]
 
@@ -66,17 +66,8 @@ pipeline {
 				"""
 			}
 	    }
-		stage("cleanup") {
+		stage("cmake") {
 			steps{
-				sh """
-					mkdir -p build
-					cd build
-					if ${params.fullBuild}; then
-						if [ -d "util" ]; then 
-							rm -Rf util;
-						fi
-					fi
-				"""
 				script {				
 					cmake_args = "-DUSE_CMAKE_LOG=1 "
 					if (params.timeTrace){
@@ -89,6 +80,55 @@ pipeline {
 						cmake_args = cmake_args + "-DMODULES_ENABLE_TASK_TRACKING=ON "
 					}
 				}
+				sh """
+					mkdir -p build
+					cd build
+					if ${params.fullBuild}; then
+						if [ -d "clang-osx-Debug-Plugins" ]; then 
+							rm -Rf clang-osx-Debug-Plugins;
+						fi
+						if [ -d "util" ]; then 
+							rm -Rf util;
+						fi
+					fi
+					mkdir -p clang-osx-Debug-Plugins
+					cd clang-osx-Debug-Plugins
+					cmake ../.. \
+					-DCMAKE_BUILD_TYPE=Debug \
+					${toolchains.osx.args} \
+					${configs.Plugins.args} \
+					${cmake_args} > cmake.txt
+					cat cmake.txt
+				"""		
+			}
+		}
+		stage("build") {	
+			steps {
+				sh """
+					cd build
+					cd clang-osx-Debug-Plugins
+					make all
+				"""				
+			}
+		}
+		stage("Test") {
+			steps {
+				//docker.image(toolchain.dockerImage).inside {
+					sh """
+				#	cd clang-osx-Debug-Plugins
+				#	ctest --output-on-failure
+					"""
+				//}
+			}
+		}   
+		stage ("Doxygen") {
+			steps {
+				sh """
+					cd build
+					cd clang-osx-Debug-Plugins
+
+					make doxygen
+				"""
 			}
 		}
         stage ("Multiconfiguration Parallel Tasks") {
@@ -124,6 +164,20 @@ pipeline {
                             values 'ios'
                         }
 					}
+					exclude {
+                        axis {
+                            name 'CONFIG'
+                            values 'Plugins'
+                        }
+                        axis {
+                            name 'PLATFORM'
+                            values 'osx'
+                        }
+						axis {
+                            name 'TYPE'
+                            values 'Debug'
+                        }
+                    }
                 }
 				stages {
 					stage("cmake") {
@@ -170,16 +224,6 @@ pipeline {
 				}
 	        }
         }
-		stage ("Doxygen") {
-			steps {
-				sh """
-					cd build
-					cd clang-osx-Debug-Plugins
-
-					make doxygen
-				"""
-			}
-		}
     }
 
 	post {
