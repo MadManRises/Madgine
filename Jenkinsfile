@@ -161,7 +161,7 @@ pipeline {
 					exclude {
                         axis {
                             name 'PLATFORM'
-                            values 'ios'
+                            values 'ios', 'android', 'emscripten'
                         }
 					}
 					exclude {
