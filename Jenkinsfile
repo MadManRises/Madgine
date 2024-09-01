@@ -23,7 +23,7 @@ def toolchains = [
 		],
 	"android": [
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64",
+			args : "-DCMAKE_TOOLCHAIN_FILE=../../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64 -DGENERIC_COMPATIBILITY_CONFIG_HEADER=/Users/madman/compat/android.h",
 			artifacts : ['bin/*']
 		],
 	"emscripten": [			
