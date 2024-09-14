@@ -73,6 +73,11 @@ namespace Threading {
                     mRec.set_value(std::forward<decltype(result)>(result));
                 }
             }
+                        
+            friend const Rec &tag_invoke(Execution::get_receiver_t, const state &state)
+            {
+                return state.mRec;
+            }
 
             Rec mRec;
             F mF;

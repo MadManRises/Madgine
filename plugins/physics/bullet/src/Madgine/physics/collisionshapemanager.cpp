@@ -62,7 +62,8 @@ namespace Physics {
         {
             assert(mRefCount > 0);
             if (--mRefCount == 0) {
-                mHandle.reset();
+                typename CollisionShapeManager::Handle handle = std::move(mHandle);
+                handle.reset();
             }
         }
 

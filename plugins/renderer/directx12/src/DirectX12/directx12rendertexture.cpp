@@ -38,6 +38,9 @@ namespace Render {
         if (context()->graphicsQueue()->isComplete(lastFrame())) {
             resizeBuffers(size);
         } else {
+            if (mResizePending && mResizeTarget == size)
+                return false;
+
             mResizePending = true;
             mResizeFence = context()->graphicsQueue()->currentFence();
             mResizeTarget = size;
