@@ -9,6 +9,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
+#include "imgui/imguiaddons.h"
+
 #include "im3d/im3d.h"
 
 #include "Generic/container/safeiterator.h"
@@ -24,6 +26,8 @@
 #include "Meta/serialize/formats.h"
 
 #include "Generic/projections.h"
+
+#include "Interfaces/filesystem/fsapi.h"
 
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)
@@ -176,6 +180,8 @@ namespace Tools {
                 tool->update();
         }
 
+        mDialogContainer.render();
+
         if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
             ImGui::End();
         }
@@ -217,6 +223,21 @@ namespace Tools {
 
             mToolReadTool = nullptr;
         }
+    }
+
+    DialogFlags ImRoot::directoryPickerImpl(Filesystem::Path &path, Filesystem::Path &selected)
+    {
+        DialogFlags flags;
+        ImGui::DirectoryPicker(path, selected);
+        return flags;
+    }
+
+    DialogFlags ImRoot::filePickerImpl(bool allowNewFile, Filesystem::Path &path, Filesystem::Path &selected)
+    {
+        DialogFlags flags;
+        ImGui::FilePicker(path, selected, &flags.implicitlyAccepted);
+        flags.acceptPossible = !selected.empty() && (allowNewFile || Filesystem::exists(selected));
+        return flags;
     }
 
 }

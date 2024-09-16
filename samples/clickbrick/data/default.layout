@@ -29,6 +29,7 @@
                                 <mSelectedColor>(1.1, 1.1, 1.1, 1)</mSelectedColor>
                                 <mDisabledColor>(0.4, 0.4, 0.4, 1)</mDisabledColor>
                             </mColorTintRenderData>
+                            <mEnabled>true</mEnabled>
                             <mChildren>
                             </mChildren>
                             <mName>StartGameButton</mName>

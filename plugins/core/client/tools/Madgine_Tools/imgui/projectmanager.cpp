@@ -103,50 +103,24 @@ namespace Tools {
 
                 ImGui::End();
 
-                bool openCreateNewConfigPopup = false;
-                bool openOpenExistingConfigPopup = false;
-                bool openCopyConfigPopup = false;
-
                 if (ImGui::BeginPopup("NewConfig")) {
-                    if (ImGui::MenuItem("Create New"))
-                        openCreateNewConfigPopup = true;
-                    if (ImGui::MenuItem("Open Existing"))
-                        openOpenExistingConfigPopup = true;
-                    if (ImGui::MenuItem("Copy Config"))
-                        openCopyConfigPopup = true;
-
-                    ImGui::EndPopup();
-                }
-
-                if (ImGui::BeginPopupModal("CreateNewConfig")) {
-
-                    ImGui::EndPopup();
-                }
-
-                if (ImGui::BeginPopupModal("OpenExistingConfig")) {
-                    bool accepted;
-                    if (ImGui::DirectoryPicker(&mCurrentPath, &mCurrentSelectionPath, accepted)) {
-                        if (accepted) {
-                            setCurrentConfig(mCurrentSelectionPath);
-                        }
-                        ImGui::CloseCurrentPopup();
+                    if (ImGui::MenuItem("Create New")) {
                     }
+
+                    if (ImGui::MenuItem("Open Existing")) {
+                        Execution::detach(
+                            mRoot.directoryPicker()
+                            | Execution::then([this](DialogResult result, const Filesystem::Path &path) {
+                                  if (result == DialogResult::Accepted) {
+                                      setCurrentConfig(path);
+                                  }
+                              }));
+                    }
+                    if (ImGui::MenuItem("Copy Config")) {
+                    }
+
                     ImGui::EndPopup();
                 }
-
-                if (ImGui::BeginPopupModal("CopyConfig")) {
-
-                    ImGui::EndPopup();
-                }
-
-                if (openNewConfigPopup)
-                    ImGui::OpenPopup("NewConfig");
-                if (openCreateNewConfigPopup)
-                    ImGui::OpenPopup("CreateNewConfig");
-                if (openOpenExistingConfigPopup)
-                    ImGui::OpenPopup("OpenExistingConfig");
-                if (openCopyConfigPopup)
-                    ImGui::OpenPopup("CopyConfig");
             }
         }
 
@@ -163,41 +137,6 @@ namespace Tools {
 
     void ProjectManager::renderMenu()
     {
-        ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
-        if (ImGui::BeginPopupModal("OpenFolder")) {
-
-            bool accepted;
-            if (ImGui::DirectoryPicker(&mCurrentPath, &mCurrentSelectionPath, accepted)) {
-                if (accepted)
-                    setProjectRoot(mCurrentSelectionPath);
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-
-        static std::string layoutNameBuffer;
-        if (ImGui::BeginPopupModal("NewLayout")) {
-
-            ImGui::InputText("Name", &layoutNameBuffer);
-            if (layoutNameBuffer.empty()) {
-                ImGui::BeginDisabled();
-            }
-            if (ImGui::Button("Ok")) {
-                setLayout(layoutNameBuffer);
-
-                ImGui::CloseCurrentPopup();
-            }
-            if (layoutNameBuffer.empty()) {
-                ImGui::EndDisabled();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Abort"))
-                ImGui::CloseCurrentPopup();
-            ImGui::EndPopup();
-        }
-
-        bool openProjectDialog = false;
-        bool openLayoutDialog = false;
 
         if (ImGui::BeginMenu("Project")) {
 
@@ -206,7 +145,17 @@ namespace Tools {
             }
 
             if (ImGui::MenuItem("Open Project...")) {
-                openProjectDialog = true;
+                Filesystem::Path currentSelectionPath;
+                if (!mProjectRoot.empty()) {
+                    currentSelectionPath = mProjectRoot.absolute();
+                }
+
+                Execution::detach(mRoot.directoryPicker()
+                    | Execution::then([this](DialogResult result, const Filesystem::Path &selected) {
+                          if (result == DialogResult::Accepted) {
+                              setProjectRoot(selected);
+                          }
+                      }));
             }
 
             ImGui::Separator();
@@ -214,7 +163,13 @@ namespace Tools {
             if (mProjectRoot.empty())
                 ImGui::BeginDisabled();
             if (ImGui::MenuItem("New Layout...")) {
-                openLayoutDialog = true;
+                Execution::detach(mRoot.dialog([](std::string &layoutName) {
+                    ImGui::InputText("Name", &layoutName);
+                    return DialogFlags { .acceptPossible = !layoutName.empty() };
+                }, std::make_tuple(""s)) | Execution::then([this](DialogResult result, const std::string &layoutName) {
+                    if (result == DialogResult::Accepted)
+                        setLayout(layoutName);
+                }));
             }
             if (ImGui::MenuItem("Save Layout")) {
                 save();
@@ -242,21 +197,6 @@ namespace Tools {
             }
 
             ImGui::EndMenu();
-        }
-
-        if (openProjectDialog) {
-            if (mProjectRoot.empty()) {
-                mCurrentPath = Filesystem::Path { "." }.absolute();
-                mCurrentSelectionPath.clear();
-            } else {
-                mCurrentSelectionPath = mProjectRoot.absolute();
-                mCurrentPath = mCurrentSelectionPath.parentPath();
-            }
-            ImGui::OpenPopup("OpenFolder");
-        }
-        if (openLayoutDialog) {
-            layoutNameBuffer.clear();
-            ImGui::OpenPopup("NewLayout");
         }
     }
 

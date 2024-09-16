@@ -112,23 +112,27 @@ namespace Tools {
         ToolBase::renderMenu();
         if (mVisible) {
 
-            bool openOpenScenePopup = false;
-            bool openSaveScenePopup = false;
-
             if (ImGui::BeginMenu("SceneEditor")) {
 
                 bool isStopped = mMode == STOP;
 
-                if (ImGui::MenuItem("Open", nullptr, nullptr, isStopped))
-                    openOpenScenePopup = true;
+                if (ImGui::MenuItem("Open", nullptr, nullptr, isStopped)) {
+                    Execution::detach(mRoot.filePicker()
+                        | Execution::then([this](DialogResult result, const Filesystem::Path &path) {
+                              if (result == DialogResult::Accepted) {
+                                  openScene(path);
+                              }
+                          }));
+                }
+
                 if (ImGui::MenuItem("Save", nullptr, nullptr, isStopped)) {
                     if (mCurrentSceneFile.empty())
-                        openSaveScenePopup = true;
+                        saveScenePopup();
                     else
                         saveScene(mCurrentSceneFile);
                 }
                 if (ImGui::MenuItem("Save As...", nullptr, nullptr, isStopped))
-                    openSaveScenePopup = true;
+                    saveScenePopup();
 
                 ImGui::Separator();
 
@@ -138,13 +142,6 @@ namespace Tools {
 
                 ImGui::EndMenu();
             }
-
-            if (openOpenScenePopup)
-                ImGui::OpenPopup("openScene");
-            if (openSaveScenePopup)
-                ImGui::OpenPopup("saveScene");
-
-            renderPopups();
         }
     }
 
@@ -552,32 +549,6 @@ namespace Tools {
         mInspector->drawMembers(camera);
     }
 
-    void SceneEditor::renderPopups()
-    {
-        ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
-        if (ImGui::BeginPopup("openScene")) {
-            bool accepted;
-            if (ImGui::FilePicker(&mFilepickerCache, &mFilepickerSelectionCache, accepted, false)) {
-                if (accepted) {
-                    openScene(mFilepickerSelectionCache);
-                }
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-        ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
-        if (ImGui::BeginPopup("saveScene")) {
-            bool accepted;
-            if (ImGui::FilePicker(&mFilepickerCache, &mFilepickerSelectionCache, accepted, true)) {
-                if (accepted) {
-                    saveScene(mFilepickerSelectionCache);
-                }
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-    }
-
     void SceneEditor::handleInputs()
     {
         return;
@@ -678,6 +649,15 @@ namespace Tools {
 
         if (mRender3DCursor)
             Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.point(10.0f), ray.point(20.0f));
+    }
+
+    void SceneEditor::saveScenePopup()
+    {
+        Execution::detach(mRoot.filePicker(true) | Execution::then([this](DialogResult result, const Filesystem::Path &path) {
+            if (result == DialogResult::Accepted) {
+                saveScene(path);
+            }
+        }));
     }
 }
 }

@@ -27,8 +27,8 @@
 #include "Modules/threading/threadlocal.h"
 
 //Engine::Threading::WorkgroupLocal<ImGuiContext *>
-THREADLOCAL(ImGuiContext*)
-    sContext;
+THREADLOCAL(ImGuiContext *)
+sContext;
 
 ImGuiContext *&getImGuiContext()
 {
@@ -941,75 +941,59 @@ bool IsDraggableValueTypeBeingAccepted(const ValueTypePayload **payloadPointer)
     return false;
 }
 
-void BeginFilesystemPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection)
+bool BeginFilesystemPicker(Engine::Filesystem::Path &path, Engine::Filesystem::Path &selection)
 {
-    if (path->empty())
-        *path = Engine::Filesystem::Path { "." }.absolute();
-    if (selection->empty())
-        *selection = Engine::Filesystem::Path { "." }.absolute();
+    bool changed = false;
+
+    if (path.empty())
+        path = Engine::Filesystem::Path { "." }.absolute();
+    if (selection.empty())
+        selection = Engine::Filesystem::Path { "." }.absolute();
 
     if (ImGui::Button("Up")) {
-        *selection = *path;
-        *path = *path / "..";
+        selection = path;
+        path = path / "..";
+        changed = true;
     }
 
     ImGui::SameLine();
 
-    std::string s = path->str();
+    std::string s = path.str();
 
     if (ImGui::InputText("Current", &s)) {
-        *path = s;
+        path = s;
+        changed = true;
     }
+
+    return changed;
 }
 
-bool EndFilesystemPicker(bool valid, bool &accepted, bool openWrite = false, bool askForConfirmation = false, bool alreadyClicked = false)
+bool DirectoryPicker(Engine::Filesystem::Path &path, Engine::Filesystem::Path &selection, const FilesystemPickerOptions &options)
 {
-    bool closed = false;
-
-    if (ImGui::Button("Cancel")) {
-        accepted = false;
-        closed = true;
-    }
-    ImGui::SameLine();
-    if (!valid)
-        BeginDisabled();
-    if (ImGui::Button(openWrite ? "Save" : "Open") || alreadyClicked) {
-        if (!askForConfirmation) {
-            accepted = true;
-            closed = true;
-        } else {
-            ImGui::OpenPopup("Confirmation");
-        }
-    }
-    if (!valid)
-        EndDisabled();
-
-    return closed;
-}
-
-bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, const FilesystemPickerOptions *options)
-{
-    BeginFilesystemPicker(path, selection);
+    bool changed = BeginFilesystemPicker(path, selection);
 
     if (ImGui::BeginChild("CurrentFolder", { 0.0f, -ImGui::GetFrameHeightWithSpacing() })) {
 
-        for (Engine::Filesystem::FileQueryResult result : Engine::Filesystem::listDirs(*path)) {
+        for (Engine::Filesystem::FileQueryResult result : Engine::Filesystem::listDirs(path)) {
 
-            bool selected = *selection == result.path();
+            bool selected = selection == result.path();
 
             if (ImGui::Selectable(result.path().filename().c_str(), selected)) {
-                *selection = result.path();
+                selection = result.path();
+                changed = true;
             }
 
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-                *path = result.path();
+                path = result.path();
+                selection = path;
+                changed = true;
             }
         }
     }
 
     ImGui::EndChild();
 
-    return EndFilesystemPicker(true, accepted);
+    return changed;
 }
 
 FilesystemPickerOptions *GetFilesystemPickerOptions()
@@ -1017,13 +1001,12 @@ FilesystemPickerOptions *GetFilesystemPickerOptions()
     return &sFilesystemPickerOptions;
 }
 
-bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool openWrite, const FilesystemPickerOptions *options)
+bool FilePicker(Engine::Filesystem::Path &path, Engine::Filesystem::Path &selection, bool *clicked, const FilesystemPickerOptions &options)
 {
-    BeginFilesystemPicker(path, selection);
+    bool changed = BeginFilesystemPicker(path, selection);
 
     bool selectedIsFile = false;
     bool selectedIsDir = false;
-    bool clicked = false;
 
     if (ImGui::BeginTable("CurrentFolder", 1, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable)) {
 
@@ -1040,7 +1023,7 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
         };
         std::vector<File> files;
 
-        std::ranges::transform(Engine::Filesystem::listFilesAndDirs(*path), std::back_inserter(files), [](Engine::Filesystem::FileQueryResult result) { return File { result.path(), result.isDir() }; });
+        std::ranges::transform(Engine::Filesystem::listFilesAndDirs(path), std::back_inserter(files), [](Engine::Filesystem::FileQueryResult result) { return File { result.path(), result.isDir() }; });
 
         for (const File &file : files) {
 
@@ -1048,7 +1031,7 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
 
             ImGui::TableNextColumn();
 
-            bool selected = *selection == file.mPath;
+            bool selected = selection == file.mPath;
             if (selected) {
                 if (file.mIsDir)
                     selectedIsDir = true;
@@ -1056,7 +1039,7 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
                     selectedIsFile = true;
             }
 
-            auto iconLookup = options && options->mIconLookup ? options->mIconLookup : sFilesystemPickerOptions->mIconLookup;
+            auto iconLookup = options.mIconLookup ? options.mIconLookup : sFilesystemPickerOptions->mIconLookup;
 
             std::string name = file.mPath.filename();
             if (iconLookup) {
@@ -1064,15 +1047,18 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
             }
 
             if (ImGui::Selectable(name.c_str(), selected, ImGuiSelectableFlags_SpanAllColumns)) {
-                *selection = file.mPath;
+                selection = file.mPath;
+                changed = true;
             }
 
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+                changed = true;
                 if (file.mIsDir) {
-                    *path = file.mPath;
+                    path = file.mPath;
                 } else {
-                    *selection = file.mPath;
-                    clicked = true;
+                    selection = file.mPath;
+                    if (clicked)
+                        *clicked = true;
                 }
             }
         }
@@ -1080,36 +1066,16 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
         ImGui::EndTable();
     }
 
-    bool validPath = true;
-
-    std::string fileName = selection->relative(*path).str();
+    std::string fileName = selection.relative(path).str();
     if (InputText("Filename:", &fileName)) {
         Engine::Filesystem::Path p = fileName;
         if (!p.empty() && p.isRelative())
-            *selection = *path / p;
-        else
-            validPath = false;
+            selection = path / p;
+
+        changed = true;
     }
 
-    bool confirmed = false;
-
-    if (openWrite) {
-        if (ImGui::BeginPopup("Confirmation")) {
-            ImGui::Text("Are you sure you want to overwrite file '%s'?", selection->c_str());
-            if (ImGui::Button("Yes")) {
-                confirmed = true;
-                clicked = true;
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("No")) {
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-    }
-
-    return EndFilesystemPicker(validPath && (selectedIsFile || (openWrite && !selectedIsDir)), accepted, openWrite, openWrite && selectedIsFile && !confirmed, clicked);
+    return changed;
 }
 
 bool InteractiveView(InteractiveViewState &state)
@@ -1407,6 +1373,4 @@ void MakeTabVisible(const char *name)
         return;
     window->DockNode->TabBar->NextSelectedTabId = window->TabId;
 }
-
-
 }

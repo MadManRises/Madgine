@@ -64,9 +64,6 @@ namespace Tools {
 
         IndexType<uint32_t> mSelectedNodeIndex;
 
-        Filesystem::Path mDirBuffer, mSelectionBuffer;
-        std::string mSelectionTargetBuffer;
-
         Vector2 mPopupPosition;
 
         std::optional<NodeGraph::PinDesc> mDragPin;

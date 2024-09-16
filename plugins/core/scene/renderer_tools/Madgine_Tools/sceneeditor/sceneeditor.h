@@ -64,11 +64,12 @@ namespace Tools {
         void renderToolbar();
         void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
-        void renderPopups();
 
         void handleInputs();
 
         void im3DInteractions();
+
+        void saveScenePopup();
 
     private:
         Window::MainWindow &mWindow;
@@ -88,8 +89,6 @@ namespace Tools {
         //Save/Load
         std::vector<char> mStartBuffer;
 
-        Filesystem::Path mFilepickerCache;
-        Filesystem::Path mFilepickerSelectionCache;
         Filesystem::Path mCurrentSceneFile;
 
         //Entity-Cache

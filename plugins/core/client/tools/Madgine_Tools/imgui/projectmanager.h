@@ -46,12 +46,8 @@ namespace Tools {
         bool mShowSettings = false;
 
     private:
-        Filesystem::Path mCurrentSelectionPath;
-        Filesystem::Path mCurrentPath;
-
         std::set<Filesystem::Path> mConfigs;
-        Filesystem::Path mCurrentConfig;
-        Filesystem::Path mConfigSelectionBuffer;
+        Filesystem::Path mCurrentConfig;        
 
         bool mUnsavedConfiguration = false;
 

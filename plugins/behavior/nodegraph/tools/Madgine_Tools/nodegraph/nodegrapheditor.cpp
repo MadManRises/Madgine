@@ -125,7 +125,7 @@ namespace Tools {
 
             ed::PushStyleVar(ed::StyleVar_NodePadding, { 0, 0, 0, 0 });
             ImVec2 specialPosition = ed::ScreenToCanvas(topLeftScreen);
-            
+
             ed::SetNodePosition(std::numeric_limits<int>::max() - 1, { floorf(specialPosition.x), floorf(specialPosition.y) });
             ed::BeginNode(std::numeric_limits<int>::max() - 1);
             ImGui::BeginVertical("inputPins", ImVec2(0, 0), 0.0f);
@@ -208,14 +208,14 @@ namespace Tools {
             uint32_t nodeId = 1;
             NodeGraph::NodeBase *hoveredNode = nullptr;
             for (NodeGraph::NodeBase *node : mGraph.nodes() | std::views::transform(projectionUniquePtrToPtr)) {
-                
+
                 if (std::optional<ExtendedValueTypeDesc> hovered = BeginNode(node, nodeId, mDragPin, mDragType))
                     hoveredPin = hovered;
 
                 EndNode();
 
                 if (ImGui::IsItemHovered()) {
-                    hoveredNode = node;                    
+                    hoveredNode = node;
                 }
 
                 ++nodeId;
@@ -386,7 +386,6 @@ namespace Tools {
 
             if (hoveredPin)
                 HoverPin(*hoveredPin);
-  
         }
         ImGui::End();
 
@@ -458,22 +457,57 @@ namespace Tools {
         ToolBase::renderMenu();
         if (mVisible) {
 
-            bool openSaveGraphPopup = false;
-            bool openOpenGraphPopup = false;
-
             if (ImGui::BeginMenu("Node Graph Editor")) {
 
                 if (ImGui::MenuItem("New Graph...")) {
                     create();
                 }
                 if (ImGui::MenuItem("Open Graph")) {
-                    openOpenGraphPopup = true;
+                    Execution::detach(mRoot.dialog(
+                                          [](std::string &selection) {
+                                              bool alreadyClicked = false;
+
+                                              ImGui::BeginChild("GraphList", { 0.0f, -ImGui::GetFrameHeightWithSpacing() });
+
+                                              for (const std::pair<std::string_view, ScopePtr> &res : NodeGraph::NodeGraphLoader::getSingleton().typedResources()) {
+
+                                                  bool selected = selection == res.first;
+
+                                                  if (ImGui::Selectable(res.first.data(), selected)) {
+                                                      selection = res.first;
+                                                  }
+
+                                                  if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+                                                      selection = res.first;
+                                                      alreadyClicked = true;
+                                                  }
+                                              }
+
+                                              ImGui::EndChild();
+
+                                              return DialogFlags { .acceptPossible = !selection.empty(), .implicitlyAccepted = alreadyClicked };
+                                          },
+                                          std::make_tuple(""s),
+                                          { .acceptText = "Open" })
+                        | Execution::then(
+                            [this](DialogResult result, const std::string &selection) {
+                                if (result == DialogResult::Accepted)
+                                    load(selection);
+                            }));
                 }
                 if (ImGui::MenuItem("Save Graph", "", false)) {
-                    if (mFilePath.empty())
-                        openSaveGraphPopup = true;
-                    else
+                    if (mFilePath.empty()) {
+                        Execution::detach(mRoot.filePicker(true)
+                            | Execution::then(
+                                [this](DialogResult result, const Filesystem::Path &path) {
+                                    if (result == DialogResult::Accepted) {
+                                        mFilePath = path;
+                                        save();
+                                    }
+                                }));
+                    } else {
                         save();
+                    }
                 }
 
                 if (ImGui::MenuItem("Debug", "", false)) {
@@ -489,69 +523,6 @@ namespace Tools {
                 ImGui::EndMenu();
             }
 
-            if (openSaveGraphPopup) {
-                mDirBuffer.clear();
-                mSelectionBuffer.clear();
-                ImGui::OpenPopup("SaveGraph");
-            }
-
-            if (openOpenGraphPopup) {
-                ImGui::OpenPopup("OpenGraph");
-            }
-
-            ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
-            if (ImGui::BeginPopupModal("SaveGraph")) {
-
-                bool accepted;
-                if (ImGui::FilePicker(&mDirBuffer, &mSelectionBuffer, accepted, true)) {
-                    if (accepted) {
-                        mFilePath = mSelectionBuffer;
-                        save();
-                    }
-                    ImGui::CloseCurrentPopup();
-                }
-
-                ImGui::EndPopup();
-            }
-
-            ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
-            if (ImGui::BeginPopupModal("OpenGraph")) {
-
-                bool alreadyClicked = false;
-
-                ImGui::BeginChild("GraphList", { 0.0f, -ImGui::GetFrameHeightWithSpacing() });
-
-                for (const std::pair<std::string_view, ScopePtr> &res : NodeGraph::NodeGraphLoader::getSingleton().typedResources()) {
-
-                    bool selected = mSelectionTargetBuffer == res.first;
-
-                    if (ImGui::Selectable(res.first.data(), selected)) {
-                        mSelectionTargetBuffer = res.first;
-                    }
-
-                    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-                        mSelectionTargetBuffer = res.first;
-                        alreadyClicked = true;
-                    }
-                }
-
-                ImGui::EndChild();
-
-                if (ImGui::Button("Cancel")) {
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::SameLine();
-                if (mSelectionTargetBuffer.empty())
-                    ImGui::BeginDisabled();
-                if (ImGui::Button("Open") || alreadyClicked) {
-                    load(mSelectionTargetBuffer);
-                    ImGui::CloseCurrentPopup();
-                }
-                if (mSelectionTargetBuffer.empty())
-                    ImGui::EndDisabled();
-
-                ImGui::EndPopup();
-            }
         }
     }
 

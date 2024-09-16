@@ -214,8 +214,8 @@ struct FilesystemPickerOptions {
 
 IMGUI_API FilesystemPickerOptions *GetFilesystemPickerOptions();
 
-IMGUI_API bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, const FilesystemPickerOptions *options = nullptr);
-IMGUI_API bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool allowNewFile = false, const FilesystemPickerOptions *options = nullptr);
+IMGUI_API bool DirectoryPicker(Engine::Filesystem::Path &path, Engine::Filesystem::Path &selection, const FilesystemPickerOptions &options = {});
+IMGUI_API bool FilePicker(Engine::Filesystem::Path &path, Engine::Filesystem::Path &selection, bool *clicked = nullptr, const FilesystemPickerOptions &options = {});
 
 struct InteractiveViewState {
     bool mMouseDown[3] = { false, false, false };
@@ -290,7 +290,7 @@ void PlotHistory(Engine::Debug::History<float, S> &data, const char *label, std:
         ImGui::Text("Min: ");
         ImGui::Text("Max: ");
         ImGui::TableNextColumn();
-        ImGui::UnitText(data.average(), units, ImGui::RightAlignText);        
+        ImGui::UnitText(data.average(), units, ImGui::RightAlignText);
         ImGui::UnitText(data.buffer()[(d.mIndex + S - 1) % S], units, ImGui::RightAlignText);
         ImGui::UnitText(d.mMin, units, ImGui::RightAlignText);
         ImGui::UnitText(d.mMax, units, ImGui::RightAlignText);
@@ -300,6 +300,5 @@ void PlotHistory(Engine::Debug::History<float, S> &data, const char *label, std:
         ImGui::EndTable();
     }
 }
-
 
 }

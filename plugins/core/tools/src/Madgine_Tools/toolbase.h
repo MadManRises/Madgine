@@ -47,6 +47,7 @@ namespace Tools {
 
         Threading::TaskQueue *taskQueue() const;
 
+
     protected:
         virtual Threading::Task<bool> init();
         virtual Threading::Task<void> finalize();
