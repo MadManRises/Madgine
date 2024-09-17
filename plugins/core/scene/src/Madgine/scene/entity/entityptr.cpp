@@ -3,7 +3,7 @@
 #include "entity.h"
 #include "entityptr.h"
 
-#include "../scenemanager.h"
+#include "../scenecontainer.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 
@@ -19,17 +19,17 @@ namespace Scene {
 
         struct EntityPtr::ControlBlockDummy {
 
-            SceneManager::ControlBlock *operator->() const
+            SceneContainer::ControlBlock *operator->() const
             {
                 return mBlock;
             }
 
-            operator SceneManager::ControlBlock *() const
+            operator SceneContainer::ControlBlock *() const
             {
                 return mBlock;
             }
 
-            SceneManager::ControlBlock *mBlock;
+            SceneContainer::ControlBlock *mBlock;
         };
 
         EntityPtr::EntityPtr(const EntityPtr &other)
@@ -138,7 +138,7 @@ namespace Scene {
         typename EntityPtr::ControlBlockDummy EntityPtr::getBlock() const
         {
             assert(mHoldsRef);
-            return { SceneManager::ControlBlock::fromPtr(mEntity) };
+            return { SceneContainer::ControlBlock::fromPtr(mEntity) };
         }
     }
 }

@@ -127,7 +127,7 @@ Engine::Threading::Task<void> GameManager::updateApp()
 
 void GameManager::spawnBrick()
 {
-    Engine::Scene::Entity::EntityPtr brick = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
+    Engine::Scene::Entity::EntityPtr brick = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().container("Default").createEntity();
 
     Engine::Scene::Entity::Transform *t = brick->addComponent<Engine::Scene::Entity::Transform>().get();
     t->mScale = { 0.01f, 0.01f, 0.01f };

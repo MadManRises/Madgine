@@ -87,24 +87,18 @@ namespace Scene {
         {
         }*/
 
-        Entity::Entity(Entity &&other, bool local)
+        /* Entity::Entity(Entity &&other, bool local)
             : SyncableUnitEx(std::move(other))
             , mName(std::move(other.mName))
             , mLocal(local)
             , mComponents(std::move(other.mComponents))
             , mSceneManager(other.mSceneManager)
         {
-        }
+        }*/        
 
-        Entity::Entity(Entity &&other)
-            : Entity(std::move(other), other.mLocal)
-        {
-        }
-
-        Entity::Entity(SceneManager &sceneMgr, bool local, const std::string &name)
+        Entity::Entity(SceneContainer &container, const std::string &name)
             : mName(name)
-            , mLocal(local)
-            , mSceneManager(sceneMgr)
+            , mContainer(container)
         {
         }
 
@@ -115,7 +109,7 @@ namespace Scene {
 
         Entity &Entity::operator=(Entity &&other)
         {
-            assert(&mSceneManager == &other.mSceneManager);
+            assert(&mContainer == &other.mContainer);
             SerializableUnitBase::operator=(std::move(other));
             mName = std::move(other.mName);
             mComponents = std::move(other.mComponents);
@@ -137,7 +131,7 @@ namespace Scene {
             auto it = mComponents.physical().find(i);
             if (it == mComponents.physical().end())
                 return {};
-            return { *it, &mSceneManager };
+            return { *it, &sceneMgr() };
         }
 
         EntityComponentPtr<const EntityComponentBase> Entity::getComponent(uint32_t i) const
@@ -145,7 +139,7 @@ namespace Scene {
             auto it = mComponents.physical().find(i);
             if (it == mComponents.physical().end())
                 return {};
-            return { { *it }, &mSceneManager };
+            return { { *it }, &sceneMgr() };
         }
 
         EntityComponentPtr<EntityComponentBase> Entity::getComponent(std::string_view name)
@@ -177,10 +171,10 @@ namespace Scene {
         {
             auto it = mComponents.physical().find(i);
             if (it != mComponents.physical().end()) {
-                return { *it, &mSceneManager };
+                return { *it, &sceneMgr() };
             } else {
-                auto it = mComponents.emplace(mSceneManager.entityComponentList(i).emplace(table, this));
-                return EntityComponentPtr<EntityComponentBase> { *it, &mSceneManager };
+                auto it = mComponents.emplace(sceneMgr().entityComponentList(i).emplace(table, this));
+                return EntityComponentPtr<EntityComponentBase> { *it, &sceneMgr() };
             }
         }
 
@@ -193,7 +187,7 @@ namespace Scene {
         {
             auto it = mComponents.find(i);
             assert(it != mComponents.physical().end());
-            mSceneManager.entityComponentList(i).erase(*it);
+            sceneMgr().entityComponentList(i).erase(*it);
             mComponents.erase(it);
         }
 
@@ -221,7 +215,7 @@ namespace Scene {
             std::string name;
             STREAM_PROPAGATE_ERROR(read(in, name, "name"));
             uint32_t i = EntityComponentRegistry::sComponentsByName().at(name);
-            handle = mSceneManager.entityComponentList(i).emplace({}, this);
+            handle = sceneMgr().entityComponentList(i).emplace({}, this);
             return {};
         }
 
@@ -232,11 +226,6 @@ namespace Scene {
             return "Component";
         }
 
-        bool Entity::isLocal() const
-        {
-            return mLocal;
-        }
-
         void Entity::handleEntityEvent(const typename std::set<EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op)
         {
             switch (op) {
@@ -245,22 +234,17 @@ namespace Scene {
             case AFTER | RESET:
                 throw "TODO";
             case AFTER | EMPLACE:
-                mSceneManager.entityComponentList(it->mHandle.mType).init(*it, this);
+                sceneMgr().entityComponentList(it->mHandle.mType).init(*it, this);
                 break;
             case BEFORE | ERASE:
-                mSceneManager.entityComponentList(it->mHandle.mType).finalize(*it, this);
+                sceneMgr().entityComponentList(it->mHandle.mType).finalize(*it, this);
                 break;
             }
         }
 
-        SceneManager &Entity::sceneMgr()
+        SceneManager &Entity::sceneMgr() const
         {
-            return mSceneManager;
-        }
-
-        const SceneManager &Entity::sceneMgr() const
-        {
-            return mSceneManager;
+            return mContainer.sceneMgr();
         }
 
         const std::vector<Debug::ContextInfo *> &Entity::behaviorContexts()
@@ -270,7 +254,7 @@ namespace Scene {
 
         EntityComponentPtr<EntityComponentBase> Entity::Helper::operator()(const EntityComponentOwningHandle<EntityComponentBase> &p) const
         {
-            return { p, &mEntity->mSceneManager };
+            return { p, &mEntity->sceneMgr() };
         }
     }
 }

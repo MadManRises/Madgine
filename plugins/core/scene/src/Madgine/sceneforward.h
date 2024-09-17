@@ -3,6 +3,7 @@
 namespace Engine {
 namespace Scene {
     struct SceneManager;
+    struct SceneContainer;
     struct SceneComponentBase;
 
     namespace Entity {

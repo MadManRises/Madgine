@@ -2,6 +2,8 @@
 
 #include "../manuallifetime.h"
 
+#include "emplace.h"
+
 namespace Engine {
 
 template <typename C, typename DataTraits = typename C::value_type>

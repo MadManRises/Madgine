@@ -30,10 +30,10 @@ namespace Scene {
             SERIALIZABLEUNIT(Entity)
 
             //Entity(const Entity &, bool local);
-            Entity(Entity &&, bool local);
-            Entity(Entity &&);
+            //            Entity(Entity &&, bool local);
+            Entity(Entity &&) = default;
 
-            Entity(SceneManager &sceneMgr, bool local, const std::string &name);
+            Entity(SceneContainer &container, const std::string &name);
             Entity(const Entity &) = delete;
             ~Entity();
 
@@ -151,15 +151,15 @@ namespace Scene {
 
             const std::vector<Debug::ContextInfo *> &behaviorContexts();
 
-            bool isLocal() const;
-
             void handleEntityEvent(const typename std::set<EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op);
 
-            SceneManager &sceneMgr();
-            const SceneManager &sceneMgr() const;
+            SceneManager &sceneMgr() const;
+
+            SceneContainer &container();
+            const SceneContainer &container() const;
 
             friend struct SyncableEntityComponentBase;
-            friend struct Scene::SceneManager;
+            friend struct Scene::SceneContainer;
 
         public:
             std::string mName;
@@ -168,11 +168,9 @@ namespace Scene {
             Serialize::StreamResult readComponent(Serialize::FormattedSerializeStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle);
             const char *writeComponent(Serialize::FormattedSerializeStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
 
-            bool mLocal;
-
             SERIALIZABLE_CONTAINER(mComponents, mutable_set<EntityComponentOwningHandle<EntityComponentBase>, std::less<>>, ParentFunctor<&Entity::handleEntityEvent>);
 
-            SceneManager &mSceneManager;
+            SceneContainer &mContainer;
 
             Execution::Lifetime mLifetime;
 

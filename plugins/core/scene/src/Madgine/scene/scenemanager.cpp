@@ -29,32 +29,32 @@
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/promise.h"
 
-#include "Generic/projections.h"
-
-UNIQUECOMPONENT(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
+UNIQUECOMPONENT(Engine::Scene::SceneManager);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
 //TODO
 //SYNCABLEUNIT_MEMBERS()
-READONLY_PROPERTY(entities, entities)
 MEMBER(mSceneComponents)
+//MEMBER(mContainers)
 METATABLE_END(Engine::Scene::SceneManager)
 
-static Engine::Threading::DataMutex::Lock static_lock(Engine::Scene::SceneManager *mgr)
+/* static Engine::Threading::DataMutex::Lock static_lock(Engine::Scene::SceneManager *mgr)
 {
     return mgr->mutex().lock(Engine::AccessMode::WRITE);
 }
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager,
     Engine::Serialize::CallableGuard<&static_lock>)
-FIELD(mEntities,
-    Serialize::ParentCreator<&Engine::Scene::SceneManager::readNonLocalEntity, &Engine::Scene::SceneManager::writeEntity>,
-    Serialize::RequestPolicy::no_requests)
 FIELD(mSceneComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Scene::SceneComponentBase>>>)
-SERIALIZETABLE_END(Engine::Scene::SceneManager)
+SERIALIZETABLE_END(Engine::Scene::SceneManager)*/
 
 namespace Engine {
 namespace Scene {
+    
+    SceneManager::ContainerData::ContainerData(SceneManager &manager)
+        : mContainer(manager)
+    {
+    }
 
     SceneManager::SceneManager(App::Application &app)
         : VirtualScope(app)
@@ -131,32 +131,6 @@ namespace Scene {
         }
     }
 
-    Entity::EntityPtr SceneManager::findEntity(const std::string &name)
-    {
-        auto it = std::ranges::find(mEntities, name, projectionKey);
-        if (it == mEntities.end()) {
-            return {};
-        }
-        return &*it;
-    }
-
-    std::string SceneManager::generateUniqueName()
-    {
-        static size_t itemCount = 0;
-        return "Madgine_AutoGen_Name_"s + std::to_string(++itemCount);
-    }
-
-    void SceneManager::remove(Entity::Entity *e)
-    {
-        if (e->isLocal()) {
-            auto it = std::ranges::find(mLocalEntities, e, projectionAddressOf);
-            mLocalEntities.erase(it);
-        } else {
-            auto it = std::ranges::find(mEntities, e, projectionAddressOf);
-            mEntities.erase(it);
-        }
-    }
-
     void SceneManager::clear()
     {
         mLifetime.end();
@@ -194,86 +168,18 @@ namespace Scene {
         return mSimulationClock;
     }
 
-    IntervalClock<Threading::CustomTimepoint> &Engine::Scene::SceneManager::animationClock()
+    IntervalClock<Threading::CustomTimepoint> &SceneManager::animationClock()
     {
         return mAnimationClock;
     }
 
-    Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &&e)
+    SceneContainer &SceneManager::container(std::string_view name)
     {
-        return &mLocalEntities.emplace_back(std::move(e), true);
-    }
-
-    Serialize::StreamResult SceneManager::readNonLocalEntity(Serialize::FormattedSerializeStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name)
-    {
-        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Entity", 1));
-        mgr = *this;
-        isLocal = false;
-        return read(in, name, "name");
-    }
-
-    std::tuple<SceneManager &, bool, std::string> SceneManager::createEntityData(const std::string &name, bool local)
-    {
-        std::string actualName = name.empty() ? generateUniqueName() : name;
-
-        return make_tuple(std::ref(*this), local, actualName);
-    }
-
-    const char *SceneManager::writeEntity(Serialize::FormattedSerializeStream &out, const Entity::Entity &entity) const
-    {
-        out.beginExtendedWrite("Entity", 1);
-        write(out, entity.name(), "name");
-        return "Entity";
-    }
-
-    Entity::EntityPtr SceneManager::createEntity(const std::string &name,
-        const std::function<void(Entity::Entity &)> &init)
-    {
-        auto toPtr = [this](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) {
-            Entity::Entity *entity = &*it;
-            mLifetime.attach(Execution::sequence(it->mLifetime.ended(), mMutex.locked(AccessMode::WRITE, [this, entity]() {
-                remove(entity);
-            })));
-            return Entity::EntityPtr { entity };
-        };
-        if (init)
-            return toPtr(TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false)));
-        else
-            return toPtr(TupleUnpacker::invokeFlatten(emplace, mEntities, mEntities.end(), createEntityData(name, false)));
-    }
-
-    void SceneManager::createEntityAsyncImpl(Serialize::GenericMessageReceiver receiver, const std::string &name, std::function<void(Entity::Entity &)> init)
-    {
-        Execution::detach(mMutex.locked(AccessMode::WRITE, [this, name, init { std::move(init) }, receiver { std::move(receiver) }]() mutable {
-            auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
-            if (init)
-                Execution::detach(
-                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init_async, this), mEntities.end(), init, createEntityData(name, false))
-                    | Execution::then(std::move(toPtr))
-                    | Execution::then_receiver(std::move(receiver)));
-            else
-                Execution::detach(
-                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_async, this), mEntities.end(), createEntityData(name, false))
-                    | Execution::then(std::move(toPtr))
-                    | Execution::then_receiver(std::move(receiver)));
-        }));
-    }
-
-    Entity::EntityPtr SceneManager::createLocalEntity(const std::string &name)
-    {
-        auto it = TupleUnpacker::invokeFlatten(emplace, mLocalEntities, mLocalEntities.end(), createEntityData(name, true));
-        Entity::Entity *entity = &*it;
-
-        mLifetime.attach(Execution::sequence(it->mLifetime.ended(), mMutex.locked(AccessMode::WRITE, [this, entity]() {
-            remove(entity);
-        })));
-
-        return entity;
-    }
-
-    Execution::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &SceneManager::entitiesSignal()
-    {
-        return mEntities.observer().signal();
+        auto pib = mContainers.try_emplace(std::string { name }, *this);
+        if (pib.second) {
+            mLifetime.attach(pib.first->second.mContainer.mLifetime.ended());
+        }
+        return pib.first->second.mContainer;
     }
 
     std::chrono::steady_clock::time_point SceneManager::Clock::get(std::chrono::steady_clock::time_point timepoint) const

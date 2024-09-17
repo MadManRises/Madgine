@@ -1,10 +1,6 @@
 #pragma once
 
-#include "Meta/serialize/hierarchy/toplevelunit.h"
-
 #include "scenecomponentcollector.h"
-
-#include "Meta/serialize/container/syncablecontainer.h"
 
 #include "Madgine/app/globalapibase.h"
 #include "Madgine/app/globalapicollector.h"
@@ -12,18 +8,11 @@
 
 #include "Modules/threading/datamutex.h"
 
-#include "Generic/execution/signalfunctor.h"
-
 #include "scenecomponentbase.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
-#include "entity/entityptr.h"
-
 #include "entity/entitycomponentcollector.h"
-
-#include "Generic/container/refcountedcontainer.h"
-#include "entity/entity.h"
 
 #include "Generic/keyvalue.h"
 
@@ -35,13 +24,13 @@
 
 #include "Modules/threading/customclock.h"
 
+#include "scenecontainer.h"
+
 namespace Engine {
 namespace Scene {
-    struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
-                                               App::GlobalAPI<Serialize::NoParent<SceneManager>> {
-        SERIALIZABLEUNIT(SceneManager)
+    struct MADGINE_SCENE_EXPORT SceneManager : App::GlobalAPI<SceneManager> {
 
-        using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
+        using Self = SceneManager;
 
         SceneManager(App::Application &app);
         SceneManager(const SceneManager &) = delete;
@@ -51,19 +40,7 @@ namespace Scene {
 
         void updateFrame();
 
-        Entity::EntityPtr createEntity(const std::string &name = "",
-            const std::function<void(Entity::Entity &)> &init = {});
-        void createEntityAsyncImpl(Serialize::GenericMessageReceiver receiver, const std::string &name = "",
-            std::function<void(Entity::Entity &)> init = {});
-        ASYNC_STUB(createEntityAsync, createEntityAsyncImpl, Serialize::make_message_sender<Entity::EntityPtr>);
-
-        Entity::EntityPtr createLocalEntity(const std::string &name = "");
-        Entity::EntityPtr findEntity(const std::string &name);
-        void remove(Entity::Entity *e);
         void clear();
-
-        //Entity::Entity *makeLocalCopy(Entity::Entity &e);
-        Entity::Entity *makeLocalCopy(Entity::Entity &&e);
 
         void pause();
         bool unpause();
@@ -72,6 +49,13 @@ namespace Scene {
 
         IntervalClock<Threading::CustomTimepoint> &simulationClock();
         IntervalClock<Threading::CustomTimepoint> &animationClock();
+
+        SceneContainer &container(std::string_view name);
+
+        /* decltype(auto) entities()
+        {
+            return concatIt(mEntities, mLocalEntities) | std::views::transform(EntityHelper {});
+        }*/
 
         template <typename T>
         T &getComponent()
@@ -130,8 +114,6 @@ namespace Scene {
 
         Threading::DataMutex &mutex();
 
-        Execution::SignalStub<const EntityContainer::iterator &, int> &entitiesSignal();
-
         template <typename T>
         Entity::EntityComponentList<T> &entityComponentList()
         {
@@ -171,40 +153,18 @@ namespace Scene {
 
         std::vector<Debug::ContextInfo *> mBehaviorContexts;
 
-        ////////////////////////////////////////////// ECS
-
-    private:
-        std::string generateUniqueName();
-
-        Serialize::StreamResult readNonLocalEntity(Serialize::FormattedSerializeStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name);
-        std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
-        const char *writeEntity(Serialize::FormattedSerializeStream &out, const Entity::Entity &entity) const;
-
-    private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
-        SYNCABLE_CONTAINER(mEntities, EntityContainer, Execution::SignalFunctor<const EntityContainer::iterator &, int>);
-        container_api<RefcountedContainer<std::deque<Serialize::NoParent<Entity::Entity>>>> mLocalEntities;
+    public:
+        MEMBER_OFFSET_CONTAINER(mSceneComponents, , SceneComponentContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>>);
 
-        struct EntityHelper {
-            Entity::EntityPtr operator()(Entity::Entity &ref) const
-            {
-                return { &ref };
-            }
+        struct ContainerData {
+            ContainerData(SceneManager &manager);
+            ContainerData(ContainerData &&) = delete;
+
+            Serialize::NoParent<SceneContainer> mContainer;            
         };
-
-    public:
-        using ControlBlock = typename EntityContainer::ControlBlock;
-
-        decltype(auto) entities()
-        {
-            return concatIt(mEntities, mLocalEntities) | std::views::transform(EntityHelper {});
-        }
-
-        ////////////////////////////////////////// ECS End
-
-    public:
-        MEMBER_OFFSET_CONTAINER(mSceneComponents, , SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
+        std::map<std::string, ContainerData> mContainers;
     };
 
 }
