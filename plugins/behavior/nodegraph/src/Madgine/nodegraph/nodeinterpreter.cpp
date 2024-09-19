@@ -65,14 +65,15 @@ namespace NodeGraph {
             receiver.stopToken(), Debug::ContinuationType::Flow);
     }
 
-    void NodeInterpreterStateBase::read(ValueType &retVal, Pin pin)
+    BehaviorError NodeInterpreterStateBase::read(ValueType &retVal, Pin pin)
     {
         if (!pin) {
             throw 0;
         } else if (!pin.mNode) {
             retVal = mArguments.at(pin.mIndex);
+            return {};
         } else {
-            mGraph->node(pin.mNode)->interpretRead(*this, retVal, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
+            return mGraph->node(pin.mNode)->interpretRead(*this, retVal, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
         }
     }
 
@@ -81,9 +82,9 @@ namespace NodeGraph {
         mGraph->node(pin.mNode)->interpretWrite(*this, mData[pin.mNode - 1], v, pin.mIndex, pin.mGroup);
     }
 
-    void NodeInterpreterStateBase::read(ValueType &retVal, uint32_t dataProvider)
+    BehaviorError NodeInterpreterStateBase::read(ValueType &retVal, uint32_t dataProvider)
     {
-        read(retVal, mGraph->mDataInPins[dataProvider].mSource);
+        return read(retVal, mGraph->mDataInPins[dataProvider].mSource);
     }
 
     void NodeInterpreterStateBase::write(uint32_t dataReceiver, const ValueType &v)

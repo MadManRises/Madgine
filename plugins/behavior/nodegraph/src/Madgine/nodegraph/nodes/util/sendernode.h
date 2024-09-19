@@ -77,13 +77,13 @@ namespace NodeGraph {
         static_assert(Config::constant || Config::exposedVariables::size == 0);
 
         template <uint32_t I>
-        static auto buildArgs(const std::tuple<> &values, type_pack<> args, std::vector<NodeResults> *results = nullptr)
+        static auto buildArgs(const std::tuple<>& values, type_pack<> args, std::vector<NodeResults>* results = nullptr)
         {
             return std::make_tuple();
         }
 
         template <uint32_t I, typename... Vs, typename T, typename... Ts>
-        static auto buildArgs(std::tuple<Vs...> &&values, type_pack<T, Ts...> args, std::vector<NodeResults> *results = nullptr)
+        static auto buildArgs(std::tuple<Vs...>&& values, type_pack<T, Ts...> args, std::vector<NodeResults>* results = nullptr)
         {
             if constexpr (is_pred_sender<T>::value) {
                 return std::tuple_cat(
@@ -110,7 +110,7 @@ namespace NodeGraph {
             }
         }
 
-        static auto buildSender(value_argument_tuple &&values, std::vector<NodeResults> *results = nullptr)
+        static auto buildSender(value_argument_tuple&& values, std::vector<NodeResults>* results = nullptr)
         {
             if constexpr (Config::constant)
                 return TupleUnpacker::invokeFromTuple(Algorithm, buildArgs<0>(std::move(values), argument_types {}, results));
@@ -136,62 +136,64 @@ namespace NodeGraph {
         template <typename Signature>
         ExtendedValueTypeDesc signature_type(uint32_t index) const
         {
-            return [this, index]<typename... T>(type_pack<T...>) {
+            return [ this, index ]<typename... T>(type_pack<T...>)
+            {
                 ExtendedValueTypeDesc types[] = { resolveType<T>()... };
                 return types[index];
-            }(Signature {});
+            }
+            (Signature {});
         }
 
         template <typename Signature>
         ExtendedValueTypeDesc stream_type(uint32_t index) const
         {
-            return [this, index]<typename... T>(type_pack<T...>) {
+            return [ this, index ]<typename... T>(type_pack<T...>)
+            {
                 ExtendedValueTypeDesc types[] = {
                     resolveType<T>()...
                 };
                 return types[index % Signature::size];
-            }(Signature {});
+            }
+            (Signature {});
         }
 
         using Sender = decltype(buildSender(std::declval<value_argument_tuple>()));
 
         struct DummyReceiver : NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>> {
             template <typename... Args>
-            void set_value(Args &&...args)
+            void set_value(Args&&... args)
             {
-                mValues = { ValueType { std::forward<decayed_t<Args>>(args) }... };
-                mHasReturned = true;
+                mStorage.set_value(std::forward<Args>(args)...);
             }
 
             template <typename... Args>
-            void set_error(Args &&...args)
+            void set_error(Args&&... args)
             {
-                throw 0;
+                mStorage.set_error(std::forward<Args>(args)...);
             }
 
             void set_done()
             {
-                throw 0;
+                mStorage.set_done();
             }
 
-            bool mHasReturned = false;
-            NodeResults mValues;
+            Execution::ResultStorage<Sender> mStorage;
 
             template <typename CPO, typename... Args>
-            friend auto tag_invoke(CPO f, DummyReceiver &receiver, Args &&...args)
-                -> tag_invoke_result_t<CPO, NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>> &, Args...>
+            friend auto tag_invoke(CPO f, DummyReceiver& receiver, Args&&... args)
+                -> tag_invoke_result_t<CPO, NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>>&, Args...>
             {
-                return f(static_cast<NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>> &>(receiver), std::forward<Args>(args)...);
+                return f(static_cast<NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>>&>(receiver), std::forward<Args>(args)...);
             }
         };
 
-        SenderNode(NodeGraph &graph)
+        SenderNode(NodeGraph& graph)
             : Node<SenderNode<Config, Algorithm, Arguments...>, AutoMaskNode<>>(graph)
         {
             this->setup();
         }
 
-        SenderNode(const SenderNode &other, NodeGraph &graph)
+        SenderNode(const SenderNode& other, NodeGraph& graph)
             : Node<SenderNode<Config, Algorithm, Arguments...>, AutoMaskNode<>>(other, graph)
             , mArguments(other.mArguments)
             , mDynamicNames(other.mDynamicNames)
@@ -218,13 +220,15 @@ namespace NodeGraph {
 
         uint32_t flowOutBaseCount(uint32_t group) const override
         {
-            static constexpr auto counts = []<typename... InnerAlg, typename... SuccSender>(type_pack<InnerAlg...>, type_pack<SuccSender...>) {
+            static constexpr auto counts = []<typename... InnerAlg, typename... SuccSender>(type_pack<InnerAlg...>, type_pack<SuccSender...>)
+            {
                 return std::array {
                     static_cast<int>(!Config::constant),
                     ((void)sizeof(type_pack<InnerAlg>), 1)...,
                     ((void)sizeof(type_pack<SuccSender>), 1)...
                 };
-            }(algorithms {}, succ_senders {});
+            }
+            (algorithms {}, succ_senders {});
             return counts[group];
         }
 
@@ -255,11 +259,13 @@ namespace NodeGraph {
 
         uint32_t dataInBaseCount(uint32_t group) const override
         {
-            static constexpr auto sizes = []<typename... Inner>(type_pack<Inner...>) {
+            static constexpr auto sizes = []<typename... Inner>(type_pack<Inner...>)
+            {
                 return std::array<uint32_t, in_types::size> {
                     dataInBaseCountHelper<Inner>()...
                 };
-            }(in_types {});
+            }
+            (in_types {});
 
             return sizes[group];
         }
@@ -276,21 +282,25 @@ namespace NodeGraph {
 
         ExtendedValueTypeDesc dataInType(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            static constexpr auto types = []<typename... Inner>(type_pack<Inner...>) {
+            static constexpr auto types = []<typename... Inner>(type_pack<Inner...>)
+            {
                 return std::array<ExtendedValueTypeDesc (SenderNode::*)(uint32_t) const, in_types::size> {
                     dataInTypeHelper<Inner>()...
                 };
-            }(in_types {});
+            }
+            (in_types {});
             return (this->*types[group])(index);
         }
 
         bool dataInVariadic(uint32_t group = 0) const override
         {
-            static constexpr auto variadic = []<typename... Inner>(type_pack<Inner...>) {
+            static constexpr auto variadic = []<typename... Inner>(type_pack<Inner...>)
+            {
                 return std::array<bool, in_types::size> {
                     InstanceOf<Inner, NodeStream>...
                 };
-            }(in_types {});
+            }
+            (in_types {});
 
             return variadic[group];
         }
@@ -302,29 +312,34 @@ namespace NodeGraph {
 
         uint32_t dataProviderBaseCount(uint32_t group) const override
         {
-            static constexpr auto sizes = []<typename... InnerAlg>(type_pack<InnerAlg...>) {
+            static constexpr auto sizes = []<typename... InnerAlg>(type_pack<InnerAlg...>)
+            {
                 return std::array {
                     Sender::template value_types<type_pack>::size,
                     InnerAlg::Signature::size...
                 };
-            }(algorithms {});
+            }
+            (algorithms {});
             return sizes[group];
         }
 
         ExtendedValueTypeDesc dataProviderType(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            static constexpr auto types = []<typename... InnerAlg>(type_pack<InnerAlg...>) {
+            static constexpr auto types = []<typename... InnerAlg>(type_pack<InnerAlg...>)
+            {
                 return std::array {
                     &SenderNode::template signature_type<typename Sender::template value_types<Execution::signature>>,
                     &SenderNode::template signature_type<typename InnerAlg::Signature>...
                 };
-            }(algorithms {});
+            }
+            (algorithms {});
             return (this->*types[group])(index);
         }
 
-        bool resolveVariableType(ExtendedValueTypeDesc &type, std::string_view name) const override
+        bool resolveVariableType(ExtendedValueTypeDesc& type, std::string_view name) const override
         {
-            return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>) {
+            return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>)
+            {
                 return ([&]() {
                     if (name == getDynamicName<Names>()) {
                         type = resolveType<T>();
@@ -332,7 +347,8 @@ namespace NodeGraph {
                     }
                     return false;
                 }() || ...);
-            }(typename Config::exposedVariables {});
+            }
+            (typename Config::exposedVariables {});
         }
 
         struct InterpretData : NodeInterpreterData {
@@ -342,7 +358,7 @@ namespace NodeGraph {
             using InnerReceiver = std::conditional_t<Config::constant,
                 std::conditional_t<(Config::exposedVariables::size > 0),
                     DummyReceiver,
-                    DummyReceiver &>,
+                    DummyReceiver&>,
                 Receiver>;
             using State = Execution::connect_result_t<Sender, InnerReceiver>;
 
@@ -364,10 +380,10 @@ namespace NodeGraph {
             }
 
             struct Receiver {
-                InterpretData *mData;
+                InterpretData* mData;
 
                 template <typename... Args>
-                void set_value(Args &&...args)
+                void set_value(Args&&... args)
                 {
                     if (mData->mResults.empty())
                         mData->mResults.emplace_back();
@@ -392,8 +408,8 @@ namespace NodeGraph {
                 }
 
                 template <typename CPO, typename... Args>
-                friend auto tag_invoke(CPO f, Receiver &receiver, Args &&...args)
-                    -> tag_invoke_result_t<CPO, NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> &, Args...>
+                friend auto tag_invoke(CPO f, Receiver& receiver, Args&&... args)
+                    -> tag_invoke_result_t<CPO, NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>&, Args...>
                 {
                     return f(*receiver.mData->mReceiver, std::forward<Args>(args)...);
                 }
@@ -411,7 +427,7 @@ namespace NodeGraph {
                 mState->start();
             }
 
-            void buildState(InnerReceiver receiver, value_argument_tuple &&args)
+            void buildState(InnerReceiver receiver, value_argument_tuple&& args)
             {
                 construct(mState,
                     DelayedConstruct<State> { [&]() { return Execution::connect(buildSender(std::move(args), &mResults), std::forward<InnerReceiver>(receiver)); } });
@@ -428,33 +444,39 @@ namespace NodeGraph {
                 return Execution::get_context(Execution::get_receiver(mState)).mNode.template getDynamicName<Name>();
             }
 
-            virtual bool readVar(ValueType &result, std::string_view name) override
+            virtual bool readVar(ValueType& result, std::string_view name) override
             {
-                return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>) {
+                return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>)
+                {
                     return ([&]() {                    
                             if (name == getDynamicName<Names>()) {
                                 return Execution::resolve_var<Names>(Execution::get_receiver(mState), result);
                             }
                             return false; }() || ...);
-                }(typename Config::exposedVariables {});
+                }
+                (typename Config::exposedVariables {});
             }
 
-            virtual bool writeVar(std::string_view name, const ValueType &value) override
+            virtual bool writeVar(std::string_view name, const ValueType& value) override
             {
-                return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>) {
+                return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>)
+                {
                     return ([&]() {                    
                             if (name == getDynamicName<Names>()) {
                                 return Execution::store_var<Names>(Execution::get_receiver(mState), value);
                             }
                             return false; }() || ...);
-                }(typename Config::exposedVariables {});
+                }
+                (typename Config::exposedVariables {});
             }
 
             virtual std::vector<std::string_view> variables() override
             {
-                return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>) {
+                return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>)
+                {
                     return std::vector<std::string_view> { Names... };
-                }(typename Config::exposedVariables {});
+                }
+                (typename Config::exposedVariables {});
             }
 
             ValueType read(uint32_t providerIndex, uint32_t group) const
@@ -467,26 +489,26 @@ namespace NodeGraph {
             ManualLifetime<NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>> mReceiver = std::nullopt;
         };
 
-        void setupInterpret(NodeInterpreterStateBase &interpreter, std::unique_ptr<NodeInterpreterData> &data) const override
+        void setupInterpret(NodeInterpreterStateBase& interpreter, std::unique_ptr<NodeInterpreterData>& data) const override
         {
             if constexpr (Config::exposedVariables::size > 0) {
                 data = std::make_unique<InterpretData>(DummyReceiver { interpreter, *this }, mArguments);
             }
         }
 
-        void interpret(NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override
+        void interpret(NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeInterpreterData>& data, uint32_t flowIn, uint32_t group) const override
         {
             if constexpr (!Config::constant) {
                 if (!data) {
                     data = std::make_unique<InterpretData>(mArguments);
                 }
-                static_cast<InterpretData *>(data.get())->start({ receiver.mInterpreter, static_cast<const SenderNode<Config, Algorithm, Arguments...> &>(receiver.mNode), receiver.mReceiver, receiver.mDebugLocation });
+                static_cast<InterpretData*>(data.get())->start({ receiver.mInterpreter, static_cast<const SenderNode<Config, Algorithm, Arguments...>&>(receiver.mNode), receiver.mReceiver, receiver.mDebugLocation });
             } else {
                 throw 0;
             }
         }
 
-        void interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const override
+        BehaviorError interpretRead(NodeInterpreterStateBase& interpreter, ValueType& retVal, std::unique_ptr<NodeInterpreterData>& data, uint32_t providerIndex, uint32_t group) const override
         {
             if constexpr (Config::constant) {
                 if constexpr (Config::exposedVariables::size > 0) {
@@ -499,16 +521,27 @@ namespace NodeGraph {
 
                     data.start();
 
-                    assert(rec.mHasReturned);
-                    retVal = rec.mValues[providerIndex];
+                    assert(!rec.mStorage.is_null());
+                    if constexpr (rec.mStorage.can_have_error) {
+                        if (rec.mStorage.is_error()) {
+                            return std::move(rec.mStorage).error().mError;
+                        }
+                    }
+                    retVal = TupleUnpacker::select(
+                        std::move(rec.mStorage).value().mValues,
+                        [](auto&& v) -> ValueType {
+                            return ValueType { std::forward<decltype(v)>(v) };
+                        },
+                        providerIndex);
                 }
             } else {
                 assert(data);
-                retVal = static_cast<InterpretData *>(data.get())->read(providerIndex, group);
+                retVal = static_cast<InterpretData*>(data.get())->read(providerIndex, group);
             }
+            return {};
         }
 
-        virtual CodeGen::Statement generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const override
+        virtual CodeGen::Statement generateRead(CodeGenerator& generator, std::unique_ptr<CodeGeneratorData>& data, uint32_t providerIndex, uint32_t group) const override
         {
 
             /* auto result = CodeGen::generatorFromSender(buildSender(value_argument_tuple { mArguments }), NodeCodegenReceiver { 0, this, generator }).generate();
@@ -527,7 +560,7 @@ namespace NodeGraph {
 
         value_argument_tuple mArguments;
         template <size_t I>
-        const decayed_t<std::tuple_element_t<I, value_argument_tuple>> &getArguments() const
+        const decayed_t<std::tuple_element_t<I, value_argument_tuple>>& getArguments() const
         {
             return std::get<I>(mArguments);
         }
@@ -544,9 +577,11 @@ namespace NodeGraph {
 
         static auto namesHelper()
         {
-            return []<fixed_string... Names>(type_pack<auto_holder<Names>...>) {
+            return []<fixed_string... Names>(type_pack<auto_holder<Names>...>)
+            {
                 return std::make_tuple(NamedString<Names> { std::string { Names } }...);
-            }(typename Config::dynamicVariableNames {});
+            }
+            (typename Config::dynamicVariableNames {});
         }
         decltype(namesHelper()) mDynamicNames = namesHelper();
         template <fixed_string Name>

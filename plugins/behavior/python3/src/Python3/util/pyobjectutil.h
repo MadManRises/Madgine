@@ -61,6 +61,7 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const FlagsHolder &f);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const KeyValueFunction &f);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const KeyValueSender &s);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const ValueTypeDesc &t);
 
         MADGINE_PYTHON3_EXPORT ValueType fromPyObject(PyObject *obj);
         MADGINE_PYTHON3_EXPORT void fromPyObject(BehaviorReceiver &receiver, PyObject *obj);

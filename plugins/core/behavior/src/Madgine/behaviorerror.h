@@ -6,8 +6,8 @@ namespace Engine {
 
 ENUM_BASE(BehaviorResult, GenericResult)
 
-struct MADGINE_BEHAVIOR_EXPORT BehaviorError {
-    BehaviorError(GenericResult result);
+struct MADGINE_BEHAVIOR_EXPORT [[nodiscard]] BehaviorError {
+    BehaviorError(GenericResult result = GenericResult::SUCCESS);
     BehaviorError(BehaviorResult result, const std::string &msg = "", const char *file = nullptr, size_t sourceLine = 0);
 
     MADGINE_BEHAVIOR_EXPORT friend std::ostream &operator<<(std::ostream &out, const BehaviorError &error);

@@ -90,13 +90,14 @@ namespace NodeGraph {
         return mFunction->mReturnType;
     }
 
-    void FunctionNode::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
+    BehaviorError FunctionNode::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         ArgumentList arguments { dataInCount() };
         for (size_t i = 0; i < dataInCount(); ++i) {
             NodeInterpretHandle<NodeBase> { interpreter, *this }.read(arguments[i], i);
         }
         mFunction->mFunctionPtr(mFunction, retVal, arguments);
+        return {};
     }
 
     CodeGen::Statement FunctionNode::generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const

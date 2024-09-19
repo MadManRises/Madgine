@@ -79,6 +79,8 @@ struct IMGUI_API ValueTypeDrawer {
     static bool draw(const Engine::KeyValueSender &s);
     static bool draw(std::chrono::nanoseconds &d);
     static bool draw(const std::chrono::nanoseconds &d);
+    static bool draw(Engine::ValueTypeDesc &t);
+    static bool draw(const Engine::ValueTypeDesc &t);
 };
 
 IMGUI_API void setPayloadStatus(std::string_view s);
@@ -87,7 +89,7 @@ IMGUI_API void Text(std::string_view s);
 IMGUI_API bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void *user_data = nullptr);
 IMGUI_API bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void *user_data = nullptr);
 
-IMGUI_API bool ValueTypeTypePicker(Engine::ValueType *v);
+IMGUI_API bool ValueTypeTypePicker(Engine::ValueTypeDesc &t);
 
 IMGUI_API void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags = 0);
 IMGUI_API bool EndTreeArrow(bool *opened = nullptr);

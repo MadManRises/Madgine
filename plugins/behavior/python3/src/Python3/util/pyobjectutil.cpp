@@ -298,6 +298,12 @@ namespace Scripting {
             return nullptr;
         }
 
+        PyObject *toPyObject(const ValueTypeDesc &t)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <type> yet");
+            return nullptr;
+        }
+
         struct Functor_to_KeyValuePair {
             void operator()(KeyValuePair &p, const std::pair<PyObject *, PyObject *> &o)
             {

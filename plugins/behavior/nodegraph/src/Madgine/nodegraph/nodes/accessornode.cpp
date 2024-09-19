@@ -84,12 +84,14 @@ namespace NodeGraph {
         return mAccessor->second.mType;
     }
 
-    void AccessorNode::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
+    BehaviorError AccessorNode::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         ValueType scope;
-        NodeInterpretHandle<NodeBase> { interpreter, *this }.read(scope, 0);
+        if (BehaviorError error = NodeInterpretHandle<NodeBase> { interpreter, *this }.read(scope, 0); error.mResult != GenericResult::SUCCESS)
+            return error;
 
         mAccessor->second.mGetter(retVal, scope.as<ScopePtr>());
+        return {};
     }
 
     CodeGen::Statement AccessorNode::generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const

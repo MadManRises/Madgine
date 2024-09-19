@@ -20,7 +20,7 @@ namespace NodeGraph {
     struct MADGINE_NODEGRAPH_EXPORT NodeInterpretHandleBase {
         NodeInterpreterStateBase &mInterpreter;
 
-        void read(const NodeBase &node, ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0);
+        BehaviorError read(const NodeBase &node, ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0);
 
         void write(const NodeBase &node, const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0);
 
@@ -32,9 +32,9 @@ namespace NodeGraph {
     struct NodeInterpretHandle : NodeInterpretHandleBase {
         const Node &mNode;
 
-        void read(ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0)
+        BehaviorError read(ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0)
         {
-            NodeInterpretHandleBase::read(mNode, retVal, dataInIndex, group);
+            return NodeInterpretHandleBase::read(mNode, retVal, dataInIndex, group);
         }
 
         void write(const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0)
@@ -116,7 +116,8 @@ namespace NodeGraph {
             handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(0, flowOutIndex), mDebugLocation);
         }
 
-        void set_value(ArgumentList args) override {
+        void set_value(ArgumentList args) override
+        {
             mDebugLocation.stepOut(Execution::get_debug_location(this->mRec));
             VirtualBehaviorState<Rec>::set_value(std::move(args));
         }
@@ -165,7 +166,7 @@ namespace NodeGraph {
     struct NodeReader {
         using Signature = Execution::signature<T...>;
 
-        using result_type = void;
+        using result_type = BehaviorError;
         template <template <typename...> typename Tuple>
         using value_types = Tuple<decayed_t<T>...>;
 
@@ -196,11 +197,18 @@ namespace NodeGraph {
                 } else {
                     assert(mIndex == 0);
                     std::tuple<typed_Value<T>...> data;
-                    TupleUnpacker::forEach(data, [&]<typename Ty>(typed_Value<Ty> &v) {
-                        handle.read(v, mIndex++);
-                    });
+                    BehaviorError error = TupleUnpacker::accumulate(data, [&]<typename Ty>(typed_Value<Ty> &v, BehaviorError e) {
+                        if (e.mResult != GenericResult::SUCCESS)
+                            return e;
+                        return handle.read(v, mIndex++);
+                        },
+                        BehaviorError {});
                     mIndex = 0;
-                    this->set_value(std::get<I>(data).template as<decayed_t<T>>()...);
+                    if (error.mResult != GenericResult::SUCCESS) {
+                        this->set_error(std::move(error));
+                    } else {
+                        this->set_value(std::get<I>(data).template as<decayed_t<T>>()...);
+                    }
                 }
             }
 

@@ -55,10 +55,10 @@ namespace NodeGraph {
         void branch(BehaviorReceiver &receiver, uint32_t flowIn, NodeDebugLocation &location);
         void branch(BehaviorReceiver &receiver, Pin pin, NodeDebugLocation &location);
 
-        void read(ValueType &retVal, Pin pin);
+        BehaviorError read(ValueType &retVal, Pin pin);
         void write(Pin pin, const ValueType &v);
 
-        void read(ValueType &retVal, uint32_t dataProvider);
+        BehaviorError read(ValueType &retVal, uint32_t dataProvider);
         void write(uint32_t dataReceiver, const ValueType &v);
 
         const NodeGraph *graph() const;
@@ -182,6 +182,8 @@ namespace NodeGraph {
         {
             f(Execution::State::SubLocation {});
         }
+
+        static constexpr size_t debug_operation_increment = 1;
 
         NodeGraphLoader::Handle mHandle;
         const NodeGraph *mGraph;

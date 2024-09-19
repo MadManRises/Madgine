@@ -10,10 +10,10 @@
 namespace Engine {
 namespace NodeGraph {
 
-    void NodeInterpretHandleBase::read(const NodeBase &node, ValueType &retVal, uint32_t dataInIndex, uint32_t group)
+    BehaviorError NodeInterpretHandleBase::read(const NodeBase &node, ValueType &retVal, uint32_t dataInIndex, uint32_t group)
     {
         Pin pin = node.dataInSource(dataInIndex, group);
-        mInterpreter.read(retVal, pin);
+        return mInterpreter.read(retVal, pin);
     }
 
     void NodeInterpretHandleBase::write(const NodeBase &node, const ValueType &v, uint32_t dataOutIndex, uint32_t group)

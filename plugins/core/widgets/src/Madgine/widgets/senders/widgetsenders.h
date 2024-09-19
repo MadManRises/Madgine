@@ -5,10 +5,6 @@
 
 #include "../widget.h"
 
-#include "Interfaces/input/inputevents.h"
-
-#include "Madgine/nativebehaviorcollector.h"
-
 namespace Engine {
 namespace Widgets {
 
@@ -18,6 +14,3 @@ namespace Widgets {
 
 }
 }
-
-NATIVE_BEHAVIOR_DECLARATION(Get_Widget)
-NATIVE_BEHAVIOR_DECLARATION(Get_WidgetManager)

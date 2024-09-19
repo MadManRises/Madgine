@@ -465,6 +465,17 @@ bool ValueTypeDrawer::draw(const std::chrono::nanoseconds &d)
     return false;
 }
 
+bool ValueTypeDrawer::draw(Engine::ValueTypeDesc &t)
+{
+    return ValueTypeTypePicker(t);
+}
+
+bool ValueTypeDrawer::draw(const Engine::ValueTypeDesc &t)
+{
+    Text(t.toString());
+    return false;
+}
+
 void setPayloadStatus(std::string_view msg)
 {
     if (ImGui::GetIO().KeyShift)
@@ -525,25 +536,27 @@ bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flag
 }
 
 template <typename T>
-bool SelectValueTypeType(Engine::ValueType *v)
+bool SelectValueTypeType(Engine::ValueTypeDesc &t)
 {
-    bool result = Selectable(Engine::toValueTypeIndex<T>().toString().data(), v->is<T>());
+    Engine::ValueTypeDesc desc;
+
+    bool result = Selectable(desc.toString().data(), t == desc);
     if (result)
-        *v = T {};
+        t = desc;
     return result;
 }
 
 template <typename... Ty>
-bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
+bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueTypeDesc &t)
 {
-    return (SelectValueTypeType<Ty>(v) || ...);
+    return (SelectValueTypeType<Ty>(t) || ...);
 }
 
-bool ValueTypeTypePicker(Engine::ValueType *v)
+bool ValueTypeTypePicker(Engine::ValueTypeDesc &t)
 {
     bool changed = false;
     if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
-        changed |= SelectValueTypeTypes(Engine::ValueTypeList::transform<Engine::type_pack_first>::filter<std::is_default_constructible> {}, v);
+        changed |= SelectValueTypeTypes(Engine::ValueTypeList::transform<Engine::type_pack_first> {}, t);
         ImGui::EndCombo();
     }
     return changed;

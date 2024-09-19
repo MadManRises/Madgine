@@ -14,13 +14,13 @@
 
 #include "Generic/customfunctors.h"
 
-#include "Madgine/behavior.h"
-
 #include "Generic/execution/lifetime.h"
 
 #include "Madgine/debug/debuggablesender.h"
 
 #include "Interfaces/log/logsenders.h"
+
+#include "Madgine/behavior.h"
 
 namespace Engine {
 namespace Scene {

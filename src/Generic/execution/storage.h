@@ -23,25 +23,28 @@ namespace Execution {
     struct ValueStorageImpl<V> {
         template <typename U>
         ValueStorageImpl(U &&u)
-            : mValue(std::forward<U>(u))
+            : mValues(std::forward<U>(u))
         {
         }
 
         void reproduce(auto &rec)
         {
-            rec.set_value(std::forward<V>(mValue));
+            rec.set_value(std::forward<V>(std::get<0>(mValues)));
         }
 
         operator V()
         {
-            return std::forward<V>(mValue);
+            return std::forward<V>(std::get<0>(mValues));
         }
 
-        V mValue;
+        std::tuple<V> mValues;
     };
 
     template <typename R>
     struct ErrorStorageImpl {
+
+        static constexpr bool is_void = false;
+
         template <typename V>
         ErrorStorageImpl(V &&e)
             : mError(std::forward<V>(e))
@@ -60,6 +63,8 @@ namespace Execution {
     struct ErrorStorageImpl<void> {
         ErrorStorageImpl() = delete;
 
+        static constexpr bool is_void = true;
+        
         void reproduce(auto &rec)
         {
             throw 0;
@@ -88,6 +93,9 @@ namespace Execution {
 
     template <typename Sender>
     struct ResultStorage {
+                
+        static constexpr bool can_have_error = !ErrorStorage<Sender>::is_void;
+
         void reproduce(auto &rec)
         {
             std::visit([&](auto &storage) {
@@ -144,6 +152,11 @@ namespace Execution {
         ValueStorage<Sender> value() &&
         {
             return std::move(std::get<ValueStorage<Sender>>(mState));
+        }
+
+        ErrorStorage<Sender> error() &&
+        {
+            return std::move(std::get<ErrorStorage<Sender>>(mState));
         }
 
         std::variant<NullStorage, ValueStorage<Sender>, ErrorStorage<Sender>, DoneStorage> mState;

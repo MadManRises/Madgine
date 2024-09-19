@@ -72,7 +72,7 @@ enum class ValueTypeEnum : unsigned char {
 struct META_EXPORT ValueTypeIndex {
     ValueTypeEnum mIndex;
 
-    constexpr ValueTypeIndex(ValueTypeEnum index)
+    constexpr ValueTypeIndex(ValueTypeEnum index = ValueTypeEnum::NullValue)
         : mIndex(index)
     {
     }

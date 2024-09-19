@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Generic/genericresult.h"
+
 namespace Engine {
 namespace Execution {
 

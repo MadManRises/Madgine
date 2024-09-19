@@ -146,9 +146,10 @@ namespace NodeGraph {
         static_cast<LibraryInterpretData *>(data.get())->start(std::move(receiver));
     }
 
-    void LibraryNode::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
+    BehaviorError LibraryNode::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         retVal = static_cast<LibraryInterpretData *>(data.get())->mResult[providerIndex];
+        return {};
     }
 
 }

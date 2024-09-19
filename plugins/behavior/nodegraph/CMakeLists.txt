@@ -7,7 +7,7 @@ FolderSources(sources "" src)
 			FolderSources(sources nodegraph nodes accessornode.cpp accessornode.h functionnode.cpp functionnode.h pumpnode.cpp pumpnode.h testnode.cpp testnode.h)
 				FolderSources(sources nodes util librarynode.cpp sendernode.cpp)
 			
-add_plugin(NodeGraph Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/nodegraphlib.h)
+add_plugin(NodeGraph Madgine Behavior ${sources} PRECOMPILED_HEADER src/Madgine/nodegraphlib.h)
 
 target_link_plugins(NodeGraph Resources Debugger Behavior)
 target_link_libraries(NodeGraph PUBLIC FilesystemSerialize CodeGen )

@@ -168,7 +168,11 @@ namespace Tools {
 
                 if (generic) {
                     ImGui::SameLine(0);
-                    result.first |= ImGui::ValueTypeTypePicker(&value);
+                    ValueTypeDesc desc;
+                    if (ImGui::ValueTypeTypePicker(desc)) {
+                        result.first = true;
+                        value.setType(desc);
+                    }
                     ImGui::EndGroup();
                 }
                 ImGui::EndDisabled();
@@ -226,7 +230,11 @@ namespace Tools {
         }
 
         if (generic) {
-            modified |= ImGui::ValueTypeTypePicker(generic);
+            ValueTypeDesc desc;
+            if (ImGui::ValueTypeTypePicker(desc)) {
+                modified = true;
+                generic->setType(desc);
+            }
         }
 
         //ImGui::EndGroup();
@@ -287,7 +295,11 @@ namespace Tools {
 
         if (generic) {
             ImGui::SameLine();
-            modified |= ImGui::ValueTypeTypePicker(generic);
+            ValueTypeDesc desc;
+            if (ImGui::ValueTypeTypePicker(desc)) {
+                modified = true;
+                generic->setType(desc);
+            }
         }
 
         //ImGui::EndGroup();
@@ -309,11 +321,11 @@ namespace Tools {
 
         if (open) {
 
-            for (auto& [key, value] : object.values()) {
+            for (auto &[key, value] : object.values()) {
                 ValueType v = value;
                 std::pair<bool, bool> p = drawValue(key, v, value.isReference());
                 changed |= p.first || p.second;
-                if (p.first){
+                if (p.first) {
                     value = v;
                 }
             }
