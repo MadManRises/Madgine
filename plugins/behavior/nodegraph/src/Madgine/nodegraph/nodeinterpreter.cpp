@@ -27,9 +27,9 @@ namespace NodeGraph {
     std::map<std::string_view, ValueType> NodeDebugLocation::localVariables() const
     {
         std::map<std::string_view, ValueType> values;
-        for (std::string_view name : mInterpreter->variables()) {
+        /* for (std::string_view name : mInterpreter->variables()) {
             mInterpreter->readVar(values.try_emplace(name).first->second, name);
-        }
+        }*/
         return values;
     }
 
@@ -102,12 +102,7 @@ namespace NodeGraph {
         return mData[index - 1];
     }
 
-    bool NodeInterpreterStateBase::resolveVar(std::string_view name, ValueType &out)
-    {
-        return readVar(out, name);
-    }
-
-    bool NodeInterpreterStateBase::readVar(ValueType &result, std::string_view name, bool recursive)
+    /* bool NodeInterpreterStateBase::readVar(ValueType &result, std::string_view name, bool recursive)
     {
         bool gotValue = false;
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
@@ -144,7 +139,7 @@ namespace NodeGraph {
             }
         }
         return variables;
-    }
+    }*/
 
     void NodeInterpreterStateBase::start()
     {

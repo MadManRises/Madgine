@@ -1,6 +1,6 @@
 <Graph serId=1>
     <mNodes>
-        <Node type="ReadVar" serId=2>
+        <Node type="GetBinding" serId=2>
             <Name>Widget</Name>
             <mFlowOutPins>
                 <Item>
@@ -169,5 +169,5 @@
     </mDataInPins>
     <mDataOutPins>
     </mDataOutPins>
-    <mLayoutData>{"nodes":{"node:120000":{"location":{"x":331,"y":-35}},"node:180000":{"location":{"x":694,"y":87}},"node:2147483645":{"location":{"x":729,"y":-203}},"node:2147483646":{"location":{"x":6,"y":-203}},"node:240000":{"location":{"x":524,"y":59}},"node:300000":{"location":{"x":156,"y":87}},"node:360000":{"location":{"x":155,"y":13}},"node:420000":{"location":{"x":-161,"y":103}},"node:60000":{"location":{"x":25,"y":48}}},"selection":["node:60000"],"view":{"scroll":{"x":6.289215087890625,"y":-202.30035400390625},"visible_rect":{"max":{"x":753.2891845703125,"y":388.69964599609375},"min":{"x":6.289215087890625,"y":-202.30035400390625}},"zoom":1}}</mLayoutData>
+    <mLayoutData>{"nodes":{"node:120000":{"location":{"x":331,"y":-35}},"node:180000":{"location":{"x":694,"y":87}},"node:2147483645":{"location":{"x":729,"y":-203}},"node:2147483646":{"location":{"x":6,"y":-203}},"node:240000":{"location":{"x":524,"y":59}},"node:300000":{"location":{"x":156,"y":87}},"node:360000":{"location":{"x":155,"y":13}},"node:60000":{"location":{"x":25,"y":48}}},"selection":null,"view":{"scroll":{"x":6.289215087890625,"y":-202.30035400390625},"visible_rect":{"max":{"x":753.2891845703125,"y":388.69964599609375},"min":{"x":6.289215087890625,"y":-202.30035400390625}},"zoom":1}}</mLayoutData>
 </Graph>

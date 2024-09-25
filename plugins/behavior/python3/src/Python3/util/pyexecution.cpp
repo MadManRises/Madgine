@@ -77,7 +77,7 @@ namespace Scripting {
                 return NULL;
 
             ValueType v;
-            bool found = self->mScope.mReceiver->resolveVar(name, v);
+            bool found = self->mScope.mReceiver->getBinding(name, v);
             if (found) {
                 return toPyObject(v);
             } else {

@@ -34,10 +34,10 @@ struct BehaviorAwaitableReceiver : Execution::execution_receiver<> {
     }
 
     template <typename O>
-    friend bool tag_invoke(Execution::resolve_var_d_t, BehaviorAwaitableReceiver &rec, std::string_view name, O &out)
+    friend bool tag_invoke(get_binding_d_t, BehaviorAwaitableReceiver &rec, std::string_view name, O &out)
     {
         ValueType v;
-        if (rec.mBehavior->mReceiver->resolveVar(name, v)) {
+        if (rec.mBehavior->mReceiver->getBinding(name, v)) {
             out = v.as<O>();
             return true;
         } else {

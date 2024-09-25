@@ -6,7 +6,7 @@
 
 #include "Meta/keyvalue/valuetype_forward.h"
 
-#include "state.h"
+#include "bindings.h"
 
 #include "Madgine/debug/debuggablesender.h"
 
@@ -19,20 +19,20 @@ struct MADGINE_BEHAVIOR_EXPORT BehaviorReceiver : Execution::VirtualReceiverBase
         static_cast<Execution::VirtualReceiverBase<BehaviorError, ArgumentList> *>(this)->set_value(ArgumentList { std::forward<Args>(args)... });
     }
 
-    virtual bool resolveVar(std::string_view name, ValueType &out) = 0;
+    virtual bool getBinding(std::string_view name, ValueType &out) = 0;
     virtual Debug::ParentLocation *debugLocation() = 0;
     virtual std::stop_token stopToken() = 0;
     virtual Log::Log *log() = 0;
 
-    bool resolveVarHelper(std::string_view name, void (*)(const ValueType &, void *), void *data);
+    bool getBindingHelper(std::string_view name, void (*)(const ValueType &, void *), void *data);
 
     template <typename O>
-    friend auto tag_invoke(Execution::resolve_var_d_t, BehaviorReceiver &rec, std::string_view name, O &out)
+    friend auto tag_invoke(get_binding_d_t, BehaviorReceiver &rec, std::string_view name, O &out)
     {
         if constexpr (std::same_as<O, ValueType> || std::same_as<O, ValueTypeRef>) {
-            return rec.resolveVar(name, out);
+            return rec.getBinding(name, out);
         } else {
-            return rec.resolveVarHelper(
+            return rec.getBindingHelper(
                 name, [](const ValueType &v, void *out) {
                     *static_cast<O *>(out) = ValueType_as<O>(v);
                 },
@@ -62,10 +62,10 @@ struct VirtualBehaviorState : Execution::VirtualStateEx<Rec, Base, type_pack<Beh
 
     using Execution::VirtualStateEx<Rec, Base, type_pack<BehaviorError>, ArgumentList>::VirtualStateEx;
 
-    bool resolveVar(std::string_view name, ValueType &out) override
+    bool getBinding(std::string_view name, ValueType &out) override
     {
         ValueTypeRef outRef { out };
-        return Execution::resolve_var_d(this->mRec, name, outRef);
+        return get_binding_d(this->mRec, name, outRef);
     }
 
     Debug::ParentLocation *debugLocation() override

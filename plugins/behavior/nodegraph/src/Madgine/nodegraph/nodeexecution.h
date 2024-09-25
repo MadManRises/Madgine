@@ -1,11 +1,10 @@
 #pragma once
 
 #include "Generic/execution/concepts.h"
-#include "Madgine/state.h"
+#include "Madgine/bindings.h"
 
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
-#include "Generic/execution/sendertraits.h"
 
 #include "Meta/keyvalue/valuetype.h"
 
@@ -24,8 +23,7 @@ namespace NodeGraph {
 
         void write(const NodeBase &node, const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0);
 
-        bool readVar(std::string_view name, ValueType &out);
-        bool writeVar(std::string_view name, const ValueType &out);
+        bool getBinding(std::string_view name, ValueType &out);
     };
 
     template <typename Node>
@@ -43,10 +41,10 @@ namespace NodeGraph {
         }
 
         template <fixed_string Name, typename O>
-        friend bool tag_invoke(Execution::resolve_var_t<Name>, NodeInterpretHandle &handle, O &out)
+        friend bool tag_invoke(get_binding_t<Name>, NodeInterpretHandle &handle, O &out)
         {
             ValueType v;
-            if (handle.readVar(handle.mNode.template getDynamicName<Name>(), v)) {
+            if (handle.getBinding(handle.mNode.template getDynamicName<Name>(), v)) {
                 out = v.as<O>();
                 return true;
             } else {
@@ -54,11 +52,6 @@ namespace NodeGraph {
             }
         }
 
-        template <fixed_string Name, typename T>
-        friend bool tag_invoke(Execution::store_var_t<Name>, NodeInterpretHandle &handle, T &&value)
-        {
-            return handle.writeVar(handle.mNode.template getDynamicName<Name>(), std::forward<T>(value));
-        }
     };
 
     template <typename Node>

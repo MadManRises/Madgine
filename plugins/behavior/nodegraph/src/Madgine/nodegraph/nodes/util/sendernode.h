@@ -8,13 +8,11 @@
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
 #include "Generic/manuallifetime.h"
-#include "Madgine/state.h"
 
 #include "../../nodeexecution.h"
 #include "../../nodegraph.h"
 #include "../../pins.h"
 #include "automasknode.h"
-#include "nodesendertraits.h"
 
 #include "Madgine/codegen/fromsender.h"
 
@@ -444,7 +442,7 @@ namespace NodeGraph {
                 return Execution::get_context(Execution::get_receiver(mState)).mNode.template getDynamicName<Name>();
             }
 
-            virtual bool readVar(ValueType& result, std::string_view name) override
+            /* virtual bool readVar(ValueType& result, std::string_view name) override
             {
                 return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>)
                 {
@@ -477,7 +475,7 @@ namespace NodeGraph {
                     return std::vector<std::string_view> { Names... };
                 }
                 (typename Config::exposedVariables {});
-            }
+            }*/
 
             ValueType read(uint32_t providerIndex, uint32_t group) const
             {

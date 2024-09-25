@@ -2,6 +2,8 @@
 
 #include "../tag_invoke.h"
 
+#include "../fixed_string.h"
+
 namespace Engine {
 namespace Execution {
 
@@ -24,8 +26,7 @@ namespace Execution {
 
     struct outer_connect_t {
         template <typename Sender, typename Rec>
-        requires (!tag_invocable<outer_connect_t, Sender, Rec>)
-        auto operator()(Sender &&sender, Rec &&rec) const
+        requires(!tag_invocable<outer_connect_t, Sender, Rec>) auto operator()(Sender &&sender, Rec &&rec) const
             noexcept(is_nothrow_tag_invocable_v<connect_t, Sender, Rec>)
                 -> tag_invoke_result_t<connect_t, Sender, Rec>
         {
@@ -272,6 +273,31 @@ namespace Execution {
 
         Sender mSender;
     };
+
+    template <typename... T>
+    struct signature : type_pack<T...> {
+    };
+
+    template <typename T>
+    struct stream;
+    
+    template <typename T>
+    using is_stream = is_instance<T, stream>;
+
+    template <fixed_string Name>
+    struct variable_name_tag;
+
+    template <fixed_string Name>
+    using variable_type = TaggedPlaceholder<variable_name_tag<Name>, 0>;
+
+    template <size_t I>
+    struct dynamic_argument_type {
+        static constexpr size_t index = I;
+    };
+
+    template <fixed_string Name, typename T>
+    struct variable;
+
 
 }
 }

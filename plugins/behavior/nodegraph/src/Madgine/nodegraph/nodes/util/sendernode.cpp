@@ -6,6 +6,8 @@
 
 #include "sendernode_impl.h"
 
+#include "functors.h"
+
 DEFAULT_SENDER_NODE_BEGIN(ForEach, Engine::Execution::for_each, std::vector<int>, Engine::NodeGraph::NodeRouter<1, Engine::ValueType>)
 ARGUMENT(Arguments, 0)
 SENDER_NODE_END(ForEach)
@@ -26,7 +28,7 @@ CONSTANT_SENDER_NODE_BEGIN(Just, Engine::Execution::just, Engine::ValueType);
 ARGUMENT(Value, 0)
 SENDER_NODE_END(Just)
 
-VARIABLE_SENDER_NODE_BEGIN(Variable, Engine::Execution::Variable<"Name">, Engine::NodeGraph::NodeReader<>, Engine::ValueType)
+/* VARIABLE_SENDER_NODE_BEGIN(Variable, Engine::Execution::Variable<"Name">, Engine::NodeGraph::NodeReader<>, Engine::ValueType)
 DYNAMIC_NAME(Name)
 ARGUMENT(DefaultValue, 0)
 SENDER_NODE_END(Variable)
@@ -37,7 +39,11 @@ SENDER_NODE_END(WriteVar)
 
 CONSTANT_VARIABLE_ACCESS_SENDER_NODE_BEGIN(ReadVar, Engine::Execution::read_var<"Name", Engine::ValueType>)
 DYNAMIC_NAME(Name)
-SENDER_NODE_END(ReadVar)
+SENDER_NODE_END(ReadVar)*/
+
+CONSTANT_VARIABLE_ACCESS_SENDER_NODE_BEGIN(GetBinding, Engine::get_binding_sender<"Name", Engine::ValueType>)
+DYNAMIC_NAME(Name)
+SENDER_NODE_END(GetBinding)
 
 CONSTANT_SENDER_NODE_BEGIN(Vector3To4, Engine::Execution::then, Engine::NodeGraph::NodeReader<Engine::Vector3, float>, Engine::NodeGraph::Vector3To4)
 SENDER_NODE_END(Vector3To4)

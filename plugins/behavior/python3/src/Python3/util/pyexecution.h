@@ -10,8 +10,6 @@
 
 #include "Madgine/behaviorreceiver.h"
 
-#include "Madgine/state.h"
-
 namespace Engine {
 namespace Scripting {
     namespace Python3 {

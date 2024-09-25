@@ -59,9 +59,9 @@ namespace NodeGraph {
             receiver.set_done();
         }
 
-        bool resolveVar(std::string_view name, ValueType &ref) override
+        bool getBinding(std::string_view name, ValueType &ref) override
         {
-            return mReceiver->readVar(name, ref);
+            return false;
         }
 
         Debug::ParentLocation *debugLocation() override

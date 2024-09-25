@@ -21,7 +21,7 @@
 
 #include "Interfaces/log/logsenders.h"
 
-#include "Madgine/state.h"
+#include "Madgine/bindings.h"
 
 #include "Generic/execution/lifetime.h"
 
@@ -153,7 +153,7 @@ namespace Widgets {
             struct receiver : Execution::algorithm_receiver<Rec> {
 
                 template <typename O>
-                friend bool tag_invoke(Execution::resolve_var_d_t, receiver &rec, std::string_view name, O &out)
+                friend bool tag_invoke(get_binding_d_t, receiver &rec, std::string_view name, O &out)
                 {
                     if (name == "Widget") {
                         out = rec.mWidget;
@@ -162,7 +162,7 @@ namespace Widgets {
                         out = &rec.mWidget->manager();
                         return true;
                     } else {
-                        return Execution::resolve_var_d(rec.mRec, name, out);
+                        return get_binding_d(rec.mRec, name, out);
                     }
                 }
 

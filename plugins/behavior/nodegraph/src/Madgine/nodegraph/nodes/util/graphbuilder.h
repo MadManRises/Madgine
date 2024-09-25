@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Generic/execution/concepts.h"
-#include "Madgine/state.h"
 
 #include "../../nodecollector.h"
 #include "../../nodeinterpreter.h"

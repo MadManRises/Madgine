@@ -22,14 +22,9 @@ namespace NodeGraph {
         mInterpreter.write(pin, v);
     }
 
-    bool NodeInterpretHandleBase::readVar(std::string_view name, ValueType &out)
+    bool NodeInterpretHandleBase::getBinding(std::string_view name, ValueType &out)
     {        
-        return mInterpreter.readVar(out, name);
-    }
-
-    bool NodeInterpretHandleBase::writeVar(std::string_view name, const ValueType &out)
-    {
-        return mInterpreter.writeVar(name, out);
+        return mInterpreter.getBinding(name, out);
     }
 
     void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, BehaviorReceiver &receiver, NodeDebugLocation &location)

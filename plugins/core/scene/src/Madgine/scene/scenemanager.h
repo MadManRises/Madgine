@@ -71,7 +71,7 @@ namespace Scene {
             struct receiver : Execution::algorithm_receiver<Rec> {
 
                 template <typename O>
-                friend bool tag_invoke(Execution::resolve_var_d_t, receiver &rec, std::string_view name, O &out)
+                friend bool tag_invoke(get_binding_d_t, receiver &rec, std::string_view name, O &out)
                 {
                     if (name == "Scene") {
                         out = rec.mScene;

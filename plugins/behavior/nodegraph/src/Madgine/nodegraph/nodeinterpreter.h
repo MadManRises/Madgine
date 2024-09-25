@@ -38,9 +38,9 @@ namespace NodeGraph {
     struct NodeInterpreterData {
         virtual ~NodeInterpreterData() = default;
 
-        virtual bool readVar(ValueType &ref, std::string_view name) { return false; }
+        /* virtual bool readVar(ValueType &ref, std::string_view name) { return false; }
         virtual bool writeVar(std::string_view name, const ValueType &v) { return false; }
-        virtual std::vector<std::string_view> variables() { return {}; }
+        virtual std::vector<std::string_view> variables() { return {}; }*/
     };
 
     struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : BehaviorReceiver {
@@ -67,10 +67,9 @@ namespace NodeGraph {
 
         std::unique_ptr<NodeInterpreterData> &data(uint32_t index);
 
-        bool resolveVar(std::string_view name, ValueType &out) override;
-        virtual bool readVar(ValueType &result, std::string_view name, bool recursive = true);
+        /* virtual bool readVar(ValueType &result, std::string_view name, bool recursive = true);
         virtual bool writeVar(std::string_view name, const ValueType &v);
-        virtual std::vector<std::string_view> variables();
+        virtual std::vector<std::string_view> variables();*/
 
         void start();
 
@@ -120,17 +119,6 @@ namespace NodeGraph {
             this->mRec.set_value(std::move(result));
         }
 
-        bool readVar(ValueType &result, std::string_view name, bool recursive = true) override
-        {
-            if (NodeInterpreterStateBase::readVar(result, name, recursive))
-                return true;
-
-            if (Execution::resolve_var_d(mRec, name, result))
-                return true;
-
-            return false;
-        }
-
         friend Rec &tag_invoke(Execution::get_receiver_t, NodeInterpreterState &state)
         {
             return state.mRec;
@@ -146,9 +134,14 @@ namespace NodeGraph {
             return Execution::get_debug_location(mRec);
         }
 
-        Log::Log* log() override
+        Log::Log *log() override
         {
             return Engine::Log::get_log(mRec);
+        }
+
+        bool getBinding(std::string_view name, ValueType &out) override
+        {
+            return get_binding_d(mRec, name, out);
         }
 
         Rec mRec;

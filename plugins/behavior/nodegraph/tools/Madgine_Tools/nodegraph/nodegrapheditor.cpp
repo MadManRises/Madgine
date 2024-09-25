@@ -30,7 +30,6 @@
 #include "Generic/projections.h"
 
 #include "Generic/execution/algorithm.h"
-#include "Madgine/state.h"
 
 #include "Madgine/codegen/codegen_cpp.h"
 #include "Madgine/codegen/fromsender.h"
