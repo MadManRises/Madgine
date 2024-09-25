@@ -13,7 +13,7 @@ namespace Render {
         , mSamples(samples)
     {
         GLuint temp;
-        glGenTextures(1, &mTextureHandle.setupAs<GLuint>());         
+        glGenTextures(1, &mTextureHandle.setupAs<GLuint>());
         GL_CHECK();
         if (mType != TextureType_2DMultiSample)
             setFilter(GL_LINEAR);
@@ -29,7 +29,17 @@ namespace Render {
 
         mBlock.mResources[0].mHandle = mTextureHandle;
         mBlock.mResources[0].mTarget = target();
-        mResourceBlock.setupAs<OpenGLResourceBlock<1>*>() = &mBlock;
+        mResourceBlock.setupAs<OpenGLResourceBlock<1> *>() = &mBlock;
+    }
+
+    OpenGLTexture::OpenGLTexture(OpenGLTexture &&other)
+        : Texture(std::move(other))
+        , mBlock(std::move(other.mBlock))
+        , mSamples(std::move(other.mSamples))
+    {
+        OpenGLResourceBlock<> *block = mResourceBlock.release<OpenGLResourceBlock<> *>();
+        assert(block == &other.mBlock);
+        mResourceBlock.setupAs<OpenGLResourceBlock<> *>() = &mBlock;
     }
 
     OpenGLTexture::~OpenGLTexture()
@@ -51,10 +61,10 @@ namespace Render {
 
     void OpenGLTexture::reset()
     {
-        if (mTextureHandle) {    
+        if (mTextureHandle) {
             GLuint handle = mTextureHandle.release<GLuint>();
             glDeleteTextures(1, &handle);
-            GL_CHECK();            
+            GL_CHECK();
         }
         if (mResourceBlock) {
             OpenGLResourceBlock<> *block = mResourceBlock.release<OpenGLResourceBlock<> *>();
@@ -80,13 +90,13 @@ namespace Render {
             internalFormat = GL_RGBA;
             sizedFormat = GL_RGBA8;
             byteWidth = 4;
-            break;            
+            break;
         case FORMAT_RGBA8_SRGB:
             internalStorage = GL_UNSIGNED_BYTE;
             internalFormat = GL_RGBA;
             sizedFormat = GL_SRGB_ALPHA;
             byteWidth = 4;
-            break;            
+            break;
         case FORMAT_RGBA16F:
             internalStorage = GL_FLOAT;
             internalFormat = GL_RGBA;

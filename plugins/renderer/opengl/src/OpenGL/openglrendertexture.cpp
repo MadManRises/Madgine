@@ -165,9 +165,9 @@ namespace Render {
 
     void OpenGLRenderTexture::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        auto it = mFramebuffers.find(mFlipFlopIndices);
-        if (it == mFramebuffers.end()) {
-            it = mFramebuffers.try_emplace(mFlipFlopIndices).first;
+        auto pib = mFramebuffers.try_emplace(mFlipFlopIndices);
+        auto it = pib.first;
+        if (pib.second) {            
             glGenFramebuffers(mFramebufferCount, it->second.data());
             GL_CHECK();
 
@@ -270,9 +270,9 @@ namespace Render {
 
         size_t count = std::min(textureCount(), inputTex->textureCount());
 
-        auto it = mFramebuffers.find(mFlipFlopIndices);
-        if (it == mFramebuffers.end()) {
-            it = mFramebuffers.try_emplace(mFlipFlopIndices).first;
+        auto pib = mFramebuffers.try_emplace(mFlipFlopIndices);
+        auto it = pib.first;
+        if (pib.second) {            
             glGenFramebuffers(mFramebufferCount, it->second.data());
             GL_CHECK();
 
@@ -348,7 +348,7 @@ namespace Render {
 
     size_t OpenGLRenderTexture::getFramebufferCount(bool *emulateCube) const
     {
-        size_t count = canFlipFlop() ? 2 : 1;
+        size_t count = 1;
 
 #if OPENGL_ES < 32
 #    if !OPENGL_ES

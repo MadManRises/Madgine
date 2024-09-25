@@ -40,7 +40,6 @@ namespace Render {
         OpenGLTexture mDepthTexture;
 
         size_t mSamples;
-        bool mHDR;
 
         std::vector<OpenGLTexture> mTextures;
 

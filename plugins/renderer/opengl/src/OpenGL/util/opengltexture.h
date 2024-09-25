@@ -23,7 +23,7 @@ namespace Render {
         OpenGLTexture(TextureType type, TextureFormat format, size_t samples = 1);
         OpenGLTexture() = default;
         OpenGLTexture(const OpenGLTexture &) = delete;
-        OpenGLTexture(OpenGLTexture &&) = default;
+        OpenGLTexture(OpenGLTexture &&);
         ~OpenGLTexture();
 
         OpenGLTexture &operator=(OpenGLTexture &&);
