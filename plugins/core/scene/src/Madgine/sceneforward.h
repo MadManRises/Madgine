@@ -7,14 +7,6 @@ namespace Scene {
     struct SceneComponentBase;
 
     namespace Entity {
-        struct Entity;
-        struct EntityComponentBase;
-        struct EntityComponentListBase;
-        struct Transform;
-        struct Animation;
-        struct Mesh;
-        struct Skeleton;
-
         struct EntityPtr;
         template <typename T>
         struct EntityComponentPtr;
@@ -24,6 +16,16 @@ namespace Scene {
         struct EntityComponentOwningHandle;
         template <typename T>
         struct EntityComponentHandle;
+
+        struct Entity;
+        struct EntityComponentBase;
+        struct EntityComponentListBase;
+        struct Transform;
+        struct Mesh;
+        struct Skeleton;
+        using SkeletonPtr = EntityComponentPtr<Skeleton>;
+
+        struct AnimationState;        
     }
 
     struct LightManager;

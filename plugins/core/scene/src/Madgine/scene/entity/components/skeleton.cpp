@@ -73,7 +73,7 @@ namespace Scene {
             assert(mSkeleton.available());
 
             for (size_t i = 0; i < mSkeleton->mBones.size(); ++i) {
-                matrices[i] = Matrix4::IDENTITY;
+                matrices[i] = mSkeleton->mBones[i].mTTransform.Transpose();
             }
         }
     }

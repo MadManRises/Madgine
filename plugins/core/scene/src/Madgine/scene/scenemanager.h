@@ -38,7 +38,7 @@ namespace Scene {
 
         virtual std::string_view key() const override;
 
-        void updateFrame();
+        void updateFrame(Closure<ByteBufferImpl<Matrix4[]>(Entity::SkeletonPtr)> callback);
 
         void clear();
 
@@ -112,6 +112,9 @@ namespace Scene {
             mBehaviorContexts.emplace_back(context);
         }
 
+        void addAnimation(Entity::AnimationState *animation);
+        bool stopAnimation(Entity::AnimationState *animation);
+
         Threading::DataMutex &mutex();
 
         template <typename T>
@@ -152,6 +155,9 @@ namespace Scene {
         IntervalClock<std::chrono::steady_clock::time_point> mFrameClock;
 
         std::vector<Debug::ContextInfo *> mBehaviorContexts;
+                
+        std::mutex mAnimationMutex;
+        std::vector<Entity::AnimationState*> mAnimationStates;
 
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 

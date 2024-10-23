@@ -8,7 +8,8 @@ namespace Execution {
 
         ConnectionStack() = default;
         ConnectionStack(const ConnectionStack &) = delete;
-        ConnectionStack(ConnectionStack&& other) {
+        ConnectionStack(ConnectionStack &&other)
+        {
             std::unique_lock lock { other.mMutex };
             mHead = other.mHead.exchange(nullptr);
         }
@@ -50,7 +51,7 @@ namespace Execution {
             return !mHead;
         }
 
-        void disconnect(T *con)
+        bool extract(T *con)
         {
             assert(con);
 
@@ -59,22 +60,24 @@ namespace Execution {
             std::atomic<T *> *next = &mHead;
             T *current = mHead;
             while (current) {
-                if (current == con) {                    
+                if (current == con) {
                     if (next->compare_exchange_strong(current, current->mNext.load())) {
-                        current->mNext = nullptr;                        
-                        current->set_done();
-                        return;
+                        current->mNext = nullptr;
+                        return true;
+                    } else {
+                        return false;
                     }
                 } else {
                     next = &current->mNext;
                     current = *next;
                 }
             }
+            return false;
         }
 
         void clear()
         {
-            T * current;
+            T *current;
             {
                 std::lock_guard guard { mMutex };
                 current = mHead.exchange(nullptr);
@@ -89,6 +92,38 @@ namespace Execution {
         std::mutex &mutex() const
         {
             return mMutex;
+        }
+
+        struct iterator {
+            T *mCurrent;
+
+            operator T *() const
+            {
+                return mCurrent;
+            }
+
+            T &operator*() const
+            {
+                return mCurrent;
+            }
+
+            iterator &operator++()
+            {
+                mCurrent = mCurrent->mNext;
+                return *this;
+            }
+
+            constexpr auto operator<=>(const iterator &) const = default;
+        };
+
+        iterator begin()
+        {
+            return { mHead };
+        }
+
+        iterator end()
+        {
+            return { nullptr };
         }
 
     private:

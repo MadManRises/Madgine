@@ -42,7 +42,7 @@
 
 #include "Madgine/awaitables/awaitablesender.h"
 
-#include "Madgine/scene/senders/scenesenders.h"
+#include "Madgine/scene/behavior/scenesenders.h"
 
 UNIQUECOMPONENT(ClickBrick::GameManager)
 

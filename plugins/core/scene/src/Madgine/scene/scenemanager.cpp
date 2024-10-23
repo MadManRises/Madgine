@@ -29,6 +29,9 @@
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/promise.h"
 
+#include "behavior/animation.h"
+#include "entity/components/skeleton.h"
+
 UNIQUECOMPONENT(Engine::Scene::SceneManager);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
@@ -50,7 +53,7 @@ SERIALIZETABLE_END(Engine::Scene::SceneManager)*/
 
 namespace Engine {
 namespace Scene {
-    
+
     SceneManager::ContainerData::ContainerData(SceneManager &manager)
         : mContainer(manager)
     {
@@ -121,7 +124,7 @@ namespace Scene {
         return mMutex;
     }
 
-    void SceneManager::updateFrame()
+    void SceneManager::updateFrame(Closure<ByteBufferImpl<Matrix4[]>(Entity::SkeletonPtr)> callback)
     {
         std::chrono::microseconds frameTimeSinceLastFrame = mFrameClock.tick(std::chrono::steady_clock::now());
         std::chrono::microseconds sceneTimeSinceLastFrame = mAnimationClock.tick(mClock.now());
@@ -129,6 +132,51 @@ namespace Scene {
         for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
             comp->updateFrame(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
         }
+
+        std::vector<Entity::AnimationState *> doneAnimations;
+
+        {
+            std::unique_lock lock { mAnimationMutex };
+            for (auto it = mAnimationStates.begin(); it != mAnimationStates.end();) {
+
+                Entity::AnimationState *animation = *it;
+
+                Entity::SkeletonPtr skeleton = animation->entity()->getComponent<Scene::Entity::Skeleton>();
+
+                const Render::SkeletonDescriptor *data = skeleton->data();
+                if (data) {
+                    size_t boneCount = data->mBones.size();
+                    auto buffer = callback(skeleton);
+
+                    if (animation->updateRender(frameTimeSinceLastFrame, sceneTimeSinceLastFrame, buffer.mData)) {
+                        doneAnimations.push_back(animation);
+                        it = mAnimationStates.erase(it);
+                    } else {
+                        ++it;
+                    }
+
+                    /* if (Scene::Entity::Transform *transform = animation->entity()->getComponent<Scene::Entity::Transform>()) {
+                    for (size_t i = 0; i < boneCount; ++i) {
+                        Vector4 v1 = buffer[i].Transpose() * data->mBones[i].mOffsetMatrix.Inverse() * Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };
+                        Vector4 v2 = v1 + Vector4 { 0.0f, 1.0f, 0.0f, 0.0f };
+                        if (data->mBones[i].mFirstChild) {
+                            size_t j = data->mBones[i].mFirstChild;
+                            v2 = buffer[j].Transpose() * data->mBones[j].mOffsetMatrix.Inverse() * Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };
+                        }
+
+                        Im3D::Arrow3D(IM3D_LINES, 0.2f, v1.xyz(), v2.xyz(), { .mTransform = transform->matrix() });
+                    }
+                }*/
+                } else {
+                    ++it;
+                }
+            }
+        }
+
+        for (Entity::AnimationState* state : doneAnimations) {
+            state->finish();
+        }
+
     }
 
     void SceneManager::clear()
@@ -190,6 +238,18 @@ namespace Scene {
     std::chrono::steady_clock::time_point SceneManager::Clock::revert(std::chrono::steady_clock::time_point timepoint) const
     {
         return timepoint + mPauseAcc + (mPauseStack > 0 ? std::chrono::steady_clock::now() - mPauseStart : 0s);
+    }
+
+    void SceneManager::addAnimation(Entity::AnimationState *animation)
+    {
+        std::unique_lock lock { mAnimationMutex };
+        mAnimationStates.push_back(animation);
+    }
+
+    bool SceneManager::stopAnimation(Entity::AnimationState *animation)
+    {
+        std::unique_lock lock { mAnimationMutex };
+        return std::erase(mAnimationStates, animation) == 1;
     }
 
 }

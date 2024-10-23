@@ -7,6 +7,8 @@
 
 #include "Modules/threading/awaitables/awaitablesender.h"
 
+#include "Meta/math/transformation.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -85,6 +87,8 @@ namespace Render {
             assert(newBone);
             skeleton.mBones.push_back(Bone { bone->mName.C_Str() });
             skeleton.mBones.back().mTTransform = assimpConvertMatrix(node->mTransformation);
+            skeleton.mBones.back().mPreTransform = assimpConvertMatrix(node->mTransformation);
+            skeleton.mBones.back().mPreTransform = Matrix4 { ExtractScalingMatrix(assimpConvertMatrix(node->mTransformation).ToMat3()) };
         }
 
         for (aiBone *bone : bones) {

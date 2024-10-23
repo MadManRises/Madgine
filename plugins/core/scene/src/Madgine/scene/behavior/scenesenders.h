@@ -28,18 +28,8 @@ namespace Scene {
     template <typename T>
     constexpr auto get_component = []() { return get_entity() | Execution::then([](Entity::Entity *e) { return e->getComponent<T>(); }); };
 
-    constexpr auto rotate = [](Vector3 axis, float speed) {
-        return yield_simulation() | Execution::let_value([=](std::chrono::microseconds timeSinceLastFrame) {
-            return get_component<Entity::Transform>() | Execution::then([=](Entity::Transform *transform) {
-                transform->mOrientation *= Quaternion { timeSinceLastFrame.count() * 0.000001f * speed, axis };
-            });
-        }) | Execution::repeat;
-    };
-
 }
 }
 
 NATIVE_BEHAVIOR_DECLARATION(Yield_Simulation)
 NATIVE_BEHAVIOR_DECLARATION(Wait_Simulation)
-
-NATIVE_BEHAVIOR_DECLARATION(Rotate)

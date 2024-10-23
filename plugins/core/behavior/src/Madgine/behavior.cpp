@@ -49,11 +49,6 @@ void CoroutineBehaviorState::destroy()
     std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).destroy();
 }
 
-void CoroutineBehaviorState::visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor)
-{
-    visitor(Execution::State::SubLocation {});
-}
-
 CoroutineBehaviorState::InitialSuspend CoroutineBehaviorState::initial_suspend() noexcept
 {
     return {};
@@ -139,7 +134,7 @@ bool CoroutineLocation::wantsPause(Debug::ContinuationType type) const
 
 void tag_invoke(Execution::visit_state_t, Behavior &behavior, CallableView<void(const Execution::StateDescriptor &)> visitor)
 {
-    behavior.mState->visitStateImpl(visitor);
+    visitor(Execution::State::SubLocation {});
 }
 
 Behavior::state::state(StatePtr state)

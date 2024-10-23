@@ -379,6 +379,7 @@ namespace Render {
                     size_t mSize;
                 };
                 list.attachResource(std::unique_ptr<void, Deleter> { ptr, { mContext, mSize } });
+                list.execute();
             }
 
             size_t mOffset;

@@ -96,8 +96,7 @@ struct BehaviorStateBase {
     virtual void destroy()
     {
         delete this;
-    }
-    virtual void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) { }
+    }    
 };
 
 template <typename Sender>
@@ -121,7 +120,6 @@ struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
     void connect(BehaviorReceiver &rec) override;
     void start() override;
     void destroy() override;
-    void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) override;
 
     struct MADGINE_BEHAVIOR_EXPORT InitialSuspend {
         bool await_ready() noexcept;
@@ -178,11 +176,6 @@ struct SenderBehaviorState : BehaviorStateBase {
     void start() override
     {
         std::get<State>(mData).start();
-    }
-
-    void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) override
-    {
-        Execution::visit_state(std::get<Sender>(mData), visitor);
     }
 
     std::variant<Sender, State> mData;

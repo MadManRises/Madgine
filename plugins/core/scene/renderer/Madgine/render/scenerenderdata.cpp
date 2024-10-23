@@ -12,7 +12,13 @@
 
 #include "Madgine/render/rendercontext.h"
 
-#include "Madgine/scene/entity/components/animation.h"
+#include "Madgine/scene/behavior/animation.h"
+
+#include "Madgine/scene/entity/components/transform.h"
+
+#include "Generic/container/safeiterator.h"
+
+#include "im3d/im3d.h"
 
 namespace Engine {
 namespace Render {
@@ -25,22 +31,11 @@ namespace Render {
     Threading::ImmediateTask<RenderFuture> SceneRenderData::render(RenderContext *context)
     {
         co_await mScene.mutex().locked(Engine::AccessMode::READ, [this, context]() {
-            mScene.updateFrame();
-
-            for (const auto &[skeleton, entity] : mScene.entityComponentList<Scene::Entity::Skeleton>()) {
-                if (skeleton.data()) {
-                    if (!skeleton.mBoneMatrices.mBuffer) {
-                        const Render::SkeletonDescriptor *data = skeleton.data();
-                        skeleton.mBoneMatrices = context->allocateBuffer<Matrix4[]>(data->mBones.size());
-                    }
-                    auto buffer = context->mapBuffer(skeleton.mBoneMatrices);
-                    if (Scene::Entity::Animation *animation = entity->getComponent<Scene::Entity::Animation>()) {
-                        animation->updateRender(entity, 0ms, 0ms, buffer.mData);
-                    } else {
-                        skeleton.resetMatrices(buffer.mData);
-                    }
+            mScene.updateFrame([context](Scene::Entity::SkeletonPtr skeleton) {
+                if (!skeleton->mBoneMatrices.mBuffer) {
+                    skeleton->mBoneMatrices = context->allocateBuffer<Matrix4[]>(skeleton->data()->mBones.size());
                 }
-            }
+                return context->mapBuffer(skeleton->mBoneMatrices); });
         });
 
         co_return {};

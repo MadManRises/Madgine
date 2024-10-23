@@ -63,7 +63,8 @@ namespace Execution {
 
         void stop()
         {
-            this->mStub->disconnect(this);
+            if (this->mStub->extract(this))
+                this->set_done();
         }
 
         std::stop_callback<callback> mCallback;

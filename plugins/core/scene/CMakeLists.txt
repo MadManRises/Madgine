@@ -5,8 +5,8 @@ FolderSources(sources "" src)
 	FolderSources(sources src Madgine sceneforward.h scenelib.h)
 		FolderSources(sources Madgine scene scenemanager.cpp scenemanager.h scenecomponentcollector.cpp scenecomponentcollector.h scenecontainer.cpp scenecontainer.h scenecomponentbase.cpp scenecomponentbase.h)
 			FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h entitycomponentcollector.cpp entitycomponentcollector.h entitycomponentptr.cpp entityptr.cpp entityptr.h entity.cpp entity.h entitycomponent.h entitycomponentlistbase.cpp entitycomponentlist.cpp entitycomponenthandle.cpp entitycomponenthandle.h masks.h)
-				FolderSources(sources entity components animation.cpp animation.h material.cpp material.h mesh.cpp mesh.h pointlight.cpp pointlight.h skeleton.cpp skeleton.h transform.cpp transform.h)
-			FolderSources(sources scene senders scenesenders.cpp scenesenders.h)
+				FolderSources(sources entity components material.cpp material.h mesh.cpp mesh.h pointlight.cpp pointlight.h skeleton.cpp skeleton.h transform.cpp transform.h)
+			FolderSources(sources scene behavior scenesenders.cpp scenesenders.h transform.cpp transform.h animation.cpp animation.h)
 
 add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib.h)
 
@@ -29,6 +29,8 @@ FolderSources(sources "" renderer)
 add_plugin(SceneRenderer Madgine Core ${sources} SOURCE_ROOT renderer PRECOMPILED_HEADER renderer/Madgine/scenerendererlib.h)
 
 target_link_plugins(SceneRenderer Scene Client)
+
+target_link_libraries(SceneRenderer PRIVATE Im3D)
 
 set(sources "")
 FolderSources(sources "" renderer_tools)

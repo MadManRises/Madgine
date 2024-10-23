@@ -27,6 +27,8 @@ namespace Scene {
 
             Render::GPUBuffer<Matrix4[]> mBoneMatrices;
 
+            std::vector<Matrix4> mLocalMatrices;
+
         private:
             typename Render::SkeletonLoader::Handle mSkeleton;
 

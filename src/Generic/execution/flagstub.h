@@ -48,9 +48,9 @@ namespace Execution {
             }
         }
 
-        void disconnect(Connection<FlagStub<Ty...>, Ty...> *con)
+        bool extract(Connection<FlagStub<Ty...>, Ty...> *con)
         {
-            mStack.disconnect(con);
+            return mStack.extract(con);
         }
 
     protected:
