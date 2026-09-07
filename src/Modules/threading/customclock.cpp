@@ -26,6 +26,11 @@ namespace Threading {
         return mClock ? mClock->revert(mTimePoint) : mTimePoint;
     }
 
+    std::chrono::steady_clock::duration CustomTimepoint::time_since_epoch() const
+    {
+        return mTimePoint.time_since_epoch();
+    }
+
     std::chrono::steady_clock::duration CustomTimepoint::operator-(const CustomTimepoint &other) const
     {
         assert(mClock == other.mClock);

@@ -52,9 +52,7 @@ namespace ClickBrick {
         int mScore = 0;
         int mLife = 100000;
 
-        Engine::Scene::SceneManager &mSceneMgr;
-
-        Engine::Execution::IntervalClock<Engine::Threading::CustomTimepoint> mSceneClock;
+        Engine::Scene::SceneManager &mSceneMgr;        
         
         Engine::ManualLifetime<Engine::Render::SceneRenderPass> mSceneRenderer;
         std::unique_ptr<Engine::Render::RenderTarget> mGameRenderTarget;

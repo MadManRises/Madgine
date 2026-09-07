@@ -14,6 +14,7 @@ namespace Execution {
         };
         struct Progress {
             float mRatio;
+            bool mInfinite = false;
         };
         struct BeginBlock {
             std::string mName;

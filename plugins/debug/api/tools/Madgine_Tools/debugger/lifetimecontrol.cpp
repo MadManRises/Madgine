@@ -68,21 +68,22 @@ namespace Tools {
         auto pre = [](bool b) { if (b) ImGui::BeginDisabled(); };
         auto post = [](bool b) { if (b) ImGui::EndDisabled(); };
 
-        bool b = lifetime.running();
+        bool b = !lifetime.parent()->running();
         pre(b);
         if (ImGui::Button(IMGUI_ICON_PLAY)) {
-            lifetime.startLifetime();
+            if (!lifetime.running())
+                lifetime.startLifetime();
+            else
+                lifetime.unpause();
         }
         post(b);
 
         b = !lifetime.running();
         pre(b);
         if (ImGui::Button(IMGUI_ICON_PAUSE)) {
-            // pause();
+            lifetime.pause();
         }
-        post(b);
 
-        pre(b);
         if (ImGui::Button(IMGUI_ICON_STOP)) {
             lifetime.endLifetime();
         }
@@ -232,7 +233,37 @@ namespace Tools {
     {
         if (beginGame()) {
             if (ImGui::BeginToolBar("Lifetime")) {
-                controls(Debug::getRootLifetime());
+                ImGui::BeginHorizontal("Controls");
+
+                ImGui::Spring();
+
+                auto pre = [](bool b) { if (b) ImGui::BeginDisabled(); };
+                auto post = [](bool b) { if (b) ImGui::EndDisabled(); };
+
+                bool b = !Debug::getRootLifetime().running();
+
+                if (ImGui::Button(IMGUI_ICON_PLAY)) {
+                    if (b)
+                        Debug::getRootLifetime().startLifetime();
+                    else
+                        Debug::getRootLifetime().unpause();
+                }
+
+                pre(b);
+                if (ImGui::Button(IMGUI_ICON_PAUSE)) {
+                    Debug::getRootLifetime().pause();
+                }
+
+                if (ImGui::Button(IMGUI_ICON_STOP)) {
+                    Debug::getRootLifetime().endLifetime();
+                }
+                post(b);
+
+                ImGui::Text(std::to_string(Debug::getRootLifetime().debugContexts().size()));
+
+                ImGui::Spring();
+
+                ImGui::EndHorizontal();
                 ImGui::EndToolBar();
             }
         }

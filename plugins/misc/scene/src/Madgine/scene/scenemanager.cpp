@@ -53,26 +53,25 @@ namespace Scene {
         : VirtualScope(app)
         , mMutex("SceneData")
         , mLifetime(&app.lifetime())
-        , mSimulationClock(mClock.now())
-        , mAnimationClock(mClock.now())
+        , mSimulationClock(app.clock().now())
+        , mAnimationClock(app.clock().now())
         , mFrameClock(std::chrono::steady_clock::now())
         , mSceneComponents(*this)
         , mEntityComponentLists(Entity::EntityComponentListTag {})
     {
-        pause();
+
     }
 
     SceneManager::SceneManager(Core::Application &app, std::nullopt_t)
         : VirtualScope(app)
         , mMutex("SceneData")
         , mLifetime(std::nullopt)
-        , mSimulationClock(mClock.now())
-        , mAnimationClock(mClock.now())
+        , mSimulationClock(app.clock().now())
+        , mAnimationClock(app.clock().now())
         , mFrameClock(std::chrono::steady_clock::now())
         , mSceneComponents(*this)
         , mEntityComponentLists(Entity::EntityComponentListTag {})
     {
-        pause();
     }
 
     SceneManager::~SceneManager()
@@ -93,7 +92,7 @@ namespace Scene {
 
         taskQueue()->queue([this]() -> Threading::Task<void> {
             while (taskQueue()->running()) {
-                mSimulationClock.tick(mClock.now());
+                mSimulationClock.tick(mApp.clock().now());
                 co_await std::chrono::microseconds { 1000000 / 60 };
             }
         });
@@ -131,7 +130,7 @@ namespace Scene {
     void SceneManager::updateFrame(Closure<Memory::TypedByteBuffer<Math::Matrix4[]>(Entity::Skeleton *)> callback)
     {
         std::chrono::microseconds frameTimeSinceLastFrame = mFrameClock.tick(std::chrono::steady_clock::now());
-        std::chrono::microseconds sceneTimeSinceLastFrame = mAnimationClock.tick(mClock.now());
+        std::chrono::microseconds sceneTimeSinceLastFrame = mAnimationClock.tick(now());
 
         for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
             comp->updateFrame(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
@@ -188,33 +187,6 @@ namespace Scene {
             startLifetime();
     }
 
-    void SceneManager::pause()
-    {
-        if (mClock.mPauseStack++ == 0) {
-            mClock.mPauseStart = std::chrono::steady_clock::now();
-        }
-    }
-
-    bool SceneManager::unpause()
-    {
-        assert(mClock.mPauseStack > 0);
-        if (--mClock.mPauseStack == 0) {
-            mClock.mPauseAcc += std::chrono::steady_clock::now() - mClock.mPauseStart;
-            return true;
-        }
-        return false;
-    }
-
-    bool SceneManager::isPaused() const
-    {
-        return mClock.mPauseStack > 0;
-    }
-
-    const Threading::CustomClock &SceneManager::clock() const
-    {
-        return mClock;
-    }
-
     Execution::IntervalClock<Threading::CustomTimepoint> &SceneManager::simulationClock()
     {
         return mSimulationClock;
@@ -228,16 +200,6 @@ namespace Scene {
     SceneContainer &SceneManager::container(std::string_view name)
     {
         return mContainers.try_emplace(std::string { name }, *this).first->second.mContainer;
-    }
-
-    std::chrono::steady_clock::time_point SceneManager::Clock::get(std::chrono::steady_clock::time_point timepoint) const
-    {
-        return (mPauseStack > 0 ? mPauseStart : timepoint) - mPauseAcc;
-    }
-
-    std::chrono::steady_clock::time_point SceneManager::Clock::revert(std::chrono::steady_clock::time_point timepoint) const
-    {
-        return timepoint + mPauseAcc + (mPauseStack > 0 ? std::chrono::steady_clock::now() - mPauseStart : 0s);
     }
 
     void SceneManager::addAnimation(Entity::AnimationState *animation)
@@ -255,7 +217,7 @@ namespace Scene {
     void SceneManager::startLifetime()
     {
         if (mLifetime.parent()) {
-            mApp.lifetime().attach(mLifetime | Execution::after([this]() { unpause(); }) | Execution::finally([this]() { pause(); }) | Behavior::context_set(this));
+            mApp.lifetime().attach(mLifetime | Behavior::context_set(this));
         } else {
             Execution::detach(mLifetime | Behavior::context_set(this));
         }

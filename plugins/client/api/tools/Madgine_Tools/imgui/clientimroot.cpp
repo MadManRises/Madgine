@@ -792,7 +792,7 @@ namespace Tools {
 
             ImGui::GetWindowDrawList()->AddImage((void *)&tex, pos, pos + image_size);
         } else {
-            ImGui::DrawSpinner(pos, pos + image_size, spinnerRadius, 6, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
+            ImGui::DrawSpinner(GImGui->Time, pos, pos + image_size, spinnerRadius, 6, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
         }
     }
 

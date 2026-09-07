@@ -46,8 +46,9 @@ IMGUI_API void EndStatus();
 IMGUI_API bool BeginToolBar(const char *name);
 IMGUI_API void EndToolBar();
 
-IMGUI_API bool Spinner(const char *label, float radius, int thickness, const ImU32 &color);
-IMGUI_API void DrawSpinner(const ImVec2 &min, const ImVec2 &max, float radius, int thickness, const ImU32 &color);
+IMGUI_API bool Spinner(const char *label, float radius, float thickness, const ImU32 &color);
+IMGUI_API bool SpinnerEx(double progress, const char *label, float radius, float thickness, const ImU32 &color);
+IMGUI_API void DrawSpinner(double progress, const ImVec2 &min, const ImVec2 &max, float radius, float thickness, const ImU32 &color);
 
 using Unit = std::pair<size_t, const char *>;
 

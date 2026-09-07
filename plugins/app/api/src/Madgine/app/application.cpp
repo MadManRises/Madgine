@@ -2,6 +2,7 @@
 
 #include "application.h"
 
+#include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
 
 #include "Modules/threading/workgroupstorage.h"
@@ -28,6 +29,8 @@ namespace Core {
         : mTaskQueue("Application")
         , mGlobalAPIs(*this)
     {
+        pause();
+
         mTaskQueue.addSetupSteps(
             [this]() { return callInit(); },
             [this]() { return callFinalize(); });
@@ -94,7 +97,7 @@ namespace Core {
     void Application::startLifetime()
     {
         mTaskQueue.queue([this]() -> Threading::ImmediateTask<void> {
-            co_await mLifetime;
+            co_await (mLifetime | Execution::after([this]() { unpause(); }) | Execution::finally([this]() { pause(); }));
         });
 
         for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
@@ -105,6 +108,43 @@ namespace Core {
     void Application::endLifetime()
     {
         mLifetime.end();
+    }
+
+    void Application::pause()
+    {
+        if (mClock.mPauseStack++ == 0) {
+            mClock.mPauseStart = std::chrono::steady_clock::now();
+        }
+    }
+
+    bool Application::unpause()
+    {
+        assert(mClock.mPauseStack > 0);
+        if (--mClock.mPauseStack == 0) {
+            mClock.mPauseAcc += std::chrono::steady_clock::now() - mClock.mPauseStart;
+            return true;
+        }
+        return false;
+    }
+
+    bool Application::isPaused() const
+    {
+        return mClock.mPauseStack > 0;
+    }
+
+    const Threading::CustomClock &Application::clock() const
+    {
+        return mClock;
+    }
+
+    std::chrono::steady_clock::time_point Application::Clock::get(std::chrono::steady_clock::time_point timepoint) const
+    {
+        return (mPauseStack > 0 ? mPauseStart : timepoint) - mPauseAcc;
+    }
+
+    std::chrono::steady_clock::time_point Application::Clock::revert(std::chrono::steady_clock::time_point timepoint) const
+    {
+        return timepoint + mPauseAcc + (mPauseStack > 0 ? std::chrono::steady_clock::now() - mPauseStart : 0s);
     }
 
 }

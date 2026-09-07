@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Modules/threading/customclock.h"
 #include "Modules/threading/madgineobject.h"
 #include "Modules/threading/taskqueue.h"
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
@@ -38,6 +39,11 @@ namespace Core {
 
         Debug::DebuggableLifetime<> &lifetime();
 
+        void pause();
+        bool unpause();
+        bool isPaused() const;
+        const Threading::CustomClock &clock() const;
+
     protected:
         /**
          * @name MadgineObject interface
@@ -52,6 +58,15 @@ namespace Core {
         Threading::TaskQueue mTaskQueue;
 
         DEBUGGABLE_LIFETIME(mLifetime);
+
+        struct Clock : Threading::CustomClock {
+            virtual std::chrono::steady_clock::time_point get(std::chrono::steady_clock::time_point timepoint) const override;
+            virtual std::chrono::steady_clock::time_point revert(std::chrono::steady_clock::time_point timepoint) const override;
+
+            std::chrono::steady_clock::duration mPauseAcc = std::chrono::steady_clock::duration::zero();
+            std::chrono::steady_clock::time_point mPauseStart;
+            std::atomic<size_t> mPauseStack = 0;
+        } mClock;
 
     public:
         GlobalAPIContainer<std::vector<Placeholder<0>>> mGlobalAPIs;

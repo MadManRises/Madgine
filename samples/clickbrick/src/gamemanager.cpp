@@ -44,7 +44,6 @@ namespace ClickBrick {
 GameManager::GameManager(Engine::Behavior::HandlerManager &ui)
     : Engine::Widgets::WidgetHandler<GameManager>(ui, "Ingame")
     , mSceneMgr(ui.app().getGlobalAPIComponent<Engine::Scene::SceneManager>())
-    , mSceneClock(mSceneMgr.clock().now())
 {
 }
 

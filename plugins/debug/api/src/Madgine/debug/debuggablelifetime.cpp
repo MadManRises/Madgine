@@ -11,7 +11,7 @@
 #include "debugger.h"
 
 METATABLE_BEGIN(Engine::Debug::DebuggableLifetimeBase)
-    //READONLY_PROPERTY(Owner, owner)
+    // READONLY_PROPERTY(Owner, owner)
     READONLY_PROPERTY(Children, children)
     READONLY_PROPERTY(DebugContexts, debugContexts)
 METATABLE_END(Engine::Debug::DebuggableLifetimeBase)
@@ -102,6 +102,20 @@ namespace Debug {
     DebuggableLifetimeBase *DebuggableLifetimeBase::parent() const
     {
         return mParent;
+    }
+
+    void DebuggableLifetimeBase::pause()
+    {
+        for (DebuggableLifetimeBase &child : children()) {
+            child.pause();
+        }
+    }
+
+    void DebuggableLifetimeBase::unpause()
+    {
+        for (DebuggableLifetimeBase &child : children()) {
+            child.unpause();
+        }
     }
 
     std::ranges::subrange<DebuggableLifetimeBase::iterator, DebuggableLifetimeBase::iterator> DebuggableLifetimeBase::children()

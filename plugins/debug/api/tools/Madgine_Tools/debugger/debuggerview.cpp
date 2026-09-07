@@ -82,7 +82,10 @@ namespace Tools {
                         actualContent = true;
                     },
                     [&](const Execution::State::Progress &progress) {
-                        ImGui::ProgressBar(progress.mRatio, ImVec2 { 100.0f, 10.0f }, "");
+                        if (progress.mInfinite)
+                            ImGui::SpinnerEx(progress.mRatio, "Test", 5.0f, 0.1f, ImGui::GetColorU32(ImGuiCol_PlotHistogram));
+                        else
+                            ImGui::ProgressBar(progress.mRatio, ImVec2 { 100.0f, 10.0f }, "");
                         actualContent = true;
                     },
                     [&](const Execution::State::BeginBlock &begin) {

@@ -109,10 +109,12 @@ namespace Execution {
                 } else {
                     std::chrono::duration duration = state->mDuration;
                     if (duration.count() == 0) {
+                        double progress = 0.0;
                         if (state) {
                             visitor(Execution::State::Marker {});
+                            progress = std::chrono::duration_cast<std::chrono::duration<double>>(state->mClock->lastTick().time_since_epoch()).count();
                         }
-                        visitor(Execution::State::Text { "Yield" });
+                        visitor(Execution::State::Progress { static_cast<float>(progress), true });
                     } else {
                         std::string title;
                         if (duration.count() < 1000) {

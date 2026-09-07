@@ -28,6 +28,8 @@ namespace Core {
 
         virtual void startLifetime();
 
+        Threading::CustomTimepoint now() const;
+
     protected:
         virtual Threading::Task<bool> init();
         virtual Threading::Task<void> finalize();

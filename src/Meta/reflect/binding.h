@@ -39,7 +39,7 @@ namespace Reflect {
                     }
                 });
 
-                return {};
+                return result;
             }
 
             std::remove_reference_t<Binding> mBinding;

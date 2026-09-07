@@ -46,5 +46,10 @@ namespace Core {
         return mApp.getGlobalAPIComponent(i);
     }
 
+    Threading::CustomTimepoint GlobalAPIBase::now() const
+    {
+        return mApp.clock().now();
+    }
+
 }
 }

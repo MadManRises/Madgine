@@ -19,6 +19,9 @@ namespace Debug {
         virtual void endLifetime() = 0;
         virtual bool running() = 0;
 
+        virtual void pause();
+        virtual void unpause();
+
         struct MADGINE_DEBUGGER_EXPORT iterator {
 
             using iterator_category = std::forward_iterator_tag;
@@ -128,6 +131,22 @@ namespace Debug {
         void endLifetime() override
         {
             OffsetPtr::parent(this)->endLifetime();
+        }
+
+        void pause() override
+        {
+            DebuggableLifetimeBase::pause();
+            if constexpr (requires { OffsetPtr::parent(this)->pause(); }) {
+                OffsetPtr::parent(this)->pause();
+            }
+        }
+
+        void unpause() override
+        {
+            DebuggableLifetimeBase::unpause();
+            if constexpr (requires { OffsetPtr::parent(this)->unpause(); }) {
+                OffsetPtr::parent(this)->unpause();
+            }
         }
 
         Reflect::ScopePtr owner() override

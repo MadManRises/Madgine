@@ -8,9 +8,9 @@
 #include "Platform/filesystem/fsapi.h"
 #include "Platform/filesystem/path.h"
 
+#include "Meta/math/matrix3.h"
 #include "Meta/reflect/boundapifunction.h"
 #include "Meta/reflect/scopeptr.h"
-#include "Meta/math/matrix3.h"
 
 #include "Modules/threading/threadlocal.h"
 #include "Modules/threading/workgroupstorage.h"
@@ -931,7 +931,13 @@ void MakeTabVisible(const char *name)
     window->DockNode->TabBar->NextSelectedTabId = window->TabId;
 }
 
-bool Spinner(const char *label, float radius, int thickness, const ImU32 &color)
+bool Spinner(const char *label, float radius, float thickness, const ImU32 &color)
+{
+    ImGuiContext &g = *GImGui;
+    return SpinnerEx(g.Time, label, radius, thickness, color);
+}
+
+bool SpinnerEx(double progress, const char *label, float radius, float thickness, const ImU32 &color)
 {
     ImGuiWindow *window = GetCurrentWindow();
     if (window->SkipItems)
@@ -949,24 +955,22 @@ bool Spinner(const char *label, float radius, int thickness, const ImU32 &color)
     if (!ItemAdd(bb, id))
         return false;
 
-    DrawSpinner(bb.Min, bb.Max, radius, thickness, color);
+    DrawSpinner(progress, bb.Min, bb.Max, radius, thickness, color);
 
     return true;
 }
 
-void DrawSpinner(const ImVec2 &min, const ImVec2 &max, float radius, int thickness, const ImU32 &color)
+void DrawSpinner(double progress, const ImVec2 &min, const ImVec2 &max, float radius, float thickness, const ImU32 &color)
 {
     ImGuiWindow *window = GetCurrentWindow();
     if (window->SkipItems)
         return;
 
-    ImGuiContext &g = *GImGui;
-
     // Render
     window->DrawList->PathClear();
 
     int num_segments = 30;
-    int start = abs(ImSin(g.Time * 1.8f) * (num_segments - 5));
+    int start = abs(ImSin(progress * 1.8f) * (num_segments - 5));
 
     const float a_min = IM_PI * 2.0f * ((float)start) / (float)num_segments;
     const float a_max = IM_PI * 2.0f * ((float)num_segments - 3) / (float)num_segments;
@@ -975,11 +979,11 @@ void DrawSpinner(const ImVec2 &min, const ImVec2 &max, float radius, int thickne
 
     for (int i = 0; i < num_segments; i++) {
         const float a = a_min + ((float)i / (float)num_segments) * (a_max - a_min);
-        window->DrawList->PathLineTo(ImVec2(center.x + ImCos(a + g.Time * 8) * radius,
-            center.y + ImSin(a + g.Time * 8) * radius));
+        window->DrawList->PathLineTo(ImVec2(center.x + ImCos(a + progress * 8) * radius,
+            center.y + ImSin(a + progress * 8) * radius));
     }
 
-    window->DrawList->PathStroke(color, false, thickness);
+    window->DrawList->PathStroke(color, 0, thickness);
 }
 
 bool BeginStatus()

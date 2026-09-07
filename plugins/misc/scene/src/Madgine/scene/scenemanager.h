@@ -36,11 +36,6 @@ namespace Scene {
 
         void clear();
 
-        void pause();
-        bool unpause();
-        bool isPaused() const;
-        const Threading::CustomClock &clock() const;
-
         Execution::IntervalClock<Threading::CustomTimepoint> &simulationClock();
         Execution::IntervalClock<Threading::CustomTimepoint> &animationClock();
 
@@ -99,14 +94,7 @@ namespace Scene {
         virtual Threading::Task<void> finalize() final;
 
     private:
-        struct Clock : Threading::CustomClock {
-            virtual std::chrono::steady_clock::time_point get(std::chrono::steady_clock::time_point timepoint) const override;
-            virtual std::chrono::steady_clock::time_point revert(std::chrono::steady_clock::time_point timepoint) const override;
 
-            std::chrono::steady_clock::duration mPauseAcc = std::chrono::steady_clock::duration::zero();
-            std::chrono::steady_clock::time_point mPauseStart;
-            std::atomic<size_t> mPauseStack = 0;
-        } mClock;
 
         friend struct SceneContainer;
 
