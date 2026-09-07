@@ -288,10 +288,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4d38e255f909587d6ea4699b91137ca5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc69d607a1947a2adc85b8bbc9f294ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_debug_1_1_debuggable_lifetime_base.html">DebuggableLifetimeBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_debuggable_lifetime_base.html#adc69d607a1947a2adc85b8bbc9f294ad">parent</a> () const</td></tr>
 <tr class="separator:adc69d607a1947a2adc85b8bbc9f294ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec9944f109e09e0bf608caef9fcd1801"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_debuggable_lifetime_base.html#aec9944f109e09e0bf608caef9fcd1801">pause</a> ()</td></tr>
+<tr class="separator:aec9944f109e09e0bf608caef9fcd1801"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af20e1ddfab08d6c975276edc27347c9e"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_debuggable_lifetime_base.html#af20e1ddfab08d6c975276edc27347c9e">running</a> ()=0</td></tr>
 <tr class="separator:af20e1ddfab08d6c975276edc27347c9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa44952a825cb52508b92d63c379ae43"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_debuggable_lifetime_base.html#afa44952a825cb52508b92d63c379ae43">startLifetime</a> ()=0</td></tr>
 <tr class="separator:afa44952a825cb52508b92d63c379ae43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32df91a3dc430cb76f532680df304322"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_debuggable_lifetime_base.html#a32df91a3dc430cb76f532680df304322">unpause</a> ()</td></tr>
+<tr class="separator:a32df91a3dc430cb76f532680df304322"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -434,6 +438,56 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aec9944f109e09e0bf608caef9fcd1801" name="aec9944f109e09e0bf608caef9fcd1801"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9944f109e09e0bf608caef9fcd1801">&#9670;&#160;</a></span>pause()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Debug::DebuggableLifetimeBase::pause </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a32df91a3dc430cb76f532680df304322" name="a32df91a3dc430cb76f532680df304322"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32df91a3dc430cb76f532680df304322">&#9670;&#160;</a></span>unpause()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Debug::DebuggableLifetimeBase::unpause </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="adc69d607a1947a2adc85b8bbc9f294ad" name="adc69d607a1947a2adc85b8bbc9f294ad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adc69d607a1947a2adc85b8bbc9f294ad">&#9670;&#160;</a></span>parent()</h2>
 
@@ -544,7 +598,7 @@ Protected Member Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Sep 3 2026 22:37:57 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Mon Sep 7 2026 22:49:47 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>
