@@ -74,8 +74,8 @@ namespace Render {
             perApplication->p = ProjectionMatrix(f);
         }
 
-        for (std::pair<const GPUMeshData *const, std::vector<ShadowSceneRenderData::ObjectData>> &instance : mData.mInstances) {
-            const GPUMeshData *meshData = instance.first;
+        for (std::pair<GPUMeshLoader::Handle const, std::vector<ShadowSceneRenderData::ObjectData>> &instance : mData.mInstances) {
+            const GPUMeshLoader::Handle &meshData = instance.first;
 
             std::vector<HLSL::PointShadowInstanceData> instanceData;
 
@@ -97,7 +97,7 @@ namespace Render {
                     Math::Matrix4 mv = v * o.mTransform;
                     return HLSL::PointShadowInstanceData {
                         mv.Transpose(),
-                        //o.mBones
+                        // o.mBones
                     };
                 });
             }

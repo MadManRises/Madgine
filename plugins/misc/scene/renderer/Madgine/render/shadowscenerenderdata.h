@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Madgine/meshloader/gpumeshdata.h"
+#include "Madgine/meshloader/gpumeshloader.h"
 #include "Madgine/render/ptr.h"
 #include "Madgine/render/renderdata.h"
 
@@ -19,7 +20,7 @@ namespace Render {
             Math::Matrix4 mTransform;
             GPUPtr<Math::Matrix4[]> mBones;
         };
-        std::map<const GPUMeshData *, std::vector<ObjectData>> mInstances;
+        std::map<GPUMeshLoader::Handle, std::vector<ObjectData>> mInstances;
 
         SceneRenderData &mRenderData;
     };

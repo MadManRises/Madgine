@@ -65,8 +65,8 @@ namespace Render {
             perFrame->light.light.dir = (v * Math::Vector4 { mData.mScene.mAmbientLightDirection, 0.0f }).xyz();
         }
 
-        for (const std::pair<const GPUMeshData * const, std::vector<ShadowSceneRenderData::ObjectData>> &instance : mData.mInstances) {
-            const GPUMeshData *meshData = instance.first;
+        for (const std::pair<GPUMeshLoader::Handle const, std::vector<ShadowSceneRenderData::ObjectData>> &instance : mData.mInstances) {
+            GPUMeshLoader::Handle meshData = instance.first;
 
             {
                 auto perObject = mPipeline->mapParameters<HLSL::ScenePerObject>(2);

@@ -129,7 +129,7 @@ namespace Render {
         mPipeline->bindResources(target, 3, mShadowResourceBlock);
 
         for (const std::pair<const LitSceneRenderData::NonInstancedData, std::vector<LitSceneRenderData::ObjectData>> &instance : mData.mInstances) {
-            const GPUMeshData *meshData = instance.first.mMesh;
+            GPUMeshLoader::Handle meshData = instance.first.mMesh;
             ResourceBlock material = instance.first.mMaterial;
 
             {

@@ -4,6 +4,8 @@
 #include "Madgine/render/ptr.h"
 #include "Madgine/render/renderdata.h"
 
+#include "Madgine/meshloader/gpumeshloader.h"
+
 namespace Engine {
 namespace Render {
 
@@ -18,7 +20,7 @@ namespace Render {
         Camera &mCamera;
 
         struct NonInstancedData {
-            const GPUMeshData *mMesh;
+            GPUMeshLoader::Handle mMesh;
             ResourceBlock mMaterial;
 
             constexpr auto operator<=>(const NonInstancedData &) const = default;
