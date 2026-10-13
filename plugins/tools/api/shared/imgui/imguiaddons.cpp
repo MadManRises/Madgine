@@ -342,7 +342,18 @@ bool LED(const char *label, bool *on, const ImVec2 &size)
 
 bool InlineContextButton(const char *text, bool checked)
 {
-    ImGui::SameLine(ImGui::GetColumnWidth() - ImGui::GetTextLineHeight() + ImGui::GetCurrentWindow()->DC.Indent.x - ImGui::GetCurrentWindow()->DC.GroupOffset.x, 0.0f);
+    ImGuiContext &g = *GImGui;
+
+    static ImGuiID sLastButtonID = 0;
+
+    if (g.LastItemData.ID == sLastButtonID) {        
+        ImGui::SameLine(0.0f, 0.0f);    
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 2.0f * ImGui::GetTextLineHeight());
+    } else {
+        ImGui::SameLine(0.0f, 0.0f);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - ImGui::GetTextLineHeight());
+    }
+
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
@@ -356,7 +367,7 @@ bool InlineContextButton(const char *text, bool checked)
     }
     ImGui::PopStyleVar(3);
 
-    ImGui::GetCurrentWindow()->WorkRect.Max.x -= ImGui::GetTextLineHeight();
+    sLastButtonID = g.LastItemData.ID;
 
     return pressed;
 }

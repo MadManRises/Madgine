@@ -99,7 +99,7 @@ namespace Execution {
 
             void continueExecution(std::chrono::microseconds elapsed) override
             {
-                this->set_value(std::move(elapsed));
+                this->set_value(std::move(elapsed)); //TODO use correct elapsed
             }
 
             friend auto tag_invoke(Execution::visit_state_t, state *state, auto &&visitor)
@@ -112,22 +112,24 @@ namespace Execution {
                         double progress = 0.0;
                         if (state) {
                             visitor(Execution::State::Marker {});
-                            progress = std::chrono::duration_cast<std::chrono::duration<double>>(state->mClock->lastTick().time_since_epoch()).count();
+                            if (state->mClock)
+                                progress = std::chrono::duration_cast<std::chrono::duration<double>>(state->mClock->lastTick().time_since_epoch()).count();
                         }
                         visitor(Execution::State::Progress { static_cast<float>(progress), true });
                     } else {
-                        std::string title;
+                        std::stringstream title;
+                        title << "Waiting ";
                         if (duration.count() < 1000) {
-                            title = std::format("Waiting {} ns", duration.count());
+                            title << duration;
                         } else if (duration.count() < 1000000) {
-                            title = std::format("Waiting {:.3f} us", std::chrono::duration_cast<std::chrono::duration<float, std::micro>>(duration).count());
+                            title << std::chrono::duration_cast<std::chrono::duration<float, std::micro>>(duration);
                         } else if (duration.count() < 1000000000) {
-                            title = std::format("Waiting {:.4f} ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(duration).count());
+                            title << std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(duration);
                         } else {
-                            title = std::format("Waiting {:.4f} s", std::chrono::duration_cast<std::chrono::duration<float>>(duration).count());
+                            title << std::chrono::duration_cast<std::chrono::duration<float>>(duration);
                         }
 
-                        visitor(Execution::State::BeginBlock { title });
+                        visitor(Execution::State::BeginBlock { title.str() });
 
                         float progress = 0.0f;
 

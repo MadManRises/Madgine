@@ -68,6 +68,7 @@ namespace Tools {
             bool isMarker = false;
             Debug::Continuation *continuation = nullptr;
             IndexType<size_t> *lineFeedback = nullptr;
+            Closure<void()> stopCallback;
             size_t breakpointIndex = 0;
             bool lastWasText = false;
 
@@ -109,17 +110,15 @@ namespace Tools {
                         actualContent = true;
                     },
                     [&](const Execution::State::Breakpoint &bp) {
-                        if (bp.mContinuation) {
-                            assert(!continuation);
-                            continuation = &bp.mContinuation;
+                        if (bp.mContinuation && *bp.mContinuation) {
 
                             std::stringstream ss;
-                            continuation->visitArguments(ss);
+                            bp.mContinuation->visitArguments(ss);
                             std::string arguments = ss.str();
                             if (!arguments.empty()) {
-                                Debug::ContinuationType type = continuation->type();
+                                Debug::ContinuationType type = bp.mContinuation->type();
                                 switch (type) {
-                                case Debug::ContinuationType::Cancelled:
+                                case Debug::ContinuationType::Done:
                                 case Debug::ContinuationType::Error:
                                     ImGui::PushStyleColor(ImGuiCol_Border, { 1.0f, 0.0f, 0.0f, 1.0f });
                                     // ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
@@ -130,11 +129,13 @@ namespace Tools {
                                     break;
                                 case Debug::ContinuationType::Flow:
                                     break;
+                                case Debug::ContinuationType::Cancelling: // TODO
+                                    break;
                                 }
                                 ImGui::BeginGroupPanel();
                                 ImGui::Text(arguments);
                                 ImGui::EndGroupPanel();
-                                if (type != Debug::ContinuationType::Flow) {
+                                if (type != Debug::ContinuationType::Flow && type != Debug::ContinuationType::Cancelling) {
                                     ImGui::PopStyleColor(1);
                                 }
                                 actualContent = true;
@@ -142,6 +143,8 @@ namespace Tools {
                         }
                         lineFeedback = bp.mLineFeedback;
                         breakpoint = breakpointIndex++;
+                        continuation = bp.mContinuation;
+                        stopCallback = bp.mStopCallback();
                     },
                     [&](const Execution::State::Marker &m) {
                         isMarker = true;
@@ -185,10 +188,12 @@ namespace Tools {
                             context.setBreakpoint(senderLocation, breakpoint, set);
                         breakpoint.reset();
                         if (continuation) {
-                            DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY));
+                            if (*continuation)
+                                DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY));
 
-                            continuations.controls(*continuation);
+                            continuations.controls(*continuation, std::move(stopCallback) );
                             continuation = nullptr;
+                            stopCallback = {};
                         }
                     }
                     if (isMarker) {

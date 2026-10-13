@@ -19,8 +19,7 @@ namespace Debug {
 
     bool ContextInfo::wantsPause(TypedPtr location, ContinuationType type, IndexType<size_t> line)
     {
-        bool pause = (line && (type == Debug::ContinuationType::Error || getBreakpoint(location.ptr(), line)))
-            || mStopRequested;
+        bool pause = (line && (type == Debug::ContinuationType::Error || getBreakpoint(location.ptr(), line)));
 
         for (DebugListener *listener : Debugger::getSingleton().mListeners) {
             pause |= listener->wantsPause(*this, location, type, line);
@@ -33,27 +32,6 @@ namespace Debug {
     {
         for (DebugListener *listener : Debugger::getSingleton().mListeners)
             listener->onSuspend(*this, location, type);
-    }
-
-    ContinuationMode ContextInfo::resume()
-    {
-        return ContinuationMode::Continue;
-    }
-
-    ContinuationMode ContextInfo::step()
-    {
-        return ContinuationMode::Step;
-    }
-
-    std::nullopt_t ContextInfo::pause()
-    {
-        return std::nullopt;
-    }
-
-    ContinuationMode ContextInfo::stop()
-    {
-        mStopRequested = true;
-        return ContinuationMode::Abort;
     }
 
     bool ContextInfo::alive() const

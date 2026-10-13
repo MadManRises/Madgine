@@ -15,11 +15,6 @@ namespace Debug {
         bool wantsPause(TypedPtr location, ContinuationType type, IndexType<size_t> line);
         void suspend(TypedPtr location, ContinuationType type);
 
-        ContinuationMode resume();
-        ContinuationMode step();
-        std::nullopt_t pause();
-        ContinuationMode stop();
-
         bool alive() const;
         bool isPaused() const;
 
@@ -31,8 +26,6 @@ namespace Debug {
         Debug::SenderLocation *mChild = nullptr;
 
     private:
-        bool mStopRequested = false;
-
         mutable std::map<const void *, DebugLocation> mDebugLocations;
     };
 

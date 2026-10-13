@@ -4,6 +4,7 @@
 
 #include "Madgine/behavior/behaviorcollector.h"
 #include "Madgine/behavior/behaviordescriptor.h"
+#include "Madgine/behavior/behaviorreceiver.h"
 #include "Madgine/debug/continuation.h"
 
 #include "python3fileloader.h"
@@ -37,7 +38,7 @@ namespace Behavior {
                 Reflect::ExtendedType mReturnType;
 
                 PyObjectPtr mFunction;
-                BehaviorDescriptor mDescriptor;                
+                BehaviorDescriptor mDescriptor;
 
                 std::string mTupleName;
                 std::unique_ptr<Reflect::Accessor[]> mTupleAccessors;
@@ -46,6 +47,29 @@ namespace Behavior {
             };
 
             std::map<std::string_view, Entry, std::less<>> mBehaviorObjects;
+        };
+
+        struct Python3BehaviorState : BehaviorReceiver {
+            Python3BehaviorState(PyObjectPtr function, const Reflect::ArgumentList &args);
+
+            ~Python3BehaviorState();
+
+            void handleExecutionError(Reflect::Error error);
+            void handleExecutionObject(PyObject *obj);
+
+            void resume(PyObjectPtr value);
+
+            void start();
+            void stop();
+
+            friend auto tag_invoke(Execution::visit_state_t, Python3BehaviorState *state, auto &&visitor)
+            {
+                visitor(Execution::State::DebugLocation { state });
+            }
+
+            mutable Debug::Continuation mContinuation;
+            PyObjectPtr mCoroutine;
+            PyObjectPtr mContext;
         };
 
     }

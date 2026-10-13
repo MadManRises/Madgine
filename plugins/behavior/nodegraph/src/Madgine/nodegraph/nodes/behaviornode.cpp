@@ -95,12 +95,12 @@ namespace Behavior {
                     , mBehavior(std::move(behavior))
                     , mLocation([this](Debug::SenderLocation::CB visitor) -> void { mBehavior->visitState(visitor); })
                 {
-                    receiver.mDebugLocation.mChild = &mLocation;
+                    receiver.mReceiver.mDebugLocation.mChild = &mLocation;
                 }
 
                 ~state()
                 {
-                    mReceiver.mDebugLocation.mChild = nullptr;
+                    mReceiver.mReceiver.mDebugLocation.mChild = nullptr;
                 }
 
                 NodeReceiver<NodeBase> mReceiver;

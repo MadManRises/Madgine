@@ -149,8 +149,10 @@ namespace Reflect {
             [](const Reflect::ScopeBinding &b) {
                 return "<binding>"s;
             },
-            [](std::chrono::duration<uint64_t, std::nano> dur) {
-                return "<duration>"s;
+            [](Duration64 dur) {
+                std::stringstream ss;
+                ss << dur;
+                return ss.str();
             },
             [](const ExtendedType &type) {
                 return type.toString();

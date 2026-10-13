@@ -51,7 +51,7 @@ namespace Behavior {
 
     void CoroutineBehaviorState::pass(Closure<void()> callback)
     {
-        mDebugLocation.mContinuation.pass(&mDebugLocation, *mReceiver, [this, callback { std::move(callback) }](BehaviorReceiver &rec) { callback(); }, Debug::ContinuationType::Flow, mDebugLocation.mLine);
+        mDebugLocation.mContinuation.pass(&mDebugLocation, *mReceiver, [this, callback { std::move(callback) }](BehaviorReceiver &rec) { callback(); }, mDebugLocation.mLine);
     }
 
     CoroutineBehaviorState::InitialSuspend CoroutineBehaviorState::initial_suspend() noexcept
@@ -66,7 +66,7 @@ namespace Behavior {
 
     void CoroutineBehaviorState::FinalSuspend::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept
     {
-        handle.promise().mReceiver->set_value();
+        handle.promise().mDebugLocation.mContinuation.returnValue(&handle.promise().mDebugLocation, *handle.promise().mReceiver);
     }
 
     void CoroutineBehaviorState::FinalSuspend::await_resume() noexcept
@@ -91,13 +91,13 @@ namespace Behavior {
 
     std::bool_constant<true> CoroutineBehaviorState::set_error(Reflect::Error result)
     {
-        mReceiver->set_error(result);
+        mDebugLocation.mContinuation.returnError(&mDebugLocation, *mReceiver, {}, std::move(result));
         return {};
     }
 
     std::bool_constant<true> CoroutineBehaviorState::set_done()
     {
-        mReceiver->set_done();
+        mDebugLocation.mContinuation.returnDone(&mDebugLocation, *mReceiver);
         return {};
     }
 

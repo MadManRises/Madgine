@@ -6,7 +6,7 @@
 #include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine_Tools/debugger/debuggerview.h"
-#include "Python3/util/pyexecution.h"
+#include "Python3/python3behaviors.h"
 
 UNIQUECOMPONENT(Engine::Tools::Python3Editor);
 
@@ -20,7 +20,7 @@ SERIALIZETABLE_END(Engine::Tools::Python3Editor)
 namespace Engine {
 namespace Tools {
 
-    std::vector<TypedPtr> visualizeBehaviorDebugLocation(ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const Behavior::Python3::Python3Coroutine *location, TypedPtr inlineLocation);
+    std::vector<TypedPtr> visualizeBehaviorDebugLocation(ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const Behavior::Python3::Python3BehaviorState *location, TypedPtr inlineLocation);
 
     Python3Editor::Python3Editor(ImRoot &root)
         : Tool<Python3Editor, ResourceEditor>(root)

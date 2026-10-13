@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Generic/execution/query.h"
 #include "Generic/execution/concepts.h"
 #include "Generic/execution/execution.h"
+#include "Generic/execution/query.h"
 
 #include "Madgine/behavior/context.h"
 
@@ -44,20 +44,19 @@ namespace Behavior {
 
         template <typename Node>
         struct NodeReceiver : NodeExecutionReceiver<Node> {
-            BehaviorReceiver &mReceiver;
-            NodeDebugLocation &mDebugLocation;
+            NodeStateBase &mReceiver;
 
             void set_value()
             {
-                continueExecution(this->mInterpreter, this->mNode, mReceiver, mDebugLocation);
+                continueExecution(this->mInterpreter, this->mNode, mReceiver);
             }
             void set_done()
             {
-                mReceiver.set_done();
+                mReceiver.mDebugLocation.mContinuation.returnDone(&mReceiver.mDebugLocation, mReceiver);
             }
             void set_error(Reflect::Error result)
             {
-                mReceiver.set_error(std::move(result));
+                mReceiver.mDebugLocation.mContinuation.returnError(&mReceiver.mDebugLocation, mReceiver, {}, std::move(result));
             }
 
             friend NodeDebugLocation *tag_invoke(Execution::get_debug_location_t, NodeReceiver &rec)
@@ -76,33 +75,16 @@ namespace Behavior {
         template <typename Node>
         struct NodeReceiverWrapper {
 
-            template <typename Sender>
-            struct sender : Execution::algorithm_sender<Sender> {
-                template <typename Rec>
-                friend auto tag_invoke(Execution::connect_t connect, sender &&sender, Rec &&rec)
-                {
-                    return tag_invoke(connect, std::forward<Sender>(sender.mSender) | Execution::with_query_value(Execution::get_context, std::move(sender.mHandle)), std::forward<Rec>(rec));
-                }
-
-                template <typename Rec>
-                friend auto tag_invoke(Execution::connect_t connect, sender &sender, Rec &&rec)
-                {
-                    return tag_invoke(connect, sender.mSender | Execution::with_query_value(Execution::get_context, sender.mHandle), std::forward<Rec>(rec));
-                }
-
-                NodeInterpretHandle<Node> mHandle;
-            };
-
             template <typename Inner>
             auto operator()(Inner &&inner) const
             {
-                return sender<Inner> { { {}, std::forward<Inner>(inner) }, std::move(mHandle) };
+                return std::forward<Inner>(inner) | Execution::with_query_value(Execution::get_context, std::move(mHandle));
             }
 
             template <typename Inner>
             friend auto operator|(Inner &&inner, NodeReceiverWrapper &&wrapper)
             {
-                return sender<Inner> { { {}, std::forward<Inner>(inner) }, std::move(wrapper.mHandle) };
+                return std::forward<Inner>(inner) | Execution::with_query_value(Execution::get_context, std::move(wrapper.mHandle));
             }
 
             NodeInterpretHandle<Node> mHandle;
@@ -112,10 +94,10 @@ namespace Behavior {
         NodeReceiverWrapper(NodeInterpretHandle<Node>) -> NodeReceiverWrapper<Node>;
 
         template <uint32_t flowOutGroup, typename Rec>
-        struct NodeState : VirtualBehaviorState<Rec> {
+        struct NodeState : Execution::VirtualState<NodeStateBase, Rec> {
 
             NodeState(Rec &&rec, uint32_t flowOutIndex)
-                : VirtualBehaviorState<Rec> { std::forward<Rec>(rec) }
+                : Execution::VirtualState<NodeStateBase, Rec> { std::forward<Rec>(rec), &Execution::get_context(rec).mInterpreter }
                 , mFlowOutIndex { flowOutIndex }
             {
             }
@@ -123,7 +105,7 @@ namespace Behavior {
             void start()
             {
                 const auto &handle = Execution::get_context(this->mRec);
-                handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(mFlowOutIndex, flowOutGroup), mDebugLocation);
+                handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(mFlowOutIndex, flowOutGroup));
             }
 
             void stop()
@@ -132,13 +114,7 @@ namespace Behavior {
                 handle.mInterpreter.stop();
             }
 
-            friend void tag_invoke(Execution::visit_state_t visit_state, NodeState *s, auto &&visitor)
-            {
-                visitor(Execution::State::DebugLocation { s ? &s->mDebugLocation : nullptr });
-            }
-
             uint32_t mFlowOutIndex = 0;
-            NodeDebugLocation mDebugLocation = &Execution::get_context(this->mRec).mInterpreter;
         };
 
         template <uint32_t flowOutGroup>
@@ -215,8 +191,8 @@ namespace Behavior {
 
                 friend void tag_invoke(Execution::visit_state_t, state *s, auto &&visitor)
                 {
-                    //Not helpful to show
-                    //visitor(Execution::State::Text { "NodeReader" });
+                    // Not helpful to show
+                    // visitor(Execution::State::Text { "NodeReader" });
                 }
 
                 size_t mBaseIndex;
@@ -275,12 +251,12 @@ namespace Behavior {
 
                 void set_error(Reflect::Error result)
                 {
-                    mState->set_error(std::move(result));
+                    mState->mDebugLocation.mContinuation.returnError(&mState->mDebugLocation, *mState, {}, std::move(result));
                 }
 
                 void set_done()
                 {
-                    mState->set_done();
+                    mState->mDebugLocation.mContinuation.returnDone(&mState->mDebugLocation, *mState);
                 }
 
                 template <typename CPO, typename... Args>
@@ -306,12 +282,14 @@ namespace Behavior {
                 {
                 }
 
-                void start() {
+                void start()
+                {
                     mPassed = false;
                     mInnerState.start();
                 }
 
-                void startAlgorithm() {
+                void startAlgorithm()
+                {
                     mPassed = true;
                     NodeState<flowOutGroup, Rec>::start();
                 }
@@ -319,7 +297,7 @@ namespace Behavior {
                 friend void tag_invoke(Execution::visit_state_t visit_state, state *s, auto &&visitor)
                 {
                     visit_state(!s || s->mPassed ? nullptr : &s->mInnerState, visitor);
-                    visit_state(s && s->mPassed ? static_cast<NodeState<flowOutGroup, Rec> *>(s) : nullptr, visitor);                    
+                    visit_state(s && s->mPassed ? static_cast<NodeState<flowOutGroup, Rec> *>(s) : nullptr, visitor);
                 }
 
                 inner_state mInnerState;
@@ -350,7 +328,7 @@ namespace Behavior {
             std::vector<NodeResults> &mResults;
         };
 
-        MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, BehaviorReceiver &receiver, NodeDebugLocation &location);
+        MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, NodeStateBase &receiver);
 
         template <typename T>
         struct NodeStream {

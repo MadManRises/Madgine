@@ -7,29 +7,6 @@
 namespace Engine {
 namespace Execution {
 
-    struct get_continuation_t {
-
-        using signature = Debug::Continuation *();
-
-        template <typename T>
-            requires(!tag_invocable<get_continuation_t, T &>)
-        auto operator()(T &t) const
-        {
-            return nullptr;
-        }
-
-        template <typename T>
-            requires tag_invocable<get_continuation_t, T &>
-        auto operator()(T &t) const
-            noexcept(is_nothrow_tag_invocable_v<get_continuation_t, T &>)
-                -> tag_invoke_result_t<get_continuation_t, T &>
-        {
-            return tag_invoke(*this, t);
-        }
-    };
-
-    inline constexpr get_continuation_t get_continuation;
-
     struct get_debug_location_t {
 
         using signature = Debug::SenderLocation *();
@@ -206,14 +183,7 @@ namespace Execution {
 
                 Debug::SenderLocation *location = get_debug_location(this->mState.mRec);
 
-                mState.mContinuation.pass(location, this->mState.mRec, [this](Rec &rec, V &&...value) mutable { 
-                    if (mState.mContinuation.mode() != Debug::ContinuationMode::Continue) {
-                        Debug::Continuation *parent = Execution::get_continuation(rec);
-                        if (parent) {
-                            parent->setMode(mState.mContinuation.mode());
-                        }
-                    }
-                    rec.set_value(std::forward<V>(value)...); }, Debug::ContinuationType::Return, mState.sEndBreakpoint, std::forward<V>(value)...);
+                mState.mContinuation.returnValue(location, this->mState.mRec, mState.sEndBreakpoint, std::forward<V>(value)...);
             }
 
             void set_done()
@@ -222,14 +192,7 @@ namespace Execution {
 
                 Debug::SenderLocation *location = get_debug_location(this->mState.mRec);
 
-                 mState.mContinuation.pass(location, this->mState.mRec, [this](Rec &rec) { 
-                    if (mState.mContinuation.mode() != Debug::ContinuationMode::Continue) {
-                        Debug::Continuation *parent = Execution::get_continuation(rec);
-                        if (parent) {
-                            parent->setMode(mState.mContinuation.mode());
-                        }
-                    }
-                rec.set_done(); }, Debug::ContinuationType::Cancelled, mState.sEndBreakpoint);
+                mState.mContinuation.returnDone(location, this->mState.mRec, mState.sEndBreakpoint);
             }
 
             template <typename... R>
@@ -239,17 +202,10 @@ namespace Execution {
 
                 Debug::SenderLocation *location = get_debug_location(this->mState.mRec);
 
-                mState.mContinuation.pass(location, this->mState.mRec, [this](Rec &rec, R &&...result) mutable { 
-                    if (mState.mContinuation.mode() != Debug::ContinuationMode::Continue) {
-                        Debug::Continuation *parent = Execution::get_continuation(rec);
-                        if (parent) {
-                            parent->setMode(mState.mContinuation.mode());
-                        }
-                    }
-                rec.set_error(std::forward<R>(result)...); }, Debug::ContinuationType::Error, mState.sEndBreakpoint, std::forward<R>(result)...);
+                mState.mContinuation.returnError(location, this->mState.mRec, mState.sEndBreakpoint, std::forward<R>(result)...);
             }
 
-            friend Debug::Continuation *tag_invoke(get_continuation_t, receiver &rec)
+            friend Debug::Continuation *tag_invoke(Debug::get_continuation_t, receiver &rec)
             {
                 return &rec.mState.mContinuation;
             }
@@ -283,28 +239,31 @@ namespace Execution {
 
                 Debug::SenderLocation *location = get_debug_location(mRec);
 
-                Debug::Continuation *parent = Execution::get_continuation(mRec);
+                Debug::Continuation *parent = Debug::get_continuation(mRec);
                 mContinuation.setMode(parent && (parent->mode() == Debug::ContinuationMode::StepInto) ? Debug::ContinuationMode::Step : Debug::ContinuationMode::Continue);
 
-                mContinuation.pass(location, mRec, [this](Rec &rec) { mState.start(); }, Debug::ContinuationType::Flow, sStartBreakpoint);
+                mContinuation.pass(location, mRec, [this](Rec &rec) { mState.start(); }, sStartBreakpoint);
             }
 
             void stop()
             {
-                if (!mContinuation.stop())
+                if (mContinuation.stop()) {
                     mState.stop();
+                    mContinuation.done();
+                }
             }
 
             friend auto tag_invoke(visit_state_t, state *state, auto &&visitor)
             {
-                Debug::Continuation empty;
                 visitor(Execution::State::Breakpoint {
                     &sStartBreakpoint,
-                    state && state->mPausedAtStart ? state->mContinuation : empty });
-                visit_state(state && !state->mContinuation ? &state->mState : nullptr, std::forward<decltype(visitor)>(visitor));
+                    state ? &state->mContinuation : nullptr,
+                    [state]() { return Closure<void()> { [state]() { state->mState.stop(); } }; } });
+                visit_state(state ? &state->mState : nullptr, std::forward<decltype(visitor)>(visitor));
                 visitor(Execution::State::Breakpoint {
                     &sEndBreakpoint,
-                    state && !state->mPausedAtStart ? state->mContinuation : empty });
+                    state ? &state->mContinuation : nullptr,
+                    [state]() { return Closure<void()> { [state]() { state->mState.stop(); } }; } });
             }
 
             Rec mRec;

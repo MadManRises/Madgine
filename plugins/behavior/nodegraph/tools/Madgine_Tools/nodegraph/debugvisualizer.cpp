@@ -8,6 +8,7 @@
 #include "Madgine/nodegraph/nodeinterpreter.h"
 #include "Madgine/nodegraph/pins.h"
 
+#include "Madgine_Tools/debugger/continuationlist.h"
 #include "Madgine_Tools/debugger/debuggerview.h"
 #include "NodeEditor/imgui_node_editor.h"
 #include "NodeEditor/imgui_node_editor_internal.h"
@@ -111,6 +112,9 @@ namespace Tools {
                     ++handledIndex;
                 } else {
                     BeginNode(node, nodeId);
+
+                    if (location->mNode == node)
+                        continuations.controls(location->mContinuation, []() { /*nothing to do yet*/ });
 
                     EndNode();
                 }

@@ -16,7 +16,7 @@
 namespace Engine {
 namespace Tools {
 
-    std::vector<TypedPtr> visualizeBehaviorDebugLocation(ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const Behavior::Python3::Python3Coroutine *location, TypedPtr inlineLocation)
+    std::vector<TypedPtr> visualizeBehaviorDebugLocation(ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const Behavior::Python3::Python3BehaviorState *location, TypedPtr inlineLocation)
     {
         if (!location)
             return {};
@@ -74,7 +74,7 @@ namespace Tools {
                             }
                         }
                     } else if (Py_IS_TYPE(next, &Behavior::Python3::PyDebugLineType)) {
-                        continuations.controls(location->mContinuation);
+                        continuations.controls(location->mContinuation, []() { /*nothing to do yet*/ });
                     } else if (!Py_IsNone(next)) {
                         if (BeginDebuggablePanel("Frame")) {
                             std::ranges::move(view.visualizeDebugLocation(continuations, context, static_cast<PyObject *>(next), location), std::back_inserter(children));

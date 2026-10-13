@@ -12,7 +12,7 @@ struct SignatureEntry {
     {
     }
 
-    R operator()(void *context, Args &&...args)
+    R operator()(void *context, Args &&...args) const
     {
         return mF(context, std::forward<Args>(args)...);
     }
@@ -102,7 +102,7 @@ struct CallableViewImpl {
         return *this;
     }
 
-    R operator()(Args...args)
+    R operator()(Args...args) const
     {
         return mEntry(mContext, std::forward<Args>(args)...);
     }

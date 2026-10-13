@@ -15,10 +15,10 @@ namespace Behavior {
             return mInterpreter.read(retVal, pin);
         }
 
-        void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, BehaviorReceiver &receiver, NodeDebugLocation &location)
+        void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, NodeStateBase &receiver)
         {
             Pin pin = node.flowOutTarget(0);
-            interpreter.branch(receiver, pin, location);
+            interpreter.branch(receiver, pin);
         }
 
     }

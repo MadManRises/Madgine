@@ -14,34 +14,28 @@ namespace Behavior {
     namespace NodeGraph {
 
         NodeInterpreterStateBase::NodeInterpreterStateBase(const NodeGraph *graph, NodeGraphLoader::Handle handle, ParameterTuple args)
-            : mDebugLocation(this)
+            : NodeStateBase(this)
             , mGraph(graph)
             , mHandle(std::move(handle))
             , mArguments(std::move(args))
         {
         }
 
-        void NodeInterpreterStateBase::branch(BehaviorReceiver &receiver, uint32_t flowIn, NodeDebugLocation &location)
+        void NodeInterpreterStateBase::branch(NodeStateBase &receiver, uint32_t flowIn)
         {
-            branch(receiver, mGraph->mFlowOutPins[flowIn].mTarget, location);
+            branch(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
         }
 
-        void NodeInterpreterStateBase::branch(BehaviorReceiver &receiver, Pin pin, NodeDebugLocation &location)
+        void NodeInterpreterStateBase::branch(NodeStateBase &receiver, Pin pin)
         {
-
-            const NodeBase *node = nullptr;
             if (pin && pin.mNode) {
-                node = mGraph->node(pin.mNode);
+                const NodeBase *node = mGraph->node(pin.mNode);
+                receiver.mDebugLocation.mNode = node;
+                receiver.mDebugLocation.mContinuation.pass(&receiver.mDebugLocation, receiver, [=, this](NodeStateBase &receiver) { node->interpret({ { { { *this }, *node } }, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup); });
+            } else {
+                receiver.mDebugLocation.mNode = nullptr;
+                receiver.mDebugLocation.mContinuation.returnValue(&receiver.mDebugLocation, receiver);
             }
-
-            location.mNode = node;
-           
-            mContinuation.pass(&mDebugLocation, receiver, [=, this, &location](BehaviorReceiver &receiver) {
-                if (pin && pin.mNode) {
-                    node->interpret({ { { { *this }, *node } }, receiver, location }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
-                } else {
-                    receiver.set_value();
-                } }, Debug::ContinuationType::Flow);
         }
 
         Reflect::Result NodeInterpreterStateBase::read(Reflect::Value &retVal, Pin pin)
@@ -120,6 +114,9 @@ namespace Behavior {
 
         void NodeInterpreterStateBase::start()
         {
+            Debug::Continuation *parent = Debug::get_continuation(*this);
+            mDebugLocation.mContinuation.setMode(parent && (parent->mode() == Debug::ContinuationMode::StepInto) ? Debug::ContinuationMode::Step : Debug::ContinuationMode::Continue);
+
             if (!mGraph)
                 mGraph = mHandle;
             mData.resize(mGraph->nodes().size());
@@ -128,12 +125,13 @@ namespace Behavior {
                 mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
             }
 
-            branch(*this, 0, mDebugLocation);
+            branch(*this, 0);
         }
 
-        void NodeInterpreterStateBase::stop()
+        void NodeStateBase::stop()
         {
-            // Nothing to do. It is the responsibility of child behaviors to listen to the stop source.
+            if (mDebugLocation.mContinuation.stop())
+                mDebugLocation.mContinuation.done(); // Nothing to do. It is the responsibility of child behaviors to listen to the stop source.
         }
 
     }

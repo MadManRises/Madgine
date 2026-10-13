@@ -6,7 +6,8 @@ namespace Behavior {
 
         struct Python3Environment;
         struct Python3Lock;
-        struct ExecutionSender;
+        
+        struct Python3BehaviorState;
 
     }
 }

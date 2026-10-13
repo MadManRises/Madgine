@@ -31,6 +31,8 @@ namespace Behavior {
             const NodeBase *mNode = nullptr;
             NodeInterpreterStateBase *mInterpreter;
             mutable std::unique_ptr<ed::EditorContext, void (*)(ed::EditorContext *)> mEditorContext = { nullptr, nullptr };
+
+            mutable Debug::Continuation mContinuation;
         };
 
         struct NodeInterpreterData {
@@ -41,17 +43,34 @@ namespace Behavior {
             virtual std::vector<std::string_view> variables() { return {}; }*/
         };
 
-        struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : BehaviorReceiver {
+        struct MADGINE_NODEGRAPH_EXPORT NodeStateBase : BehaviorReceiver {
+
+            NodeStateBase(NodeInterpreterStateBase *interpreter)
+                : mDebugLocation(interpreter)
+            {
+            }
+
+            void stop();
+
+            friend void tag_invoke(Execution::visit_state_t, NodeStateBase *state, auto &&visitor)
+            {
+                visitor(Execution::State::DebugLocation { state ? &state->mDebugLocation : nullptr });
+            }
+
+            NodeDebugLocation mDebugLocation;
+        };
+
+        struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : NodeStateBase {
             NodeInterpreterStateBase(const NodeGraph *graph, NodeGraphLoader::Handle handle, ParameterTuple args);
             NodeInterpreterStateBase(const NodeInterpreterStateBase &) = delete;
-            NodeInterpreterStateBase(NodeInterpreterStateBase &&) = default;
+            NodeInterpreterStateBase(NodeInterpreterStateBase &&) = delete;
             virtual ~NodeInterpreterStateBase() = default;
 
             NodeInterpreterStateBase &operator=(const NodeInterpreterStateBase &) = delete;
-            NodeInterpreterStateBase &operator=(NodeInterpreterStateBase &&) = default;
+            NodeInterpreterStateBase &operator=(NodeInterpreterStateBase &&) = delete;
 
-            void branch(BehaviorReceiver &receiver, uint32_t flowIn, NodeDebugLocation &location);
-            void branch(BehaviorReceiver &receiver, Pin pin, NodeDebugLocation &location);
+            void branch(NodeStateBase &receiver, uint32_t flowIn);
+            void branch(NodeStateBase &receiver, Pin pin);
 
             Reflect::Result read(Reflect::Value &retVal, Pin pin);
 
@@ -68,17 +87,6 @@ namespace Behavior {
             virtual std::vector<std::string_view> variables();*/
 
             void start();
-            void stop();
-
-            friend void tag_invoke(Execution::visit_state_t, NodeInterpreterStateBase *state, auto &&visitor)
-            {
-                visitor(Execution::State::DebugLocation { &state->mDebugLocation });
-            }
-
-        protected:
-            NodeDebugLocation mDebugLocation;
-
-            Debug::Continuation mContinuation;
 
         private:
             ParameterTuple mArguments;

@@ -74,6 +74,11 @@ namespace Execution {
                     mRec.set_done();
             }
 
+            void stop()
+            {
+                throw 0;
+            }
+
             void stopRequested() override
             {
                 // TODO also sync with start()

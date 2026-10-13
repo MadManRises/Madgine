@@ -13,9 +13,6 @@ namespace Engine {
 namespace Behavior {
     namespace Python3 {
 
-        MADGINE_PYTHON3_EXPORT void handleExecutionObject(BehaviorReceiver &rec, PyObject *obj);
-        MADGINE_PYTHON3_EXPORT void handleExecutionError(BehaviorReceiver &rec, Reflect::Error error);
-
         bool lock();
         void unlock();
 
@@ -35,14 +32,6 @@ namespace Behavior {
                 DebugLine mLine;
         };
 
-        struct Python3Coroutine {
-            mutable Debug::Continuation mContinuation;
-            PyObjectPtr mCoroutine;
-            PyObjectPtr mContext;
-        };
-
-        MADGINE_PYTHON3_EXPORT void resumeCoroutine(Python3Coroutine &coro, BehaviorReceiver &rec, PyObjectPtr value);
-
         extern PyMethodDef PyStateMethods[];
 
         struct PyStateBase {
@@ -51,8 +40,7 @@ namespace Behavior {
             void resume();
 
             std::atomic_flag mFlag;
-            Python3Coroutine *mCoroutine = nullptr;
-            BehaviorReceiver *mRec = nullptr;
+            Python3BehaviorState *mState = nullptr;            
             PyObjectPtr mResult;
 
             Debug::SenderLocation *mChild = nullptr;
@@ -79,7 +67,7 @@ namespace Behavior {
                 return tag_invoke(f, rec.mReceiver, std::forward<Args>(args)...);
             }
 
-            friend Debug::Continuation *tag_invoke(Execution::get_continuation_t, PyReceiver &rec)
+            friend Debug::Continuation *tag_invoke(Debug::get_continuation_t, PyReceiver &rec)
             {
                 return &rec.mContinuation;
             }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Generic/closure.h"
+#include "Generic/callable_view.h"
+
 #include "../typed_ptr.h"
 
 namespace Engine {
@@ -31,7 +34,8 @@ namespace Execution {
         };
         struct Breakpoint {
             IndexType<size_t> *mLineFeedback;
-            Debug::Continuation &mContinuation;
+            Debug::Continuation *mContinuation;
+            CallableView<Closure<void()>()> mStopCallback;
         };
         struct Marker {
         };

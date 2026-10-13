@@ -1,5 +1,5 @@
 
-
+#include "Generic/closure.h"
 
 namespace Engine {
 namespace Tools {
@@ -20,11 +20,11 @@ namespace Tools {
 
         ContinuationList &operator=(const ContinuationList &) = delete;
 
-        void controls(Debug::Continuation &continuation);
+        void controls(Debug::Continuation &continuation, Closure<void()> stopCallback);
 
     private:
         ControlButton mButton;
-        std::vector<std::pair<Debug::Continuation&, Debug::ContinuationMode>> mContinuations;
+        std::vector<std::tuple<Debug::Continuation &, Debug::ContinuationMode, Closure<void()>>> mContinuations;
     };
 
 }

@@ -18,46 +18,53 @@ namespace Tools {
 
     ContinuationList::~ContinuationList()
     {
-        for (auto &[continuation, mode] : mContinuations) {
+        for (auto &[continuation, mode, callback] : mContinuations) {
+            if (callback)
+                callback();
             continuation(mode);
         }
     }
 
-    void ContinuationList::controls(Debug::Continuation &continuation)
+    void ContinuationList::controls(Debug::Continuation &continuation, Closure<void()> stopCallback)
     {
-        ImGui::PushID(&continuation);
-
         ControlButton button = mButton;
+        
+        if (continuation || ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+            ImGui::PushID(&continuation);            
 
-        if (ImGui::InlineContextButton(IMGUI_ICON_STOP)) {
-            button = ControlButton::STOP;
+            if (ImGui::InlineContextButton(IMGUI_ICON_STOP)) {
+                button = ControlButton::STOP;
+            }
+
+            if (ImGui::InlineContextButton(IMGUI_ICON_STEP)) {
+                button = ControlButton::STEPOVER;
+            }
+
+            if (ImGui::InlineContextButton(IMGUI_ICON_STEP "##1")) {
+                button = ControlButton::STEPINTO;
+            }
+
+            if (ImGui::InlineContextButton(IMGUI_ICON_PLAY)) {
+                button = ControlButton::PLAY;
+            }
+
+            ImGui::PopID();
         }
 
-        if (ImGui::InlineContextButton(IMGUI_ICON_STEP)) {
-            button = ControlButton::STEPOVER;
-        }
-
-        if (ImGui::InlineContextButton(IMGUI_ICON_STEP "##1")) {
-            button = ControlButton::STEPINTO;
-        }
-
-        if (ImGui::InlineContextButton(IMGUI_ICON_PLAY)) {
-            button = ControlButton::PLAY;
-        }
-
-        ImGui::PopID();
         switch (button) {
         case ControlButton::PLAY:
-            mContinuations.emplace_back(continuation, Debug::ContinuationMode::Continue);
+            mContinuations.emplace_back(continuation, Debug::ContinuationMode::Continue, Closure<void()> {});
             break;
         case ControlButton::STEPOVER:
-            mContinuations.emplace_back(continuation, Debug::ContinuationMode::Step);
+            mContinuations.emplace_back(continuation, Debug::ContinuationMode::Step, Closure<void()> {});
             break;
         case ControlButton::STEPINTO:
-            mContinuations.emplace_back(continuation, Debug::ContinuationMode::StepInto);
+            mContinuations.emplace_back(continuation, Debug::ContinuationMode::StepInto, Closure<void()> {});
             break;
         case ControlButton::STOP:
-            mContinuations.emplace_back(continuation, Debug::ContinuationMode::Abort);
+            if (continuation.stop()) {
+                mContinuations.emplace_back(continuation, Debug::ContinuationMode::Done, std::move(stopCallback));
+            }
             break;
         case ControlButton::PAUSE:
             continuation.pause();

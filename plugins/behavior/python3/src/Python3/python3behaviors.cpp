@@ -18,7 +18,10 @@
 
 #include "python3env.h"
 #include "python3streamredirect.h"
+#include "util/pylistptr.h"
+#include "util/pyobjectinstance.h"
 #include "util/pyobjectutil.h"
+#include "util/pyscopeptr.h"
 #include "util/pysender.h"
 #include "util/python3lock.h"
 #include "util/pytype.h"
@@ -89,66 +92,161 @@ namespace Behavior {
         {
         }
 
-        struct Python3BehaviorState : BehaviorReceiver {
-            Python3BehaviorState(PyObjectPtr function, const Reflect::ArgumentList &args)
-            {
-                Python3Lock lock;
-                mCoroutine.mCoroutine = function.call(args);
-                if (!mCoroutine.mCoroutine) {
-                    mCoroutine.mCoroutine = PyErr_GetRaisedException();
+        Python3BehaviorState::Python3BehaviorState(PyObjectPtr function, const Reflect::ArgumentList &args)
+        {
+            Python3Lock lock;
+            mCoroutine = function.call(args);
+            if (!mCoroutine) {
+                mCoroutine = PyErr_GetRaisedException();
+            }
+        }
+
+        Python3BehaviorState::~Python3BehaviorState()
+        {
+            Python3Lock lock;
+            mCoroutine.reset();
+            mContext.reset();
+        }
+
+        void Python3BehaviorState::handleExecutionError(Reflect::Error error)
+        {
+            Python3Suspend suspend;
+            mContinuation.returnError(this, *this, {}, std::move(error));                                    
+        }
+
+        void Python3BehaviorState::handleExecutionObject(PyObject *obj)
+        {
+            if (!obj) {
+                if (PyErr_ExceptionMatches(PyExc_EOFError)) {
+                    Python3Suspend suspend;
+                    mContinuation.returnDone(this, *this);                    
+                } else {
+                    handleExecutionError(fetchError());
                 }
+                return;
             }
 
-            ~Python3BehaviorState()
-            {
-                Python3Lock lock;
-                mCoroutine.mCoroutine.reset();
-                mCoroutine.mContext.reset();
-            }
+            Python3Suspend suspend;
 
-            void start()
-            {
-                Debug::Continuation *parent = Execution::get_continuation(*this);
-                mCoroutine.mContinuation.setMode(parent && (parent->mode() == Debug::ContinuationMode::StepInto) ? Debug::ContinuationMode::Step : Debug::ContinuationMode::Continue);
+            auto set_value = [this](auto &&...args) {
+                mContinuation.returnValue(this, *this, {}, std::forward<decltype(args)>(args)...);
+            };
 
-                Python3Lock lock;
-                if (PyExceptionInstance_Check(mCoroutine.mCoroutine)) {
-                    handleExecutionError(*this, fromPyError(mCoroutine.mCoroutine));
-                    return;
+            if (obj == Py_None) {
+                set_value();
+            } else if (PyUnicode_Check(obj)) {
+                const char *s;
+                if (!PyArg_Parse(obj, "s", &s))
+                    throw 0;
+                set_value(std::string { s });
+            } else if (PyBool_Check(obj)) {
+                set_value(obj == Py_True);
+            } else if (PyLong_Check(obj)) {
+                int i;
+                if (!PyArg_Parse(obj, "i", &i))
+                    throw 0;
+                set_value(i);
+            } else if (PyDict_Check(obj)) {
+                Py_INCREF(obj);
+                set_value(Reflect::AssociativeRange { PyDictPtr { obj }, Engine::type_holder<VirtualRangeHelper> });
+            } else if (PyList_Check(obj)) {
+                Py_INCREF(obj);
+                set_value(Reflect::SequenceRange { PyListPtr { obj }, Engine::type_holder<VirtualRangeHelper> });
+            } else if (obj->ob_type == &PyScopePtrType) {
+                set_value(reinterpret_cast<PyScopePtr *>(obj)->mPtr);
+            } else if (PyTuple_Check(obj)) {
+                size_t size = PyTuple_Size(obj);
+                Reflect::ArgumentList args { std::true_type {}, size };
+                for (size_t i = 0; i < args.size(); ++i) {
+                    Reflect::Result result = fromPyObject(args[i], PyTuple_GetItem(obj, i));
+                    if (result) {
+                        mContinuation.returnError(this, *this, {}, std::move(*result.mError));                        
+                        return;
+                    }
                 }
-                
-                if (!mCoroutine.mContext) {
-                    mCoroutine.mContext = PyContext_New();
-                    if (PyContext_Enter(mCoroutine.mContext) < 0)
-                        handleExecutionError(*this, fetchError());
-                    PyObjectPtr token = PyContextVar_Set(sPyContinuationContextVar, PyCapsule_New(&mCoroutine.mContinuation, "Continuation", nullptr));
-                    if (!token)
-                        handleExecutionError(*this, fetchError());
-                    token = PyContextVar_Set(sPyReceiverContextVar, PyCapsule_New(this, "Receiver", nullptr));
-                    if (!token)
-                        handleExecutionError(*this, fetchError());
-                    Platform::Log::Log *log = Platform::Log::get_log(*this);
-                    if (log)
-                        token = PyContextVar_Set(sPyLogContextVar, PyCapsule_New(log, "Log", nullptr));
-                    if (PyContext_Exit(mCoroutine.mContext) < 0)
-                        handleExecutionError(*this, fetchError());
+                set_value(std::move(args));
+            } else {
+                Py_INCREF(obj);
+                set_value(Reflect::ObjectPtr { std::make_unique<PyObjectInstance>(obj) });
+            }
+        }
+
+        void Python3BehaviorState::resume(PyObjectPtr value)
+        {
+            PyObjectPtr result;
+            PyContext_Enter(mContext);
+            if (!value) {
+                PyObjectPtr exc = PyObject_CallFunction(PyExc_EOFError, NULL, NULL);
+                result = PyObject_CallFunctionObjArgs(mCoroutine.get("throw"), static_cast<PyObject *>(exc), NULL);
+            } else if (PyExceptionInstance_Check(value)) {
+                result = PyObject_CallFunctionObjArgs(mCoroutine.get("throw"), static_cast<PyObject *>(value), NULL);
+            } else {
+                result = PyObject_Call(mCoroutine.get("send"), value, NULL);
+            }
+            PyContext_Exit(mContext);
+            if (!result) {
+                if (PyErr_ExceptionMatches(PyExc_StopIteration)) {
+                    PyObjectPtr type, value, traceback;
+                    PyErr_Fetch(&type, &value, &traceback);
+
+                    result = value.get("value");
                 }
+                handleExecutionObject(result);
+            } else if (Py_IS_TYPE(result, &PyStateType)) {
+                PyStateBase &state = reinterpret_cast<PyStateHelper *>(static_cast<PyObject *>(result))->mState;
+                state.mState = this;
+                state.resume();
+            } else if (Py_IS_TYPE(result, &PyDebugLineType)) {
+                Python3Suspend suspend;
 
-                resumeCoroutine(mCoroutine, *this, toPyTuple(Reflect::ArgumentList { std::monostate {} }));
+                mContinuation.suspend(this, *this, [](Python3BehaviorState &state) mutable { // TODO: Proper wrapping receiver
+                    Python3Lock lock;
+                    state.resume(toPyTuple(Reflect::ArgumentList { std::monostate {} }));
+                },
+                    Debug::ContinuationType::Flow);
+            } else {
+                std::string typeName = PyUnicode_AsUTF8(PyType_GetName(Py_TYPE(result)));
+                Python3Suspend suspend;
+                throw 0;
+            }
+        }
+
+        void Python3BehaviorState::start()
+        {
+            Debug::Continuation *parent = Debug::get_continuation(*this);
+            mContinuation.setMode(parent && (parent->mode() == Debug::ContinuationMode::StepInto) ? Debug::ContinuationMode::Step : Debug::ContinuationMode::Continue);
+
+            Python3Lock lock;
+            if (PyExceptionInstance_Check(mCoroutine)) {
+                handleExecutionError(fromPyError(mCoroutine));
+                return;
             }
 
-            void stop()
-            {
-                mCoroutine.mContinuation.stop();
+            if (!mContext) {
+                mContext = PyContext_New();
+                if (PyContext_Enter(mContext) < 0)
+                    handleExecutionError(fetchError());
+                PyObjectPtr token = PyContextVar_Set(sPyContinuationContextVar, PyCapsule_New(&mContinuation, "Continuation", nullptr));
+                if (!token)
+                    handleExecutionError(fetchError());
+                token = PyContextVar_Set(sPyReceiverContextVar, PyCapsule_New(this, "Receiver", nullptr));
+                if (!token)
+                    handleExecutionError(fetchError());
+                Platform::Log::Log *log = Platform::Log::get_log(*this);
+                if (log)
+                    token = PyContextVar_Set(sPyLogContextVar, PyCapsule_New(log, "Log", nullptr));
+                if (PyContext_Exit(mContext) < 0)
+                    handleExecutionError(fetchError());
             }
 
-            friend auto tag_invoke(Execution::visit_state_t, Python3BehaviorState *state, auto &&visitor)
-            {
-                visitor(Execution::State::DebugLocation { state ? &state->mCoroutine : nullptr });
-            }
+            resume(toPyTuple(Reflect::ArgumentList { std::monostate {} }));
+        }
 
-            Python3Coroutine mCoroutine;
-        };
+        void Python3BehaviorState::stop()
+        {
+            if (mContinuation.stop())
+                mContinuation.done(); // Could use stop() instead, but no way to interfere with Python execution yet
+        }
 
         struct Python3BehaviorSender : Execution::base_sender {
 
