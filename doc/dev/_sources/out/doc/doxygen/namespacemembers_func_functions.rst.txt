@@ -19,7 +19,6 @@ Functions
       e <namespacemembers_func_e>
       f <namespacemembers_func_f>
       g <namespacemembers_func_g>
-      h <namespacemembers_func_h>
       i <namespacemembers_func_i>
       j <namespacemembers_func_j>
       k <namespacemembers_func_k>
@@ -38,5 +37,5 @@ Functions
 
    .. raw:: html
 
-      </div><!-- contents --><!-- start footer part --><hr class="footer"/><address class="footer"><small>Generated on Tue Sep 29 2026 21:03:49 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5</small></address></body></html>
+      </div><!-- contents --><!-- start footer part --><hr class="footer"/><address class="footer"><small>Generated on Tue Oct 13 2026 20:57:20 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5</small></address></body></html>
 

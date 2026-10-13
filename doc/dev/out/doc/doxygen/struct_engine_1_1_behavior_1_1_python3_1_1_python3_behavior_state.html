@@ -256,6 +256,8 @@ $(function() {
   <div class="headertitle"><div class="title">Engine::Behavior::Python3::Python3BehaviorState Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;python3behaviors.h&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for Engine::Behavior::Python3::Python3BehaviorState:</div>
 <div class="dyncontent">
@@ -269,6 +271,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a23a606b02313669c67ef45b75114dee5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0021c06891fd9b3551649dfb7b57978"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#ac0021c06891fd9b3551649dfb7b57978">~Python3BehaviorState</a> ()</td></tr>
 <tr class="separator:ac0021c06891fd9b3551649dfb7b57978"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6163a6f4b5351e19c1296b4f582ad5a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#a6163a6f4b5351e19c1296b4f582ad5a2">handleExecutionError</a> (<a class="el" href="struct_engine_1_1_reflect_1_1_error.html">Reflect::Error</a> error)</td></tr>
+<tr class="separator:a6163a6f4b5351e19c1296b4f582ad5a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a485fda5955e50cf301336a1126e23d66"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#a485fda5955e50cf301336a1126e23d66">handleExecutionObject</a> (PyObject *obj)</td></tr>
+<tr class="separator:a485fda5955e50cf301336a1126e23d66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87f602c17fc9d134f07ce09302f5dd05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#a87f602c17fc9d134f07ce09302f5dd05">resume</a> (<a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_object_ptr.html">PyObjectPtr</a> value)</td></tr>
+<tr class="separator:a87f602c17fc9d134f07ce09302f5dd05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93e7c6c7b09afe3d65603df56320b9cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#a93e7c6c7b09afe3d65603df56320b9cd">start</a> ()</td></tr>
 <tr class="separator:a93e7c6c7b09afe3d65603df56320b9cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1816d4bca2724a5b2316bbac28ed4f9a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#a1816d4bca2724a5b2316bbac28ed4f9a">stop</a> ()</td></tr>
@@ -280,8 +288,12 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a6f655f53f08f399776cc357762e1a2dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_coroutine.html">Python3Coroutine</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#a6f655f53f08f399776cc357762e1a2dc">mCoroutine</a></td></tr>
-<tr class="separator:a6f655f53f08f399776cc357762e1a2dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13fefdd978e3b355de2a49a83c250908"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_object_ptr.html">PyObjectPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#a13fefdd978e3b355de2a49a83c250908">mContext</a></td></tr>
+<tr class="separator:a13fefdd978e3b355de2a49a83c250908"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ef988f949042a92d4d77b39243e4c15"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_debug_1_1_continuation.html">Debug::Continuation</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#a7ef988f949042a92d4d77b39243e4c15">mContinuation</a></td></tr>
+<tr class="separator:a7ef988f949042a92d4d77b39243e4c15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2e272039149fe017e23276c5a252619"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_object_ptr.html">PyObjectPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_behavior_state.html#af2e272039149fe017e23276c5a252619">mCoroutine</a></td></tr>
+<tr class="separator:af2e272039149fe017e23276c5a252619"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
@@ -294,9 +306,6 @@ Friends</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Engine::Behavior::Python3::Python3BehaviorState::Python3BehaviorState </td>
@@ -316,11 +325,6 @@ Friends</h2></td></tr>
           <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
@@ -330,9 +334,6 @@ Friends</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Engine::Behavior::Python3::Python3BehaviorState::~Python3BehaviorState </td>
@@ -341,24 +342,70 @@ Friends</h2></td></tr>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a6163a6f4b5351e19c1296b4f582ad5a2" name="a6163a6f4b5351e19c1296b4f582ad5a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6163a6f4b5351e19c1296b4f582ad5a2">&#9670;&#160;</a></span>handleExecutionError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Behavior::Python3::Python3BehaviorState::handleExecutionError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_reflect_1_1_error.html">Reflect::Error</a>&#160;</td>
+          <td class="paramname"><em>error</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a485fda5955e50cf301336a1126e23d66" name="a485fda5955e50cf301336a1126e23d66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a485fda5955e50cf301336a1126e23d66">&#9670;&#160;</a></span>handleExecutionObject()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Behavior::Python3::Python3BehaviorState::handleExecutionObject </td>
+          <td>(</td>
+          <td class="paramtype">PyObject *&#160;</td>
+          <td class="paramname"><em>obj</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a87f602c17fc9d134f07ce09302f5dd05" name="a87f602c17fc9d134f07ce09302f5dd05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87f602c17fc9d134f07ce09302f5dd05">&#9670;&#160;</a></span>resume()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Behavior::Python3::Python3BehaviorState::resume </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_object_ptr.html">PyObjectPtr</a>&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a93e7c6c7b09afe3d65603df56320b9cd" name="a93e7c6c7b09afe3d65603df56320b9cd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a93e7c6c7b09afe3d65603df56320b9cd">&#9670;&#160;</a></span>start()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Behavior::Python3::Python3BehaviorState::start </td>
@@ -367,11 +414,6 @@ Friends</h2></td></tr>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
@@ -381,9 +423,6 @@ Friends</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Behavior::Python3::Python3BehaviorState::stop </td>
@@ -392,11 +431,6 @@ Friends</h2></td></tr>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
@@ -445,27 +479,64 @@ Friends</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="a6f655f53f08f399776cc357762e1a2dc" name="a6f655f53f08f399776cc357762e1a2dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6f655f53f08f399776cc357762e1a2dc">&#9670;&#160;</a></span>mCoroutine</h2>
+<a id="a7ef988f949042a92d4d77b39243e4c15" name="a7ef988f949042a92d4d77b39243e4c15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ef988f949042a92d4d77b39243e4c15">&#9670;&#160;</a></span>mContinuation</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_engine_1_1_debug_1_1_continuation.html">Debug::Continuation</a> Engine::Behavior::Python3::Python3BehaviorState::mContinuation</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af2e272039149fe017e23276c5a252619" name="af2e272039149fe017e23276c5a252619"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2e272039149fe017e23276c5a252619">&#9670;&#160;</a></span>mCoroutine</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_python3_coroutine.html">Python3Coroutine</a> Engine::Behavior::Python3::Python3BehaviorState::mCoroutine</td>
+          <td class="memname"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_object_ptr.html">PyObjectPtr</a> Engine::Behavior::Python3::Python3BehaviorState::mCoroutine</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<a id="a13fefdd978e3b355de2a49a83c250908" name="a13fefdd978e3b355de2a49a83c250908"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13fefdd978e3b355de2a49a83c250908">&#9670;&#160;</a></span>mContext</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_object_ptr.html">PyObjectPtr</a> Engine::Behavior::Python3::Python3BehaviorState::mContext</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following files:<ul>
+<li>plugins/behavior/python3/src/Python3/<a class="el" href="python3behaviors_8h.html">python3behaviors.h</a></li>
 <li>plugins/behavior/python3/src/Python3/<a class="el" href="python3behaviors_8cpp.html">python3behaviors.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 29 2026 21:03:47 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Tue Oct 13 2026 20:57:18 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

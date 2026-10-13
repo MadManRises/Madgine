@@ -9,8 +9,8 @@
 <area shape="rect" id="node10" href="$src_2_meta_2serialize_2context_8h.html" title=" " alt="" coords="919,548,993,573"/>
 <area shape="rect" id="node20" href="$serializableunitptr_8h.html" title=" " alt="" coords="930,475,1118,500"/>
 <area shape="rect" id="node21" href="$formattedmessagestream_8h.html" title=" " alt="" coords="785,174,1015,199"/>
-<area shape="rect" id="node40" href="$serializablemapholder_8h.html" title=" " alt="" coords="1039,174,1246,199"/>
-<area shape="rect" id="node41" href="$visitor_8h.html" title=" " alt="" coords="736,255,803,280"/>
+<area shape="rect" id="node42" href="$serializablemapholder_8h.html" title=" " alt="" coords="1039,174,1246,199"/>
+<area shape="rect" id="node43" href="$visitor_8h.html" title=" " alt="" coords="736,255,803,280"/>
 <area shape="rect" id="node6" href="$delayedconstruct_8h.html" title=" " alt="" coords="445,255,624,280"/>
 <area shape="rect" id="node8" href="$fixed__string_8h.html" title=" " alt="" coords="275,255,421,280"/>
 <area shape="rect" id="node11" href="$src_2_generic_2context_8h.html" title=" " alt="" coords="979,629,1101,654"/>
@@ -29,15 +29,17 @@
 <area shape="rect" id="node25" href="$serializestream_8h.html" title=" " alt="" coords="734,401,853,427"/>
 <area shape="rect" id="node26" href="$stream_8h.html" title=" " alt="" coords="785,475,906,500"/>
 <area shape="rect" id="node28" href="$_generic_2execution_2future_8h.html" title=" " alt="" coords="1321,328,1495,353"/>
-<area shape="rect" id="node39" href="$nulledptr_8h.html" title=" " alt="" coords="1112,328,1243,353"/>
+<area shape="rect" id="node41" href="$nulledptr_8h.html" title=" " alt="" coords="1112,328,1243,353"/>
 <area shape="rect" id="node29" href="$flag_8h.html" title=" " alt="" coords="1379,401,1431,427"/>
 <area shape="rect" id="node30" href="$flagstub_8h.html" title=" " alt="" coords="1365,475,1443,500"/>
 <area shape="rect" id="node31" href="$connection_8h.html" title=" " alt="" coords="1451,548,1546,573"/>
-<area shape="rect" id="node37" href="$stack_8h.html" title=" " alt="" coords="1206,548,1327,573"/>
-<area shape="rect" id="node38" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="1352,548,1427,573"/>
+<area shape="rect" id="node39" href="$stack_8h.html" title=" " alt="" coords="1206,548,1327,573"/>
+<area shape="rect" id="node40" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="1352,548,1427,573"/>
 <area shape="rect" id="node32" href="$virtualstate_8h.html" title=" " alt="" coords="1447,629,1543,654"/>
 <area shape="rect" id="node33" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="1398,717,1591,742"/>
-<area shape="rect" id="node36" href="$virtual__invoke_8h.html" title=" " alt="" coords="1142,717,1303,742"/>
+<area shape="rect" id="node38" href="$virtual__invoke_8h.html" title=" " alt="" coords="1142,717,1303,742"/>
 <area shape="rect" id="node34" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="1435,797,1554,823"/>
-<area shape="rect" id="node35" href="$typed__ptr_8h.html" title=" " alt="" coords="1447,871,1542,896"/>
+<area shape="rect" id="node35" href="$closure_8h.html" title=" " alt="" coords="1268,871,1391,896"/>
+<area shape="rect" id="node36" href="$callable__view_8h.html" title=" " alt="" coords="1415,871,1574,896"/>
+<area shape="rect" id="node37" href="$typed__ptr_8h.html" title=" " alt="" coords="1598,871,1693,896"/>
 </map>

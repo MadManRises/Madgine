@@ -251,7 +251,6 @@ $(function() {
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="#friends">Friends</a> &#124;
 <a href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Engine::Behavior::NodeGraph::NodeState&lt; flowOutGroup, Rec &gt; Struct Template Reference</div></div>
 </div><!--header-->
@@ -261,7 +260,7 @@ $(function() {
 <div class="dynheader">
 Inheritance diagram for Engine::Behavior::NodeGraph::NodeState&lt; flowOutGroup, Rec &gt;:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state__inherit__graph.svg" width="232" height="330"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state__inherit__graph.svg" width="232" height="242"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -276,15 +275,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a462ea306ed76e2b1428765b2475875d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_debug_location.html">NodeDebugLocation</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state.html#a462ea306ed76e2b1428765b2475875d6">mDebugLocation</a> = &amp;<a class="el" href="namespace_engine_1_1_execution.html#a276b8fa89d8a0bb315b4f8c6f09b30bf">Execution::get_context</a>(this-&gt;mRec).mInterpreter</td></tr>
-<tr class="separator:a462ea306ed76e2b1428765b2475875d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1bde2e4f41cab2b98eaecf16e813d8f"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state.html#ac1bde2e4f41cab2b98eaecf16e813d8f">mFlowOutIndex</a> = 0</td></tr>
 <tr class="separator:ac1bde2e4f41cab2b98eaecf16e813d8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
-Friends</h2></td></tr>
-<tr class="memitem:ad5346de79c1d3c49a526853565241ac2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state.html#ad5346de79c1d3c49a526853565241ac2">tag_invoke</a> (<a class="el" href="struct_engine_1_1_execution_1_1visit__state__t.html">Execution::visit_state_t</a> visit_state, <a class="el" href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state.html">NodeState</a> *s, auto &amp;&amp;visitor)</td></tr>
-<tr class="separator:ad5346de79c1d3c49a526853565241ac2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a26085fda4222d8935592adc48f6f72d3" name="a26085fda4222d8935592adc48f6f72d3"></a>
@@ -380,51 +372,6 @@ template&lt;uint32_t flowOutGroup, typename Rec &gt; </div>
 
 </div>
 </div>
-<h2 class="groupheader">Friends And Related Function Documentation</h2>
-<a id="ad5346de79c1d3c49a526853565241ac2" name="ad5346de79c1d3c49a526853565241ac2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5346de79c1d3c49a526853565241ac2">&#9670;&#160;</a></span>tag_invoke</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;uint32_t flowOutGroup, typename Rec &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classvoid.html">void</a> tag_invoke </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_engine_1_1_execution_1_1visit__state__t.html">Execution::visit_state_t</a>&#160;</td>
-          <td class="paramname"><em>visit_state</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state.html">NodeState</a>&lt; flowOutGroup, Rec &gt; *&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">auto &amp;&amp;&#160;</td>
-          <td class="paramname"><em>visitor</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="ac1bde2e4f41cab2b98eaecf16e813d8f" name="ac1bde2e4f41cab2b98eaecf16e813d8f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac1bde2e4f41cab2b98eaecf16e813d8f">&#9670;&#160;</a></span>mFlowOutIndex</h2>
@@ -442,29 +389,13 @@ template&lt;uint32_t flowOutGroup, typename Rec &gt; </div>
 
 </div>
 </div>
-<a id="a462ea306ed76e2b1428765b2475875d6" name="a462ea306ed76e2b1428765b2475875d6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a462ea306ed76e2b1428765b2475875d6">&#9670;&#160;</a></span>mDebugLocation</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;uint32_t flowOutGroup, typename Rec &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_debug_location.html">NodeDebugLocation</a> <a class="el" href="struct_engine_1_1_behavior_1_1_node_graph_1_1_node_state.html">Engine::Behavior::NodeGraph::NodeState</a>&lt; flowOutGroup, Rec &gt;::mDebugLocation = &amp;<a class="el" href="namespace_engine_1_1_execution.html#a276b8fa89d8a0bb315b4f8c6f09b30bf">Execution::get_context</a>(this-&gt;mRec).mInterpreter</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>plugins/behavior/nodegraph/src/Madgine/nodegraph/<a class="el" href="nodeexecution_8h.html">nodeexecution.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 29 2026 21:03:47 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Tue Oct 13 2026 20:57:18 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

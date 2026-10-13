@@ -1,0 +1,14 @@
+.. meta::7892df42a53e0fa40d2a9543185f8e24f09acc2be35eedb1a7b5d33ad6e1608b79120c9d0b6efc78b4a9af0e7d37dc5273acadd8457e833ad69c78176a99101f
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Engine::Debug::get_continuation_t Struct Reference
+
+get\_continuation\_t Struct Reference
+=====================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_debug_1_1get__continuation__t.html

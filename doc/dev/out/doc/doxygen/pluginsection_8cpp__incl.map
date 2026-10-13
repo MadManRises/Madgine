@@ -30,14 +30,16 @@
 <area shape="rect" id="node29" href="$taskpromisesharedstate_8h.html" title=" " alt="" coords="1433,255,1603,280"/>
 <area shape="rect" id="node30" href="$delayedconstruct_8h.html" title=" " alt="" coords="1366,328,1545,353"/>
 <area shape="rect" id="node31" href="$flag_8h.html" title=" " alt="" coords="1569,328,1729,353"/>
-<area shape="rect" id="node41" href="$taskhandle_8h.html" title=" " alt="" coords="1247,328,1341,353"/>
+<area shape="rect" id="node43" href="$taskhandle_8h.html" title=" " alt="" coords="1247,328,1341,353"/>
 <area shape="rect" id="node32" href="$flagstub_8h.html" title=" " alt="" coords="1610,401,1687,427"/>
 <area shape="rect" id="node33" href="$connection_8h.html" title=" " alt="" coords="1491,475,1585,500"/>
-<area shape="rect" id="node40" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="1610,475,1685,500"/>
+<area shape="rect" id="node42" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="1610,475,1685,500"/>
 <area shape="rect" id="node34" href="$virtualstate_8h.html" title=" " alt="" coords="1490,548,1586,573"/>
 <area shape="rect" id="node35" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="1341,621,1535,647"/>
-<area shape="rect" id="node38" href="$virtual__invoke_8h.html" title=" " alt="" coords="1559,621,1720,647"/>
+<area shape="rect" id="node40" href="$virtual__invoke_8h.html" title=" " alt="" coords="1559,621,1720,647"/>
 <area shape="rect" id="node36" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="1379,695,1497,720"/>
-<area shape="rect" id="node37" href="$typed__ptr_8h.html" title=" " alt="" coords="1391,768,1485,793"/>
-<area shape="rect" id="node39" href="$callable__traits_8h.html" title=" " alt="" coords="1583,695,1695,720"/>
+<area shape="rect" id="node37" href="$closure_8h.html" title=" " alt="" coords="1211,768,1334,793"/>
+<area shape="rect" id="node38" href="$callable__view_8h.html" title=" " alt="" coords="1359,768,1517,793"/>
+<area shape="rect" id="node39" href="$typed__ptr_8h.html" title=" " alt="" coords="1541,768,1636,793"/>
+<area shape="rect" id="node41" href="$callable__traits_8h.html" title=" " alt="" coords="1583,695,1695,720"/>
 </map>

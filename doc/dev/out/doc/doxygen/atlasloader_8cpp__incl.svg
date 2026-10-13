@@ -155,18 +155,18 @@ var sectionId = 'dynsection-0';
 <path fill="none" stroke="#63b8ff" d="M2767.42,-523.19C2844.05,-518.7 2976.29,-505.84 3006,-470 3014.51,-459.73 3007.72,-453.22 3006,-440 2992.7,-337.96 2981.47,-280.38 2886,-242 2814.69,-213.33 2593.44,-263.11 2542,-206 2533.08,-196.09 2534.85,-187.25 2542,-176 2551.54,-161 2567.62,-150.97 2583.86,-144.3"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2584.9,-147.64 2593.07,-140.9 2582.48,-141.08 2584.9,-147.64"/>
 </g>
-<!-- Node62 -->
+<!-- Node63 -->
 <g id="node48" class="node">
-<title>Node62</title>
+<title>Node63</title>
 <g id="a_node48"><a xlink:href="awaitabletimepoint_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2996.5,-464.5 2841.5,-464.5 2841.5,-445.5 2996.5,-445.5 2996.5,-464.5"/>
 <text text-anchor="middle" x="2919" y="-452.5" font-family="Helvetica,sans-Serif" font-size="10.00">awaitables/awaitabletimepoint.h</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node62 -->
+<!-- Node1&#45;&gt;Node63 -->
 <g id="edge58" class="edge">
-<title>Node1&#45;&gt;Node62</title>
+<title>Node1&#45;&gt;Node63</title>
 <path fill="none" stroke="#63b8ff" d="M2767.47,-506.88C2803.68,-494.72 2849.97,-479.18 2881.8,-468.49"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2882.62,-471.91 2890.98,-465.41 2880.39,-465.27 2882.62,-471.91"/>
 </g>
@@ -649,48 +649,48 @@ var sectionId = 'dynsection-0';
 <path fill="none" stroke="#63b8ff" d="M1668.39,-247.03C1610.56,-234.57 1506.73,-212.2 1450.93,-200.17"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="1451.78,-196.78 1441.26,-198.09 1450.3,-203.62 1451.78,-196.78"/>
 </g>
-<!-- Node64 -->
+<!-- Node65 -->
 <g id="node24" class="node">
-<title>Node64</title>
+<title>Node65</title>
 <g id="a_node24"><a xlink:href="plugins_2resources_2api_2src_2_madgine_2resources_2ptr_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1658.5,-200.5 1623.5,-200.5 1623.5,-181.5 1658.5,-181.5 1658.5,-200.5"/>
 <text text-anchor="middle" x="1641" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">ptr.h</text>
 </a>
 </g>
 </g>
-<!-- Node21&#45;&gt;Node64 -->
+<!-- Node21&#45;&gt;Node65 -->
 <g id="edge25" class="edge">
-<title>Node21&#45;&gt;Node64</title>
+<title>Node21&#45;&gt;Node65</title>
 <path fill="none" stroke="#63b8ff" d="M1700.41,-247.1C1689.69,-237.17 1672.13,-220.87 1658.87,-208.57"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="1661.33,-206.09 1651.62,-201.85 1656.57,-211.22 1661.33,-206.09"/>
 </g>
-<!-- Node65 -->
+<!-- Node66 -->
 <g id="node25" class="node">
-<title>Node65</title>
+<title>Node66</title>
 <g id="a_node25"><a xlink:href="resource_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1739,-200.5 1677,-200.5 1677,-181.5 1739,-181.5 1739,-200.5"/>
 <text text-anchor="middle" x="1708" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">resource.h</text>
 </a>
 </g>
 </g>
-<!-- Node21&#45;&gt;Node65 -->
+<!-- Node21&#45;&gt;Node66 -->
 <g id="edge26" class="edge">
-<title>Node21&#45;&gt;Node65</title>
+<title>Node21&#45;&gt;Node66</title>
 <path fill="none" stroke="#63b8ff" d="M1709.72,-247.1C1709.44,-238.12 1709,-223.95 1708.63,-212.22"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="1712.13,-212.22 1708.32,-202.34 1705.14,-212.44 1712.13,-212.22"/>
 </g>
-<!-- Node66 -->
+<!-- Node67 -->
 <g id="node26" class="node">
-<title>Node66</title>
+<title>Node67</title>
 <g id="a_node26"><a xlink:href="resourcebase_8h.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="1840.5,-200.5 1757.5,-200.5 1757.5,-181.5 1840.5,-181.5 1840.5,-200.5"/>
 <text text-anchor="middle" x="1799" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">resourcebase.h</text>
 </a>
 </g>
 </g>
-<!-- Node21&#45;&gt;Node66 -->
+<!-- Node21&#45;&gt;Node67 -->
 <g id="edge27" class="edge">
-<title>Node21&#45;&gt;Node66</title>
+<title>Node21&#45;&gt;Node67</title>
 <path fill="none" stroke="#63b8ff" d="M1722.38,-247.1C1736.59,-236.88 1760.17,-219.93 1777.42,-207.52"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="1779.43,-210.39 1785.5,-201.71 1775.34,-204.7 1779.43,-210.39"/>
 </g>
@@ -1013,18 +1013,18 @@ var sectionId = 'dynsection-0';
 <path fill="none" stroke="#63b8ff" d="M2911.16,-181.39C2920.07,-167.76 2934.33,-140.76 2923,-121 2914.92,-106.91 2900.46,-96.85 2886.31,-89.9"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2888.1,-86.87 2877.54,-86 2885.25,-93.26 2888.1,-86.87"/>
 </g>
-<!-- Node63 -->
+<!-- Node64 -->
 <g id="node49" class="node">
-<title>Node63</title>
+<title>Node64</title>
 <g id="a_node49"><a xlink:href="taskqualifiers_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2493.5,-200.5 2404.5,-200.5 2404.5,-181.5 2493.5,-181.5 2493.5,-200.5"/>
 <text text-anchor="middle" x="2449" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">../taskqualifiers.h</text>
 </a>
 </g>
 </g>
-<!-- Node62&#45;&gt;Node63 -->
+<!-- Node63&#45;&gt;Node64 -->
 <g id="edge59" class="edge">
-<title>Node62&#45;&gt;Node63</title>
+<title>Node63&#45;&gt;Node64</title>
 <path fill="none" stroke="#63b8ff" d="M2925.34,-445.06C2941.5,-421.07 2981.04,-354 2953,-308 2919.69,-253.35 2886.25,-260.58 2825,-242 2689.31,-200.83 2647.68,-230.41 2508,-206 2503.69,-205.25 2499.22,-204.37 2494.77,-203.43"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2495.8,-200.07 2485.28,-201.32 2494.28,-206.9 2495.8,-200.07"/>
 </g>
@@ -1245,9 +1245,9 @@ var sectionId = 'dynsection-0';
 <path fill="none" stroke="#63b8ff" d="M1194.6,-313.03C1117.43,-301.39 982.89,-281.08 900.59,-268.66"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="901.25,-265.21 890.84,-267.18 900.2,-272.14 901.25,-265.21"/>
 </g>
-<!-- Node124&#45;&gt;Node63 -->
+<!-- Node124&#45;&gt;Node64 -->
 <g id="edge80" class="edge">
-<title>Node124&#45;&gt;Node63</title>
+<title>Node124&#45;&gt;Node64</title>
 <path fill="none" stroke="#63b8ff" d="M2464.5,-247.1C2461.94,-238.03 2457.9,-223.64 2454.58,-211.85"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2457.97,-210.96 2451.89,-202.28 2451.23,-212.85 2457.97,-210.96"/>
 </g>

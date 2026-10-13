@@ -601,48 +601,48 @@ var sectionId = 'dynsection-0';
 <path fill="none" stroke="#63b8ff" d="M3582.79,-384.97C3742.27,-378.86 4075.95,-363.45 4189,-338 4190.76,-337.6 4192.55,-337.14 4194.34,-336.62"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="4195.38,-339.96 4203.72,-333.42 4193.12,-333.33 4195.38,-339.96"/>
 </g>
-<!-- Node55 -->
+<!-- Node56 -->
 <g id="node18" class="node">
-<title>Node55</title>
+<title>Node56</title>
 <g id="a_node18"><a xlink:href="plugins_2resources_2api_2src_2_madgine_2resources_2ptr_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="3446.5,-332.5 3411.5,-332.5 3411.5,-313.5 3446.5,-313.5 3446.5,-332.5"/>
 <text text-anchor="middle" x="3429" y="-320.5" font-family="Helvetica,sans-Serif" font-size="10.00">ptr.h</text>
 </a>
 </g>
 </g>
-<!-- Node8&#45;&gt;Node55 -->
+<!-- Node8&#45;&gt;Node56 -->
 <g id="edge17" class="edge">
-<title>Node8&#45;&gt;Node55</title>
+<title>Node8&#45;&gt;Node56</title>
 <path fill="none" stroke="#63b8ff" d="M3486.68,-379.1C3476.28,-369.17 3459.22,-352.87 3446.35,-340.57"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="3448.98,-338.25 3439.33,-333.87 3444.14,-343.31 3448.98,-338.25"/>
 </g>
-<!-- Node56 -->
+<!-- Node57 -->
 <g id="node19" class="node">
-<title>Node56</title>
+<title>Node57</title>
 <g id="a_node19"><a xlink:href="resource_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="3527,-332.5 3465,-332.5 3465,-313.5 3527,-313.5 3527,-332.5"/>
 <text text-anchor="middle" x="3496" y="-320.5" font-family="Helvetica,sans-Serif" font-size="10.00">resource.h</text>
 </a>
 </g>
 </g>
-<!-- Node8&#45;&gt;Node56 -->
+<!-- Node8&#45;&gt;Node57 -->
 <g id="edge18" class="edge">
-<title>Node8&#45;&gt;Node56</title>
+<title>Node8&#45;&gt;Node57</title>
 <path fill="none" stroke="#63b8ff" d="M3496,-379.1C3496,-370.12 3496,-355.95 3496,-344.22"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="3499.5,-344.34 3496,-334.34 3492.5,-344.34 3499.5,-344.34"/>
 </g>
-<!-- Node57 -->
+<!-- Node58 -->
 <g id="node20" class="node">
-<title>Node57</title>
+<title>Node58</title>
 <g id="a_node20"><a xlink:href="resourcebase_8h.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="3628.5,-332.5 3545.5,-332.5 3545.5,-313.5 3628.5,-313.5 3628.5,-332.5"/>
 <text text-anchor="middle" x="3587" y="-320.5" font-family="Helvetica,sans-Serif" font-size="10.00">resourcebase.h</text>
 </a>
 </g>
 </g>
-<!-- Node8&#45;&gt;Node57 -->
+<!-- Node8&#45;&gt;Node58 -->
 <g id="edge19" class="edge">
-<title>Node8&#45;&gt;Node57</title>
+<title>Node8&#45;&gt;Node58</title>
 <path fill="none" stroke="#63b8ff" d="M3508.65,-379.1C3523.32,-368.78 3547.75,-351.61 3565.43,-339.17"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="3567.05,-342.31 3573.22,-333.69 3563.02,-336.58 3567.05,-342.31"/>
 </g>

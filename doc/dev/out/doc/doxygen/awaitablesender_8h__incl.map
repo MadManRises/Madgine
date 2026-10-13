@@ -1,11 +1,13 @@
 <map id="src/Generic/execution/awaitablesender.h" name="src/Generic/execution/awaitablesender.h">
-<area shape="rect" id="node1" title=" " alt="" coords="244,5,392,45"/>
-<area shape="rect" id="node2" href="$stoppable_8h.html" title=" " alt="" coords="234,93,322,119"/>
-<area shape="rect" id="node9" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="354,167,429,192"/>
-<area shape="rect" id="node3" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="51,167,137,192"/>
-<area shape="rect" id="node6" href="$stop__callback_8h.html" title=" " alt="" coords="149,240,261,265"/>
-<area shape="rect" id="node7" href="$stop__source_8h.html" title=" " alt="" coords="227,167,329,192"/>
-<area shape="rect" id="node4" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="5,240,124,265"/>
-<area shape="rect" id="node5" href="$typed__ptr_8h.html" title=" " alt="" coords="17,313,112,339"/>
-<area shape="rect" id="node8" href="$stack_8h.html" title=" " alt="" coords="285,240,407,265"/>
+<area shape="rect" id="node1" title=" " alt="" coords="411,5,559,45"/>
+<area shape="rect" id="node2" href="$stoppable_8h.html" title=" " alt="" coords="401,93,489,119"/>
+<area shape="rect" id="node11" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="521,167,596,192"/>
+<area shape="rect" id="node3" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="219,167,304,192"/>
+<area shape="rect" id="node8" href="$stop__callback_8h.html" title=" " alt="" coords="316,240,428,265"/>
+<area shape="rect" id="node9" href="$stop__source_8h.html" title=" " alt="" coords="394,167,497,192"/>
+<area shape="rect" id="node4" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="173,240,291,265"/>
+<area shape="rect" id="node5" href="$closure_8h.html" title=" " alt="" coords="5,313,128,339"/>
+<area shape="rect" id="node6" href="$callable__view_8h.html" title=" " alt="" coords="153,313,311,339"/>
+<area shape="rect" id="node7" href="$typed__ptr_8h.html" title=" " alt="" coords="335,313,430,339"/>
+<area shape="rect" id="node10" href="$stack_8h.html" title=" " alt="" coords="453,240,574,265"/>
 </map>

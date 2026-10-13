@@ -1,9 +1,11 @@
 <map id="plugins/debug/api/src/Madgine/debug/continuation.h" name="plugins/debug/api/src/Madgine/debug/continuation.h">
-<area shape="rect" id="node1" title=" " alt="" coords="5,5,204,45"/>
+<area shape="rect" id="node1" title=" " alt="" coords="24,5,223,45"/>
 <area shape="rect" id="node2" href="$typed__ptr_8h.html" title=" " alt="" coords="5,387,140,412"/>
-<area shape="rect" id="node3" href="$contextinfo_8h.html" title=" " alt="" coords="60,167,155,192"/>
-<area shape="rect" id="node6" href="$debuglocation_8h.html" title=" " alt="" coords="142,93,254,119"/>
-<area shape="rect" id="node4" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="111,240,304,265"/>
-<area shape="rect" id="node5" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="129,313,248,339"/>
-<area shape="rect" id="node7" href="$query_8h.html" title=" " alt="" coords="234,167,405,192"/>
+<area shape="rect" id="node3" href="$contextinfo_8h.html" title=" " alt="" coords="79,167,173,192"/>
+<area shape="rect" id="node8" href="$debuglocation_8h.html" title=" " alt="" coords="161,93,273,119"/>
+<area shape="rect" id="node4" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="129,240,323,265"/>
+<area shape="rect" id="node5" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="167,313,285,339"/>
+<area shape="rect" id="node6" href="$closure_8h.html" title=" " alt="" coords="165,387,287,412"/>
+<area shape="rect" id="node7" href="$callable__view_8h.html" title=" " alt="" coords="312,387,471,412"/>
+<area shape="rect" id="node9" href="$query_8h.html" title=" " alt="" coords="253,167,423,192"/>
 </map>

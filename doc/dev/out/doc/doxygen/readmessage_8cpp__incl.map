@@ -22,15 +22,17 @@
 <area shape="rect" id="node20" href="$_generic_2enum_8h.html" title=" " alt="" coords="614,555,727,581"/>
 <area shape="rect" id="node22" href="$pendingrequest_8h.html" title=" " alt="" coords="872,167,992,192"/>
 <area shape="rect" id="node23" href="$_generic_2execution_2future_8h.html" title=" " alt="" coords="845,240,1019,265"/>
-<area shape="rect" id="node34" href="$nulledptr_8h.html" title=" " alt="" coords="1043,240,1173,265"/>
+<area shape="rect" id="node36" href="$nulledptr_8h.html" title=" " alt="" coords="1043,240,1173,265"/>
 <area shape="rect" id="node24" href="$flag_8h.html" title=" " alt="" coords="906,313,958,339"/>
 <area shape="rect" id="node25" href="$flagstub_8h.html" title=" " alt="" coords="893,394,971,419"/>
 <area shape="rect" id="node26" href="$connection_8h.html" title=" " alt="" coords="753,475,847,500"/>
-<area shape="rect" id="node32" href="$stack_8h.html" title=" " alt="" coords="871,475,993,500"/>
-<area shape="rect" id="node33" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="1017,475,1092,500"/>
+<area shape="rect" id="node34" href="$stack_8h.html" title=" " alt="" coords="871,475,993,500"/>
+<area shape="rect" id="node35" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="1017,475,1092,500"/>
 <area shape="rect" id="node27" href="$virtualstate_8h.html" title=" " alt="" coords="752,555,848,581"/>
 <area shape="rect" id="node28" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="703,636,897,661"/>
-<area shape="rect" id="node31" href="$virtual__invoke_8h.html" title=" " alt="" coords="517,636,678,661"/>
+<area shape="rect" id="node33" href="$virtual__invoke_8h.html" title=" " alt="" coords="517,636,678,661"/>
 <area shape="rect" id="node29" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="741,709,859,735"/>
-<area shape="rect" id="node30" href="$typed__ptr_8h.html" title=" " alt="" coords="753,783,847,808"/>
+<area shape="rect" id="node30" href="$closure_8h.html" title=" " alt="" coords="573,783,696,808"/>
+<area shape="rect" id="node31" href="$callable__view_8h.html" title=" " alt="" coords="721,783,879,808"/>
+<area shape="rect" id="node32" href="$typed__ptr_8h.html" title=" " alt="" coords="903,783,998,808"/>
 </map>

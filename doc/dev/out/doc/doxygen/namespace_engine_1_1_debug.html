@@ -290,6 +290,8 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_default_mem_resource.html">DefaultMemResource</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1get__continuation__t.html">get_continuation_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1get__debug__context__t.html">get_debug_context_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_history.html">History</a></td></tr>
@@ -314,16 +316,24 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:aab90867d6b661aa591a3e4818086d976"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976">ContinuationMode</a> { <a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976aa0bfb8e59e6c13fc8d990781f77694fe">Continue</a>
+<tr class="memitem:aab90867d6b661aa591a3e4818086d976"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976">ContinuationMode</a> { <br />
+&#160;&#160;<a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976aa0bfb8e59e6c13fc8d990781f77694fe">Continue</a>
 , <a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976a48c7c41b72e1d678923ce3571aa65b2d">Step</a>
 , <a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976acfe04d96f4c74452c2bde9d822e77924">StepInto</a>
-, <a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976a727b63583e01fa2b3952dab580c84dc2">Abort</a>
+, <a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976ab5dec2a0be32a9519706da36736c917c">StopRequested</a>
+, <br />
+&#160;&#160;<a class="el" href="namespace_engine_1_1_debug.html#aab90867d6b661aa591a3e4818086d976af92965e2c8a7afb3c1b9a5c09a263636">Done</a>
+<br />
  }</td></tr>
 <tr class="separator:aab90867d6b661aa591a3e4818086d976"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67581ff14ecb24a87badb4fe4b01b6c1"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1">ContinuationType</a> { <a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1af1a76f66cca677c6e628d9ca58a6c8fc">Flow</a>
+<tr class="memitem:a67581ff14ecb24a87badb4fe4b01b6c1"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1">ContinuationType</a> { <br />
+&#160;&#160;<a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1af1a76f66cca677c6e628d9ca58a6c8fc">Flow</a>
 , <a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1a988fd738de9c6d177440c5dcf69e73ce">Return</a>
 , <a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1a902b0d55fddef6f8d651fe1035b7d4bd">Error</a>
-, <a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1aa149e85a44aeec9140e92733d9ed694e">Cancelled</a>
+, <a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1af92965e2c8a7afb3c1b9a5c09a263636">Done</a>
+, <br />
+&#160;&#160;<a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1a56395991012586c2067aa7bcb5905b50">Cancelling</a>
+<br />
  }</td></tr>
 <tr class="separator:a67581ff14ecb24a87badb4fe4b01b6c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -352,6 +362,8 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
+<tr class="memitem:ab6c020168ff0eb7db9b33cfa8338cdad"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="struct_engine_1_1_debug_1_1get__continuation__t.html">get_continuation_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_debug.html#ab6c020168ff0eb7db9b33cfa8338cdad">get_continuation</a></td></tr>
+<tr class="separator:ab6c020168ff0eb7db9b33cfa8338cdad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a7ad29b1dd828648b16fc7e02af0ba4"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="struct_engine_1_1_debug_1_1get__debug__context__t.html">get_debug_context_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_debug.html#a4a7ad29b1dd828648b16fc7e02af0ba4">get_debug_context</a></td></tr>
 <tr class="separator:a4a7ad29b1dd828648b16fc7e02af0ba4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad81f6ab50965ec1332c6c1462964aa7a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespace_engine_1_1_threading.html#a08a884aca2656a974472fc6f773c2098">Threading::WorkgroupLocal</a>&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_debug.html#ad81f6ab50965ec1332c6c1462964aa7a">sInitialized</a></td></tr>
@@ -400,7 +412,8 @@ Variables</h2></td></tr>
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aab90867d6b661aa591a3e4818086d976aa0bfb8e59e6c13fc8d990781f77694fe" name="aab90867d6b661aa591a3e4818086d976aa0bfb8e59e6c13fc8d990781f77694fe"></a>Continue&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="aab90867d6b661aa591a3e4818086d976a48c7c41b72e1d678923ce3571aa65b2d" name="aab90867d6b661aa591a3e4818086d976a48c7c41b72e1d678923ce3571aa65b2d"></a>Step&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="aab90867d6b661aa591a3e4818086d976acfe04d96f4c74452c2bde9d822e77924" name="aab90867d6b661aa591a3e4818086d976acfe04d96f4c74452c2bde9d822e77924"></a>StepInto&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aab90867d6b661aa591a3e4818086d976a727b63583e01fa2b3952dab580c84dc2" name="aab90867d6b661aa591a3e4818086d976a727b63583e01fa2b3952dab580c84dc2"></a>Abort&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aab90867d6b661aa591a3e4818086d976ab5dec2a0be32a9519706da36736c917c" name="aab90867d6b661aa591a3e4818086d976ab5dec2a0be32a9519706da36736c917c"></a>StopRequested&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aab90867d6b661aa591a3e4818086d976af92965e2c8a7afb3c1b9a5c09a263636" name="aab90867d6b661aa591a3e4818086d976af92965e2c8a7afb3c1b9a5c09a263636"></a>Done&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -428,7 +441,8 @@ Variables</h2></td></tr>
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a67581ff14ecb24a87badb4fe4b01b6c1af1a76f66cca677c6e628d9ca58a6c8fc" name="a67581ff14ecb24a87badb4fe4b01b6c1af1a76f66cca677c6e628d9ca58a6c8fc"></a>Flow&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a67581ff14ecb24a87badb4fe4b01b6c1a988fd738de9c6d177440c5dcf69e73ce" name="a67581ff14ecb24a87badb4fe4b01b6c1a988fd738de9c6d177440c5dcf69e73ce"></a>Return&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a67581ff14ecb24a87badb4fe4b01b6c1a902b0d55fddef6f8d651fe1035b7d4bd" name="a67581ff14ecb24a87badb4fe4b01b6c1a902b0d55fddef6f8d651fe1035b7d4bd"></a>Error&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a67581ff14ecb24a87badb4fe4b01b6c1aa149e85a44aeec9140e92733d9ed694e" name="a67581ff14ecb24a87badb4fe4b01b6c1aa149e85a44aeec9140e92733d9ed694e"></a>Cancelled&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a67581ff14ecb24a87badb4fe4b01b6c1af92965e2c8a7afb3c1b9a5c09a263636" name="a67581ff14ecb24a87badb4fe4b01b6c1af92965e2c8a7afb3c1b9a5c09a263636"></a>Done&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a67581ff14ecb24a87badb4fe4b01b6c1a56395991012586c2067aa7bcb5905b50" name="a67581ff14ecb24a87badb4fe4b01b6c1a56395991012586c2067aa7bcb5905b50"></a>Cancelling&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -662,6 +676,28 @@ template&lt;typename... Ty&gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
+<a id="ab6c020168ff0eb7db9b33cfa8338cdad" name="ab6c020168ff0eb7db9b33cfa8338cdad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6c020168ff0eb7db9b33cfa8338cdad">&#9670;&#160;</a></span>get_continuation</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="struct_engine_1_1_debug_1_1get__continuation__t.html">get_continuation_t</a> Engine::Debug::get_continuation</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ac225d3f00f566e6ed855746250c479d9" name="ac225d3f00f566e6ed855746250c479d9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac225d3f00f566e6ed855746250c479d9">&#9670;&#160;</a></span>sRoot</h2>
 
@@ -737,7 +773,7 @@ template&lt;typename... Ty&gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 29 2026 21:03:47 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Tue Oct 13 2026 20:57:18 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

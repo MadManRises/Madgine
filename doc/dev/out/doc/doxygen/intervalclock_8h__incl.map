@@ -1,10 +1,11 @@
 <map id="src/Generic/execution/intervalclock.h" name="src/Generic/execution/intervalclock.h">
-<area shape="rect" id="node1" title=" " alt="" coords="173,5,321,45"/>
-<area shape="rect" id="node2" href="$_generic_2execution_2binding_8h.html" title=" " alt="" coords="110,93,183,119"/>
-<area shape="rect" id="node4" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="149,167,235,192"/>
-<area shape="rect" id="node5" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="173,240,291,265"/>
-<area shape="rect" id="node7" href="$genericresult_8h.html" title=" " alt="" coords="310,93,426,119"/>
-<area shape="rect" id="node3" href="$callable__view_8h.html" title=" " alt="" coords="5,167,125,192"/>
-<area shape="rect" id="node6" href="$typed__ptr_8h.html" title=" " alt="" coords="185,313,279,339"/>
-<area shape="rect" id="node8" href="$_generic_2enum_8h.html" title=" " alt="" coords="336,167,400,192"/>
+<area shape="rect" id="node1" title=" " alt="" coords="126,5,274,45"/>
+<area shape="rect" id="node2" href="$_generic_2execution_2binding_8h.html" title=" " alt="" coords="63,93,137,119"/>
+<area shape="rect" id="node4" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="103,167,188,192"/>
+<area shape="rect" id="node5" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="151,240,270,265"/>
+<area shape="rect" id="node8" href="$genericresult_8h.html" title=" " alt="" coords="263,93,379,119"/>
+<area shape="rect" id="node3" href="$callable__view_8h.html" title=" " alt="" coords="5,313,125,339"/>
+<area shape="rect" id="node6" href="$closure_8h.html" title=" " alt="" coords="149,313,272,339"/>
+<area shape="rect" id="node7" href="$typed__ptr_8h.html" title=" " alt="" coords="297,313,391,339"/>
+<area shape="rect" id="node9" href="$_generic_2enum_8h.html" title=" " alt="" coords="289,167,353,192"/>
 </map>

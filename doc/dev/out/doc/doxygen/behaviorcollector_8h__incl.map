@@ -1,26 +1,28 @@
 <map id="plugins/behavior/api/src/Madgine/behavior/behaviorcollector.h" name="plugins/behavior/api/src/Madgine/behavior/behaviorcollector.h">
-<area shape="rect" id="node1" title=" " alt="" coords="365,5,516,60"/>
-<area shape="rect" id="node2" href="$opaqueptr_8h.html" title=" " alt="" coords="71,115,210,141"/>
-<area shape="rect" id="node3" href="$taskfuture_8h.html" title=" " alt="" coords="234,115,434,141"/>
-<area shape="rect" id="node18" href="$uniquecomponent_8h.html" title=" " alt="" coords="459,108,636,148"/>
-<area shape="rect" id="node22" href="$uniquecomponentdefine_8h.html" title=" " alt="" coords="660,108,837,148"/>
-<area shape="rect" id="node4" href="$taskpromisesharedstate_8h.html" title=" " alt="" coords="249,196,419,221"/>
-<area shape="rect" id="node5" href="$delayedconstruct_8h.html" title=" " alt="" coords="51,269,230,295"/>
-<area shape="rect" id="node6" href="$flag_8h.html" title=" " alt="" coords="254,269,414,295"/>
-<area shape="rect" id="node17" href="$taskhandle_8h.html" title=" " alt="" coords="439,269,533,295"/>
-<area shape="rect" id="node7" href="$flagstub_8h.html" title=" " alt="" coords="295,343,373,368"/>
-<area shape="rect" id="node8" href="$connection_8h.html" title=" " alt="" coords="155,416,249,441"/>
-<area shape="rect" id="node15" href="$stack_8h.html" title=" " alt="" coords="273,416,395,441"/>
-<area shape="rect" id="node16" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="419,416,494,441"/>
-<area shape="rect" id="node9" href="$virtualstate_8h.html" title=" " alt="" coords="154,489,250,515"/>
-<area shape="rect" id="node10" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="5,563,199,588"/>
-<area shape="rect" id="node13" href="$virtual__invoke_8h.html" title=" " alt="" coords="223,563,384,588"/>
-<area shape="rect" id="node11" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="43,636,161,661"/>
-<area shape="rect" id="node12" href="$typed__ptr_8h.html" title=" " alt="" coords="55,709,149,735"/>
-<area shape="rect" id="node14" href="$callable__traits_8h.html" title=" " alt="" coords="247,636,359,661"/>
-<area shape="rect" id="node19" href="$component__index_8h.html" title=" " alt="" coords="449,196,582,221"/>
-<area shape="rect" id="node20" href="$indexholder_8h.html" title=" " alt="" coords="607,196,704,221"/>
-<area shape="rect" id="node21" href="$indextype_8h.html" title=" " alt="" coords="588,269,723,295"/>
-<area shape="rect" id="node23" href="$replace_8h.html" title=" " alt="" coords="759,269,882,295"/>
-<area shape="rect" id="node24" href="$_modules_2uniquecomponent_2annotations_8h.html" title=" " alt="" coords="782,196,881,221"/>
+<area shape="rect" id="node1" title=" " alt="" coords="495,5,646,60"/>
+<area shape="rect" id="node2" href="$opaqueptr_8h.html" title=" " alt="" coords="201,115,340,141"/>
+<area shape="rect" id="node3" href="$taskfuture_8h.html" title=" " alt="" coords="364,115,564,141"/>
+<area shape="rect" id="node20" href="$uniquecomponent_8h.html" title=" " alt="" coords="589,108,766,148"/>
+<area shape="rect" id="node24" href="$uniquecomponentdefine_8h.html" title=" " alt="" coords="790,108,967,148"/>
+<area shape="rect" id="node4" href="$taskpromisesharedstate_8h.html" title=" " alt="" coords="379,196,549,221"/>
+<area shape="rect" id="node5" href="$delayedconstruct_8h.html" title=" " alt="" coords="181,269,360,295"/>
+<area shape="rect" id="node6" href="$flag_8h.html" title=" " alt="" coords="384,269,544,295"/>
+<area shape="rect" id="node19" href="$taskhandle_8h.html" title=" " alt="" coords="569,269,663,295"/>
+<area shape="rect" id="node7" href="$flagstub_8h.html" title=" " alt="" coords="425,343,503,368"/>
+<area shape="rect" id="node8" href="$connection_8h.html" title=" " alt="" coords="285,416,379,441"/>
+<area shape="rect" id="node17" href="$stack_8h.html" title=" " alt="" coords="403,416,525,441"/>
+<area shape="rect" id="node18" href="$_generic_2execution_2storage_8h.html" title=" " alt="" coords="549,416,624,441"/>
+<area shape="rect" id="node9" href="$virtualstate_8h.html" title=" " alt="" coords="284,489,380,515"/>
+<area shape="rect" id="node10" href="$src_2_generic_2execution_2concepts_8h.html" title=" " alt="" coords="135,563,329,588"/>
+<area shape="rect" id="node15" href="$virtual__invoke_8h.html" title=" " alt="" coords="353,563,514,588"/>
+<area shape="rect" id="node11" href="$src_2_generic_2execution_2statedescriptor_8h.html" title=" " alt="" coords="173,636,291,661"/>
+<area shape="rect" id="node12" href="$closure_8h.html" title=" " alt="" coords="5,709,128,735"/>
+<area shape="rect" id="node13" href="$callable__view_8h.html" title=" " alt="" coords="153,709,311,735"/>
+<area shape="rect" id="node14" href="$typed__ptr_8h.html" title=" " alt="" coords="335,709,430,735"/>
+<area shape="rect" id="node16" href="$callable__traits_8h.html" title=" " alt="" coords="377,636,489,661"/>
+<area shape="rect" id="node21" href="$component__index_8h.html" title=" " alt="" coords="579,196,712,221"/>
+<area shape="rect" id="node22" href="$indexholder_8h.html" title=" " alt="" coords="737,196,834,221"/>
+<area shape="rect" id="node23" href="$indextype_8h.html" title=" " alt="" coords="718,269,853,295"/>
+<area shape="rect" id="node25" href="$replace_8h.html" title=" " alt="" coords="889,269,1012,295"/>
+<area shape="rect" id="node26" href="$_modules_2uniquecomponent_2annotations_8h.html" title=" " alt="" coords="912,196,1011,221"/>
 </map>
