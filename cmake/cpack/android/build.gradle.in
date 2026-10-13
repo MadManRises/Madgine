@@ -1,12 +1,12 @@
 plugins {
-    id 'com.android.application' version '8.13.1'
-    id 'com.android.library' version '8.13.1' apply false
+    id 'com.android.application' version '9.4.0'
+    id 'com.android.library' version '9.4.0' apply false
 }
 
 android {
     namespace "com.@PROJECT_NAME@.@target@"
 
-    compileSdkVersion @ANDROID_PLATFORM_LEVEL@
+    compileSdkVersion 35
 
     defaultConfig {
         applicationId "com.@PROJECT_NAME@.@target@"
@@ -22,13 +22,7 @@ android {
             debuggable false
             zipAlignEnabled true
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-
-        applicationVariants.all { variant ->
-            variant.outputs.all {
-                outputFileName = "@target@.apk"
-            }
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -44,8 +38,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
 }
