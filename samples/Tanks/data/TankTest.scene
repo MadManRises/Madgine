@@ -1,0 +1,290 @@
+<Container syncId=261>
+    <mEntities>
+        <Entity name="Tank1" syncId=262>
+            <mParent>0</mParent>
+            <mComponents>
+                <Material serId=1>
+                    <mMaterial serId=2>
+                        <mName></mName>
+                        <mDiffuseColor>[1, 0.1, 0.8, 1]</mDiffuseColor>
+                    </mMaterial>
+                </Material>
+                <Mesh serId=3>
+                    <mMesh>TankBody</mMesh>
+                    <mMaterial>0</mMaterial>
+                </Mesh>
+                <Transform serId=5>
+                    <mPosition>[0, 0, 0]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{0, 0, 0, 1}</mOrientation>
+                </Transform>
+                <RigidBody serId=6>
+                    <mShapeHandle name="TankBody" serId=7>
+                    </mShapeHandle>
+                    <Kinematic>false</Kinematic>
+                    <Mass>5</Mass>
+                    <Friction>2</Friction>
+                    <LinearFactor>[1, 1, 1]</LinearFactor>
+                    <AngularFactor>[1, 1, 1]</AngularFactor>
+                    <Ghost>false</Ghost>
+                    <CollisionGroup>2</CollisionGroup>
+                    <CollisionMask>65535</CollisionMask>
+                </RigidBody>
+            </mComponents>
+            <mBehaviors serId=8>
+                <mEntries>
+                    <Native/TankMovement serId=9>
+                        <mParameters>
+                        </mParameters>
+                    </Native/TankMovement>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+        <Entity name="Tank1Tower" syncId=263>
+            <mParent>262</mParent>
+            <mComponents>
+                <Material serId=10>
+                    <mMaterial serId=11>
+                        <mName></mName>
+                        <mDiffuseColor>[1, 0.1, 0.8, 1]</mDiffuseColor>
+                    </mMaterial>
+                </Material>
+                <Mesh serId=12>
+                    <mMesh>TankTower</mMesh>
+                    <mMaterial>0</mMaterial>
+                </Mesh>
+                <Transform serId=14>
+                    <mPosition>[0, 0, 0]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{0, 0.506296, 0, 0.86236}</mOrientation>
+                </Transform>
+            </mComponents>
+            <mBehaviors serId=15>
+                <mEntries>
+                    <Native/Look_At serId=16>
+                        <mParameters>
+                            <Target>264</Target>
+                            <Locked>true</Locked>
+                        </mParameters>
+                    </Native/Look_At>
+                    <Python3/TankShooting serId=17>
+                        <mParameters>
+                            <entity type=0></entity>
+                            <scene></scene>
+                        </mParameters>
+                    </Python3/TankShooting>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+        <Entity name="Tank2" syncId=264>
+            <mParent>0</mParent>
+            <mComponents>
+                <Material serId=18>
+                    <mMaterial serId=19>
+                        <mName></mName>
+                        <mDiffuseColor>[0, 1, 0, 1]</mDiffuseColor>
+                    </mMaterial>
+                </Material>
+                <Mesh serId=20>
+                    <mMesh>TankBody</mMesh>
+                    <mMaterial>0</mMaterial>
+                </Mesh>
+                <Transform serId=22>
+                    <mPosition>[10.327, 0, 5.93074]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{0, 0, 0, 1}</mOrientation>
+                </Transform>
+                <RigidBody serId=23>
+                    <mShapeHandle name="TankBody" serId=7>
+                    </mShapeHandle>
+                    <Kinematic>false</Kinematic>
+                    <Mass>5</Mass>
+                    <Friction>2</Friction>
+                    <LinearFactor>[1, 1, 1]</LinearFactor>
+                    <AngularFactor>[1, 1, 1]</AngularFactor>
+                    <Ghost>false</Ghost>
+                    <CollisionGroup>2</CollisionGroup>
+                    <CollisionMask>65535</CollisionMask>
+                </RigidBody>
+            </mComponents>
+            <mBehaviors serId=24>
+                <mEntries>
+                    <Native/TankMovement serId=25>
+                        <mParameters>
+                        </mParameters>
+                    </Native/TankMovement>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+        <Entity name="Tank2Tower" syncId=265>
+            <mParent>264</mParent>
+            <mComponents>
+                <Material serId=26>
+                    <mMaterial serId=27>
+                        <mName></mName>
+                        <mDiffuseColor>[0, 1, 0, 1]</mDiffuseColor>
+                    </mMaterial>
+                </Material>
+                <Mesh serId=28>
+                    <mMesh>TankTower</mMesh>
+                    <mMaterial>0</mMaterial>
+                </Mesh>
+                <Transform serId=30>
+                    <mPosition>[0, 0, 0]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{0, -0.86236, 0, 0.506296}</mOrientation>
+                </Transform>
+            </mComponents>
+            <mBehaviors serId=31>
+                <mEntries>
+                    <Native/Look_At serId=32>
+                        <mParameters>
+                            <Target>262</Target>
+                            <Locked>true</Locked>
+                        </mParameters>
+                    </Native/Look_At>
+                    <Python3/TankShooting serId=33>
+                        <mParameters>
+                            <entity type=0></entity>
+                            <scene></scene>
+                        </mParameters>
+                    </Python3/TankShooting>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+        <Entity name="Floor" syncId=266>
+            <mParent>0</mParent>
+            <mComponents>
+                <Mesh serId=34>
+                    <mMesh>Plane</mMesh>
+                    <mMaterial>0</mMaterial>
+                </Mesh>
+                <Transform serId=36>
+                    <mPosition>[0, -0.654374, 0]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{0, 0, 0, 1}</mOrientation>
+                </Transform>
+                <RigidBody serId=37>
+                    <mShapeHandle name="Plane" serId=38>
+                    </mShapeHandle>
+                    <Kinematic>false</Kinematic>
+                    <Mass>0</Mass>
+                    <Friction>2</Friction>
+                    <LinearFactor>[1, 1, 1]</LinearFactor>
+                    <AngularFactor>[1, 1, 1]</AngularFactor>
+                    <Ghost>false</Ghost>
+                    <CollisionGroup>1</CollisionGroup>
+                    <CollisionMask>65534</CollisionMask>
+                </RigidBody>
+            </mComponents>
+            <mBehaviors serId=39>
+                <mEntries>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+        <Entity name="Wall1" syncId=267>
+            <mParent>0</mParent>
+            <mComponents>
+                <Transform serId=40>
+                    <mPosition>[-15.5554, 0, 0]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{0, 0, -0.707107, 0.707107}</mOrientation>
+                </Transform>
+                <RigidBody serId=41>
+                    <mShapeHandle name="Plane" serId=42>
+                    </mShapeHandle>
+                    <Kinematic>false</Kinematic>
+                    <Mass>0</Mass>
+                    <Friction>10</Friction>
+                    <LinearFactor>[1, 1, 1]</LinearFactor>
+                    <AngularFactor>[1, 1, 1]</AngularFactor>
+                    <Ghost>false</Ghost>
+                    <CollisionGroup>1</CollisionGroup>
+                    <CollisionMask>65534</CollisionMask>
+                </RigidBody>
+            </mComponents>
+            <mBehaviors serId=43>
+                <mEntries>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+        <Entity name="Wall2" syncId=268>
+            <mParent>0</mParent>
+            <mComponents>
+                <Transform serId=44>
+                    <mPosition>[26.3438, 0, 0]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{0, 0, 0.707107, 0.707107}</mOrientation>
+                </Transform>
+                <RigidBody serId=45>
+                    <mShapeHandle name="Plane" serId=46>
+                    </mShapeHandle>
+                    <Kinematic>false</Kinematic>
+                    <Mass>0</Mass>
+                    <Friction>10</Friction>
+                    <LinearFactor>[1, 1, 1]</LinearFactor>
+                    <AngularFactor>[1, 1, 1]</AngularFactor>
+                    <Ghost>false</Ghost>
+                    <CollisionGroup>1</CollisionGroup>
+                    <CollisionMask>65534</CollisionMask>
+                </RigidBody>
+            </mComponents>
+            <mBehaviors serId=47>
+                <mEntries>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+        <Entity name="Wall3" syncId=269>
+            <mParent>0</mParent>
+            <mComponents>
+                <Transform serId=48>
+                    <mPosition>[0, 0, 30.6018]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{-0.707107, 0, 0, 0.707107}</mOrientation>
+                </Transform>
+                <RigidBody serId=49>
+                    <mShapeHandle name="Plane" serId=50>
+                    </mShapeHandle>
+                    <Kinematic>false</Kinematic>
+                    <Mass>0</Mass>
+                    <Friction>10</Friction>
+                    <LinearFactor>[1, 1, 1]</LinearFactor>
+                    <AngularFactor>[1, 1, 1]</AngularFactor>
+                    <Ghost>false</Ghost>
+                    <CollisionGroup>1</CollisionGroup>
+                    <CollisionMask>65534</CollisionMask>
+                </RigidBody>
+            </mComponents>
+            <mBehaviors serId=51>
+                <mEntries>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+        <Entity name="Wall4" syncId=270>
+            <mParent>0</mParent>
+            <mComponents>
+                <Transform serId=52>
+                    <mPosition>[0, 0, -24.7051]</mPosition>
+                    <mScale>[1, 1, 1]</mScale>
+                    <mOrientation>{0.707107, 0, 0, 0.707107}</mOrientation>
+                </Transform>
+                <RigidBody serId=53>
+                    <mShapeHandle name="Plane" serId=54>
+                    </mShapeHandle>
+                    <Kinematic>false</Kinematic>
+                    <Mass>0</Mass>
+                    <Friction>10</Friction>
+                    <LinearFactor>[1, 1, 1]</LinearFactor>
+                    <AngularFactor>[1, 1, 1]</AngularFactor>
+                    <Ghost>false</Ghost>
+                    <CollisionGroup>1</CollisionGroup>
+                    <CollisionMask>65534</CollisionMask>
+                </RigidBody>
+            </mComponents>
+            <mBehaviors serId=55>
+                <mEntries>
+                </mEntries>
+            </mBehaviors>
+        </Entity>
+    </mEntities>
+</Container>

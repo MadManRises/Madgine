@@ -191,7 +191,7 @@ namespace Tools {
                             if (*continuation)
                                 DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY));
 
-                            continuations.controls(*continuation, std::move(stopCallback) );
+                            continuations.controls(*continuation, std::move(stopCallback));
                             continuation = nullptr;
                             stopCallback = {};
                         }
@@ -203,6 +203,23 @@ namespace Tools {
                 }
             };
             senderLocation->visit(visitor);
+
+            if (breakpoint) {
+                if (lineFeedback) {
+                    assert(!*lineFeedback || *lineFeedback == breakpoint);
+                    *lineFeedback = breakpoint;
+                }
+                bool set = context.getBreakpoint(senderLocation, breakpoint);
+                if (Breakpoint(ImGui::GetCursorScreenPos().y - 10.0f, ImGui::GetCursorScreenPos().y, &set))
+                    context.setBreakpoint(senderLocation, breakpoint, set);
+
+                if (continuation) {
+                    if (*continuation)
+                        DrawDebugMarker(ImGui::GetCursorScreenPos().y - 5.0f);
+
+                    continuations.controls(*continuation, std::move(stopCallback));
+                }
+            }
 
             return subLocations;
         } else {

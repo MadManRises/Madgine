@@ -1,0 +1,115 @@
+<Graph serId=1>
+    <mNodes>
+        <Node type="Accessor/Engine::Physics::RigidBody/CollisionSignal" serId=2>
+            <mFlowOutPins>
+                <Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                    <Item serId=3>
+                        <mSource serId=4>
+                            <mNode>3</mNode>
+                            <mIndex>0</mIndex>
+                            <mGroup>0</mGroup>
+                        </mSource>
+                    </Item>
+                </Item>
+            </mDataInPins>
+        </Node>
+        <Node type="Connect" serId=5>
+            <mFlowOutPins>
+                <Item>
+                    <Item serId=6>
+                        <mTarget serId=7>
+                            <mNode>-1</mNode>
+                            <mIndex>0</mIndex>
+                            <mGroup>0</mGroup>
+                        </mTarget>
+                    </Item>
+                </Item>
+                <Item>
+                    <Item serId=8>
+                        <mTarget serId=9>
+                            <mNode>4</mNode>
+                            <mIndex>0</mIndex>
+                            <mGroup>0</mGroup>
+                        </mTarget>
+                    </Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                    <Item serId=10>
+                        <mSource serId=11>
+                            <mNode>1</mNode>
+                            <mIndex>0</mIndex>
+                            <mGroup>0</mGroup>
+                        </mSource>
+                    </Item>
+                </Item>
+            </mDataInPins>
+        </Node>
+        <Node type="Accessor/Engine::Scene::Entity::Entity/RigidBody" serId=12>
+            <mFlowOutPins>
+                <Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                    <Item serId=13>
+                        <mSource serId=14>
+                            <mNode>-1</mNode>
+                            <mIndex>0</mIndex>
+                            <mGroup>1</mGroup>
+                        </mSource>
+                    </Item>
+                </Item>
+            </mDataInPins>
+        </Node>
+        <Node type="Function/Engine::Scene::Entity::Entity::endLifetime" serId=15>
+            <mFlowOutPins>
+                <Item>
+                    <Item serId=16>
+                        <mTarget serId=17>
+                            <mNode>-1</mNode>
+                            <mIndex>-1</mIndex>
+                            <mGroup>0</mGroup>
+                        </mTarget>
+                    </Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                    <Item serId=18>
+                        <mSource serId=19>
+                            <mNode>-1</mNode>
+                            <mIndex>0</mIndex>
+                            <mGroup>1</mGroup>
+                        </mSource>
+                    </Item>
+                </Item>
+            </mDataInPins>
+        </Node>
+    </mNodes>
+    <mFlowOutPins>
+        <Item serId=20>
+            <mTarget serId=21>
+                <mNode>2</mNode>
+                <mIndex>0</mIndex>
+                <mGroup>0</mGroup>
+            </mTarget>
+        </Item>
+    </mFlowOutPins>
+    <mDataInPins>
+    </mDataInPins>
+    <mLayoutData>{"nodes":{"node:120000":{"location":{"x":319,"y":100}},"node:180000":{"location":{"x":-84,"y":4}},"node:2147483645":{"location":{"x":673,"y":-140}},"node:2147483646":{"location":{"x":-15,"y":-140}},"node:240000":{"location":{"x":526,"y":132}},"node:60000":{"location":{"x":95,"y":132}}},"selection":null,"view":{"scroll":{"x":-14.426361083984375,"y":-139.965621948242188},"visible_rect":{"max":{"x":697.5736083984375,"y":460.03436279296875},"min":{"x":-14.426361083984375,"y":-139.965621948242188}},"zoom":1}}</mLayoutData>
+    <mContextualInputs>
+        <Item serId=22>
+            <mDescriptor serId=23>
+                <mName>Entity</mName>
+                <mType>Engine::Scene::Entity::Entity</mType>
+            </mDescriptor>
+        </Item>
+    </mContextualInputs>
+</Graph>

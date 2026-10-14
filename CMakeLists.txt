@@ -88,9 +88,9 @@ add_subdirectory(src)
 
 add_subdirectory(plugins)
 
-add_subdirectory(samples)
-
 resolve_dependencies()
+
+add_subdirectory(samples)
 
 set (LAUNCHER_LOCATION ${CMAKE_CURRENT_LIST_DIR}/launcher CACHE INTERNAL "")
 function(create_launcher MADGINE_BINARY_NAME)
