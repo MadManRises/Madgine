@@ -114,8 +114,7 @@ namespace Behavior {
 
         void NodeInterpreterStateBase::start()
         {
-            Debug::Continuation *parent = Debug::get_continuation(*this);
-            mDebugLocation.mContinuation.setMode(parent && (parent->mode() == Debug::ContinuationMode::StepInto) ? Debug::ContinuationMode::Step : Debug::ContinuationMode::Continue);
+            mDebugLocation.mContinuation.start(*this);
 
             if (!mGraph)
                 mGraph = mHandle;

@@ -131,10 +131,25 @@ namespace Debug {
             assert(mode() == ContinuationMode::Done);
         }
 
+        
+        void start(auto &rec) {
+
+            Continuation *parent = get_continuation(rec);
+
+            ContinuationMode target = ContinuationMode::Continue;
+            
+            if (parent && parent->mode() == Debug::ContinuationMode::StepInto)
+                target = Debug::ContinuationMode::Step;
+
+            uintptr_t prev = mImpl.exchange(static_cast<uintptr_t>(target));
+
+            assert(toMode(prev) == ContinuationMode::Done);
+        }
+
         template <typename Rec, typename F, typename... Args>
         void suspend(TypedPtr location, Rec &rec, F &&callback, ContinuationType type, Args &&...args)
         {
-            auto f = [&rec, this, callback { forward_capture<F>(callback) }](ContinuationMode triggerMode, Args &&...args) mutable {
+            auto f = [&rec, callback { forward_capture<F>(callback) }](ContinuationMode triggerMode, Args &&...args) mutable {
                 if (triggerMode == Debug::ContinuationMode::Done) {
                     rec.set_done();
                 } else if constexpr (std::invocable<F, ContinuationMode, Rec &, Args...>) { // :(
@@ -331,7 +346,7 @@ namespace Debug {
         }
 
     private:
-        std::atomic<uintptr_t> mImpl = 0;
+        std::atomic<uintptr_t> mImpl = static_cast<uintptr_t>(ContinuationMode::Done);
     };
 
 }

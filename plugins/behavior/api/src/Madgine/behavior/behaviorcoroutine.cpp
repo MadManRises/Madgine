@@ -22,10 +22,12 @@ namespace Behavior {
         if (mResolveNames) {
             Reflect::Result result = mResolveNames(*mReceiver);
             if (result) {
-                mReceiver->set_error(std::move(*result.mError));
+                mDebugLocation.mContinuation.returnError(&mDebugLocation, *mReceiver, {}, std::move(*result.mError));
                 return;
             }
         }
+
+        mDebugLocation.mContinuation.start(*mReceiver);
         std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).resume();
     }
 

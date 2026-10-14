@@ -239,8 +239,7 @@ namespace Execution {
 
                 Debug::SenderLocation *location = get_debug_location(mRec);
 
-                Debug::Continuation *parent = Debug::get_continuation(mRec);
-                mContinuation.setMode(parent && (parent->mode() == Debug::ContinuationMode::StepInto) ? Debug::ContinuationMode::Step : Debug::ContinuationMode::Continue);
+                mContinuation.start(mRec);
 
                 mContinuation.pass(location, mRec, [this](Rec &rec) { mState.start(); }, sStartBreakpoint);
             }

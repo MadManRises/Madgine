@@ -104,6 +104,8 @@ namespace Behavior {
 
             void start()
             {
+                this->mDebugLocation.mContinuation.start(this->mRec);
+
                 const auto &handle = Execution::get_context(this->mRec);
                 handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(mFlowOutIndex, flowOutGroup));
             }

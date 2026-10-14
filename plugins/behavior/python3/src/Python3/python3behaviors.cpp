@@ -213,8 +213,7 @@ namespace Behavior {
 
         void Python3BehaviorState::start()
         {
-            Debug::Continuation *parent = Debug::get_continuation(*this);
-            mContinuation.setMode(parent && (parent->mode() == Debug::ContinuationMode::StepInto) ? Debug::ContinuationMode::Step : Debug::ContinuationMode::Continue);
+            mContinuation.start(*this);
 
             Python3Lock lock;
             if (PyExceptionInstance_Check(mCoroutine)) {
