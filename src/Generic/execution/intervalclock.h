@@ -26,7 +26,7 @@ namespace Execution {
                 {
                     std::lock_guard guard { mMutex };
                     for (auto it = mWaitStates.begin(); it != mWaitStates.end();) {
-                        if ((*it)->mWaitUntil <= mLastTick) {
+                        if ((*it)->mStartTime + (*it)->mDuration <= mLastTick) {
                             doneWaits.push_back(*it);
                             it = mWaitStates.erase(it);
                         } else {
@@ -35,7 +35,7 @@ namespace Execution {
                     }
                 }
                 for (WaitState *waitState : doneWaits)
-                    waitState->continueExecution(elapsed);
+                    waitState->continueExecution(now);
             }
 
             return elapsed;
@@ -51,7 +51,7 @@ namespace Execution {
             void start(IntervalClock &clock)
             {
                 mClock = &clock;
-                mWaitUntil = mClock->mLastTick + mDuration;
+                mStartTime = mClock->mLastTick;
                 std::lock_guard guard { mClock->mMutex };
                 mClock->mWaitStates.push_back(this);
             }
@@ -62,11 +62,11 @@ namespace Execution {
                 return std::erase(mClock->mWaitStates, this) == 1;
             }
 
-            virtual void continueExecution(std::chrono::microseconds elapsed) = 0;
+            virtual void continueExecution(Timepoint now) = 0;
 
             IntervalClock *mClock = nullptr;
             std::chrono::steady_clock::duration mDuration;
-            Timepoint mWaitUntil;
+            Timepoint mStartTime;
         };
 
         template <Execution::Binding<IntervalClock &> Binding, typename Rec>
@@ -76,8 +76,8 @@ namespace Execution {
                 : WaitState(duration)
                 , Execution::base_state<Rec>(std::forward<Rec>(rec))
                 , mBinding(std::forward<Binding>(binding))
-                , mDuration(durationOverride > 0s ? durationOverride : duration)
-                , mAcc(mDuration - duration - acc)
+                , mDebugDuration(durationOverride > 0s ? durationOverride : duration)
+                , mAcc(acc)
             {
             }
 
@@ -97,9 +97,9 @@ namespace Execution {
                     this->set_done();
             }
 
-            void continueExecution(std::chrono::microseconds elapsed) override
+            void continueExecution(Timepoint now) override
             {
-                this->set_value(std::move(elapsed)); //TODO use correct elapsed
+                this->set_value(std::chrono::duration_cast<std::chrono::microseconds>(now - this->mStartTime));
             }
 
             friend auto tag_invoke(Execution::visit_state_t, state *state, auto &&visitor)
@@ -107,7 +107,7 @@ namespace Execution {
                 if (!state) {
                     visitor(Execution::State::Text { "Wait..." });
                 } else {
-                    std::chrono::duration duration = state->mDuration;
+                    std::chrono::duration duration = state->mDebugDuration;
                     if (duration.count() == 0) {
                         double progress = 0.0;
                         if (state) {
@@ -134,8 +134,8 @@ namespace Execution {
                         float progress = 0.0f;
 
                         if (state) {
-                            std::chrono::steady_clock::duration remaining = std::chrono::duration_cast<std::chrono::steady_clock::duration>(state->mWaitUntil - state->mClock->lastTick()) + state->mAcc;
-                            progress = 1.0f - (static_cast<float>(remaining.count()) / duration.count());
+                            std::chrono::steady_clock::duration elapsed = std::chrono::duration_cast<std::chrono::steady_clock::duration>(state->mClock->lastTick() - state->mStartTime) + state->mAcc;
+                            progress = static_cast<float>(elapsed.count()) / duration.count();
 
                             visitor(Execution::State::Marker {});
                         }
@@ -148,7 +148,7 @@ namespace Execution {
             }
 
             Binding mBinding;
-            std::chrono::steady_clock::duration mDuration;
+            std::chrono::steady_clock::duration mDebugDuration;
             std::chrono::steady_clock::duration mAcc;
         };
 
