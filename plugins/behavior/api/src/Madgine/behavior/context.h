@@ -152,7 +152,7 @@ namespace Behavior {
             friend Reflect::Result tag_invoke(Reflect::get_reflect_contextual_t, receiver &rec, Reflect::Value &retVal, const Reflect::MetaTable *type)
             {
                 if ((*Reflect::toType<std::decay_t<T>>().mSecondary.mMetaTable)->isDerivedFrom(type)) {
-                    toValue(retVal, forward_ref<T>(rec.mValue));
+                    toValue(retVal, rec.mValue);
                     return {};
                 }
 
