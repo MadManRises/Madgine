@@ -1,0 +1,14 @@
+.. meta::858ffbb55cba8e1aee4054f891c61ed44feec9be1ff38b1362d6ba3df3c497eac75f3d6936696e812550d6e13711fd5f21195fa39962a68d443a155905eec0f7
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: plugins/misc/widgets/src/Madgine/widgets/widgetptr.cpp File Reference
+
+plugins/misc/widgets/src/Madgine/widgets/widgetptr.cpp File Reference
+=====================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: widgetptr_8cpp.html

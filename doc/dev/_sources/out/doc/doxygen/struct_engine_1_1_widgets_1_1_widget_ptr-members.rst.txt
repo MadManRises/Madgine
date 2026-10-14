@@ -1,0 +1,14 @@
+.. meta::16e54911ae1053762d834592c61c8e13be0b219eedc88ce54fd15a044f64a26fcca1fc309080adf5b2490989128573860d4030aee81d662bfe23e210cd0243f5
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Member List
+
+Member List
+===========
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_widgets_1_1_widget_ptr-members.html

@@ -376,6 +376,8 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager.html">WidgetManager</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_ptr.html">WidgetPtr</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widgets_lines_data.html">WidgetsLinesData</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widgets_render_data.html">WidgetsRenderData</a></td></tr>
@@ -391,8 +393,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:a6be1b187a973bf371496815d79fe7476"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53bdcfd8542c1df7ed6fe6191caadbb8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#a53bdcfd8542c1df7ed6fe6191caadbb8">Vertex</a> = <a class="el" href="struct_engine_1_1_compound.html">Compound</a>&lt; <a class="el" href="struct_engine_1_1_render_1_1_vertex_pos.html">Render::VertexPos</a>, <a class="el" href="struct_engine_1_1_render_1_1_vertex_color.html">Render::VertexColor</a>, <a class="el" href="struct_engine_1_1_render_1_1_vertex_u_v.html">Render::VertexUV</a> &gt;</td></tr>
 <tr class="separator:a53bdcfd8542c1df7ed6fe6191caadbb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae60f514686c51eed8392c0209e243af7"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#ae60f514686c51eed8392c0209e243af7">WidgetContext</a> = <a class="el" href="struct_engine_1_1_behavior_1_1_context_parameter.html">Behavior::ContextParameter</a>&lt; <a class="el" href="struct_engine_1_1_execution_1_1_binding_ptr.html">Execution::BindingPtr</a>&lt; <a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html">WidgetBase</a> &amp; &gt; &gt;</td></tr>
-<tr class="separator:ae60f514686c51eed8392c0209e243af7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab688718fadb1f219717b6f07828639fd"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#ab688718fadb1f219717b6f07828639fd">WidgetContext</a> = <a class="el" href="struct_engine_1_1_behavior_1_1_context_parameter.html">Behavior::ContextParameter</a>&lt; <a class="el" href="struct_engine_1_1_widgets_1_1_widget_ptr.html">WidgetPtr</a> &gt;</td></tr>
+<tr class="separator:ab688718fadb1f219717b6f07828639fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5a1ba18b478d1bc5fbdb091d6c6b810"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:aa5a1ba18b478d1bc5fbdb091d6c6b810"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#aa5a1ba18b478d1bc5fbdb091d6c6b810">WidgetHandler</a> = <a class="el" href="struct_engine_1_1_reflect_1_1_virtual_scope.html">Reflect::VirtualScope</a>&lt; T, Behavior::HandlerComponent&lt; T, <a class="el" href="struct_engine_1_1_widgets_1_1_widget_handler_base.html">WidgetHandlerBase</a> &gt; &gt;</td></tr>
 <tr class="separator:aa5a1ba18b478d1bc5fbdb091d6c6b810"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -407,9 +409,9 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ac859e946a8ad568027c47b8635480bde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#ac859e946a8ad568027c47b8635480bde">animate_move</a> (<a class="el" href="struct_engine_1_1_math_1_1_matrix3.html">Math::Matrix3</a> dist, std::chrono::nanoseconds duration, <a class="el" href="namespace_engine_1_1_widgets.html#ae60f514686c51eed8392c0209e243af7">WidgetContext</a> widgetContext)</td></tr>
+<tr class="memitem:ac859e946a8ad568027c47b8635480bde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#ac859e946a8ad568027c47b8635480bde">animate_move</a> (<a class="el" href="struct_engine_1_1_math_1_1_matrix3.html">Math::Matrix3</a> dist, std::chrono::nanoseconds duration, <a class="el" href="namespace_engine_1_1_widgets.html#ab688718fadb1f219717b6f07828639fd">WidgetContext</a> widgetContext)</td></tr>
 <tr class="separator:ac859e946a8ad568027c47b8635480bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8da122819d85fee5741468218d9965e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#a8da122819d85fee5741468218d9965e9">animate_opacity</a> (float dist, std::chrono::nanoseconds duration, <a class="el" href="namespace_engine_1_1_widgets.html#ae60f514686c51eed8392c0209e243af7">WidgetContext</a> widgetContext)</td></tr>
+<tr class="memitem:a8da122819d85fee5741468218d9965e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#a8da122819d85fee5741468218d9965e9">animate_opacity</a> (float dist, std::chrono::nanoseconds duration, <a class="el" href="namespace_engine_1_1_widgets.html#ab688718fadb1f219717b6f07828639fd">WidgetContext</a> widgetContext)</td></tr>
 <tr class="separator:a8da122819d85fee5741468218d9965e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4ab8970624a29cdc0e151e682ef394f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#af4ab8970624a29cdc0e151e682ef394f">applyProperties</a> (<a class="el" href="struct_engine_1_1_widgets_1_1_geometry.html">Geometry</a> &amp;geometry, <a class="el" href="struct_engine_1_1_widgets_1_1_property_range.html">PropertyRange</a> range, uint16_t activeConditions, uint16_t rangeMask, <a class="el" href="struct_engine_1_1_widgets_1_1_geometry_source_info.html">GeometrySourceInfo</a> *source)</td></tr>
 <tr class="separator:af4ab8970624a29cdc0e151e682ef394f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -421,6 +423,8 @@ Functions</h2></td></tr>
 <tr class="separator:a54c90faf7d972906c21f13aa302176f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff7e4a6d372cc301454b1bc6c9a00a72"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#aff7e4a6d372cc301454b1bc6c9a00a72">ENUM</a> (WidgetType, DEFAULT_WIDGET, MODAL_OVERLAY, NONMODAL_OVERLAY, ROOT_WIDGET)</td></tr>
 <tr class="separator:aff7e4a6d372cc301454b1bc6c9a00a72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe9183a2c494ea819a411b88bb664815"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_serialize_1_1_stream_result.html">Serialize::StreamResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#afe9183a2c494ea819a411b88bb664815">tag_invoke</a> (<a class="el" href="struct_engine_1_1_serialize_1_1apply__map__t.html">Serialize::apply_map_t</a>, <a class="el" href="struct_engine_1_1_widgets_1_1_widget_ptr.html">WidgetPtr</a> &amp;ptr, <a class="el" href="struct_engine_1_1_serialize_1_1_formatted_serialize_stream.html">Serialize::FormattedSerializeStream</a> &amp;in, bool success, <a class="el" href="namespace_engine_1_1_serialize.html#a709a54509cec297f0cc972145d963d0a">Serialize::ContextPtr</a> context)</td></tr>
+<tr class="separator:afe9183a2c494ea819a411b88bb664815"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2a9da0bc3ff3c03fe5f6a6cdaaaaba5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#ae2a9da0bc3ff3c03fe5f6a6cdaaaaba5">tempWidget</a> (<a class="el" href="struct_engine_1_1_widgets_1_1_widget_loader_1_1_handle.html">WidgetLoader::Handle</a> desc, const <a class="el" href="struct_engine_1_1_math_1_1_matrix3.html">Math::Matrix3</a> &amp;pos, const <a class="el" href="struct_engine_1_1_math_1_1_matrix3.html">Math::Matrix3</a> &amp;size, <a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a> behavior)</td></tr>
 <tr class="separator:ae2a9da0bc3ff3c03fe5f6a6cdaaaaba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a49551b1a4c17196ce95283422f026112"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine_1_1_widgets.html#a49551b1a4c17196ce95283422f026112">TYPED_ENUM</a> (PropertyType, int8_t, POSITION, SIZE, CONDITIONAL)</td></tr>
@@ -450,14 +454,14 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ae60f514686c51eed8392c0209e243af7" name="ae60f514686c51eed8392c0209e243af7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae60f514686c51eed8392c0209e243af7">&#9670;&#160;</a></span>WidgetContext</h2>
+<a id="ab688718fadb1f219717b6f07828639fd" name="ab688718fadb1f219717b6f07828639fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab688718fadb1f219717b6f07828639fd">&#9670;&#160;</a></span>WidgetContext</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="namespace_engine_1_1_widgets.html#ae60f514686c51eed8392c0209e243af7">Engine::Widgets::WidgetContext</a> = typedef <a class="el" href="struct_engine_1_1_behavior_1_1_context_parameter.html">Behavior::ContextParameter</a>&lt;<a class="el" href="struct_engine_1_1_execution_1_1_binding_ptr.html">Execution::BindingPtr</a>&lt;<a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html">WidgetBase</a> &amp;&gt; &gt;</td>
+          <td class="memname">using <a class="el" href="namespace_engine_1_1_widgets.html#ab688718fadb1f219717b6f07828639fd">Engine::Widgets::WidgetContext</a> = typedef <a class="el" href="struct_engine_1_1_behavior_1_1_context_parameter.html">Behavior::ContextParameter</a>&lt;<a class="el" href="struct_engine_1_1_widgets_1_1_widget_ptr.html">WidgetPtr</a>&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -586,7 +590,7 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespace_engine_1_1_widgets.html#ae60f514686c51eed8392c0209e243af7">WidgetContext</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespace_engine_1_1_widgets.html#ab688718fadb1f219717b6f07828639fd">WidgetContext</a>&#160;</td>
           <td class="paramname"><em>widgetContext</em>&#160;</td>
         </tr>
         <tr>
@@ -620,7 +624,7 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespace_engine_1_1_widgets.html#ae60f514686c51eed8392c0209e243af7">WidgetContext</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespace_engine_1_1_widgets.html#ab688718fadb1f219717b6f07828639fd">WidgetContext</a>&#160;</td>
           <td class="paramname"><em>widgetContext</em>&#160;</td>
         </tr>
         <tr>
@@ -909,6 +913,52 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="afe9183a2c494ea819a411b88bb664815" name="afe9183a2c494ea819a411b88bb664815"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe9183a2c494ea819a411b88bb664815">&#9670;&#160;</a></span>tag_invoke()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_engine_1_1_serialize_1_1_stream_result.html">Serialize::StreamResult</a> Engine::Widgets::tag_invoke </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_serialize_1_1apply__map__t.html">Serialize::apply_map_t</a>&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_ptr.html">WidgetPtr</a> &amp;&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_serialize_1_1_formatted_serialize_stream.html">Serialize::FormattedSerializeStream</a> &amp;&#160;</td>
+          <td class="paramname"><em>in</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>success</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespace_engine_1_1_serialize.html#a709a54509cec297f0cc972145d963d0a">Serialize::ContextPtr</a>&#160;</td>
+          <td class="paramname"><em>context</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Variable Documentation</h2>
 <a id="a4081dc904dfc0516573f88907498f359" name="a4081dc904dfc0516573f88907498f359"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4081dc904dfc0516573f88907498f359">&#9670;&#160;</a></span>wait_frame</h2>
@@ -965,7 +1015,7 @@ template&lt;typename T &gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Oct 13 2026 23:51:31 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Wed Oct 14 2026 19:10:00 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

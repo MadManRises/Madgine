@@ -1,0 +1,14 @@
+.. meta::a06149000f07f4b15e3129010ebc62164fa5e2588ba64c75c211ec2e4295e7a236bf4f0d8d73cc8609b5416fe24675b1dbd1cf7f838705abab83fe859ff9f00d
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Engine::Widgets::WidgetPtr Struct Reference
+
+WidgetPtr Struct Reference
+==========================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_widgets_1_1_widget_ptr.html
