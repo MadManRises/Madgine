@@ -6,6 +6,7 @@
 #include "Madgine/behavior/context.h"
 
 #include "../widgetloader.h"
+#include "../widgetptr.h"
 
 namespace Engine {
 namespace Widgets {
@@ -20,7 +21,7 @@ namespace Widgets {
         void start();
         void stop();
 
-        WidgetBase *widget();
+        WidgetPtr widget();
 
     private:
         WidgetLoader::Handle mDesc;
@@ -32,7 +33,7 @@ namespace Widgets {
 
             friend Reflect::Result tag_invoke(Reflect::get_reflect_contextual_t, receiver &rec, Reflect::Value &out, const Reflect::MetaTable *type)
             {
-                if (table<WidgetBase>->isDerivedFrom(type)){
+                if (table<WidgetBase>->isDerivedFrom(type)) {
                     toValue(out, rec.mState.widget());
                     return {};
                 } else {

@@ -12,7 +12,7 @@
 namespace Engine {
 namespace Widgets {
 
-    using WidgetContext = Behavior::ContextParameter<Execution::BindingPtr<WidgetBase &>>;
+    using WidgetContext = Behavior::ContextParameter<WidgetPtr>;
     using WidgetManagerContext = Behavior::ContextParameter<WidgetManager &>;
 
     constexpr auto wait_frame = [](std::chrono::steady_clock::duration duration, WidgetManagerContext manager = {}, std::chrono::steady_clock::duration durationOverride = -1s, std::chrono::steady_clock::duration acc = 0s) {

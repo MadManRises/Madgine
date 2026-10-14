@@ -20,6 +20,7 @@
 #include "util/widgetsrenderdata.h"
 #include "widgetcollector.h"
 #include "widgetloader.h"
+#include "widgetptr.h"
 
 namespace Engine {
 namespace Widgets {
@@ -43,6 +44,7 @@ namespace Widgets {
         WidgetManager &manager();
         const std::string &key() const;
 
+        WidgetPtr pointer();
         void destroy();
 
         void show();
@@ -161,7 +163,7 @@ namespace Widgets {
         template <typename Sender>
         void addBehavior(Sender &&sender)
         {
-            lifetime().attach(std::forward<Sender>(sender) | Behavior::context_set(this) | Platform::Log::log_result());
+            lifetime().attach(std::forward<Sender>(sender) | Behavior::context_set(pointer()) | Platform::Log::log_result());
         }
         Debug::DebuggableLifetime<Reflect::get_reflect_contextual> &lifetime();
 

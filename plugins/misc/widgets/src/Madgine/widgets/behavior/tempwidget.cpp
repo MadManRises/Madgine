@@ -76,9 +76,9 @@ namespace Widgets {
         mState.stop();
     }
 
-    WidgetBase *TempWidgetState::widget()
+    WidgetPtr TempWidgetState::widget()
     {
-        return mWidget.get();
+        return mWidget->pointer();
     }
 
     void TempWidgetState::receiver::set_value(Reflect::ArgumentList args)

@@ -7,6 +7,8 @@ namespace Widgets {
 
     struct WidgetDescriptor;
 
+    struct WidgetPtr;
+
     struct WidgetBase;
     struct Bar;
     struct Button;

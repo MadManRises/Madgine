@@ -11,8 +11,11 @@
 
 #include "geometry.h"
 #include "widgetmanager.h"
+#include "widgetptr.h"
 
 METATABLE_BEGIN(Engine::Widgets::WidgetBase)
+    STORAGE_BEGIN(Engine::Widgets::WidgetBase, Engine::Widgets::WidgetPtr)
+    STORAGE_END(Engine::Widgets::WidgetBase)
     READONLY_PROPERTY(Children, children)
     MEMBER(mName)
     READONLY_PROPERTY(Pos, getPos)
@@ -200,6 +203,11 @@ namespace Widgets {
     const char *WidgetBase::getClass() const
     {
         return "Widget";
+    }
+
+    WidgetPtr WidgetBase::pointer()
+    {                
+        return lifetime().bind(Execution::ConstantBinding { *this });
     }
 
     void WidgetBase::destroy()

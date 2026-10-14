@@ -51,13 +51,13 @@
             </mDataInPins>
         </Node>
         <Node type="Native/temp_widget" serId=12>
-            <mDefaultParameters>
-                <Class serId=13>
-                    <Name>test</Name>
-                </Class>
+            <mBehavior serId=200>
+            <mParameters>
+                <Class>test</Class>
                 <Position>[0, 0, 0, 0, 0, 0, 0, 0, 0]</Position>
                 <Size>[1, 0, 0, 0, 1, 0, 0, 0, 1]</Size>
-            </mDefaultParameters>
+            </mParameters>
+            </mBehavior>
             <mFlowOutPins>
                 <Item>
                     <Item serId=14>
@@ -188,10 +188,12 @@
             </mDataInPins>
         </Node>
         <Node type="Native/Animate_Opacity" serId=41>
-            <mDefaultParameters>
+            <mBehavior serId=300>
+            <mParameters>
                 <Delta>-1</Delta>
                 <Duration>3000000000ns</Duration>
-            </mDefaultParameters>
+            </mParameters>
+            </mBehavior>
             <mFlowOutPins>
                 <Item>
                     <Item serId=42>
@@ -227,10 +229,12 @@
             </mDataInPins>
         </Node>
         <Node type="Native/Animate_Move" serId=48>
-            <mDefaultParameters>
+            <mBehavior serId=400>
+            <mParameters>
                 <Distance>[0, 0, 0, 0, -0.1, 0, 0, 0, 0]</Distance>
                 <Duration>1500000000ns</Duration>
-            </mDefaultParameters>
+            </mParameters>
+            </mBehavior>
             <mFlowOutPins>
                 <Item>
                     <Item serId=49>
@@ -278,12 +282,12 @@
     <mDataInPins>
     </mDataInPins>
     <mLayoutData>{"nodes":{"node:120000":{"location":{"x":380,"y":-385}},"node:180000":{"location":{"x":576,"y":-357}},"node:2147483645":{"location":{"x":1008,"y":-543}},"node:2147483646":{"location":{"x":178,"y":-543}},"node:240000":{"location":{"x":381,"y":-245}},"node:300000":{"location":{"x":173,"y":-249}},"node:360000":{"location":{"x":588,"y":-193}},"node:420000":{"location":{"x":826,"y":-241}},"node:480000":{"location":{"x":826,"y":-97}},"node:60000":{"location":{"x":173,"y":-329}}},"selection":["node:180000"],"view":{"scroll":{"x":178.1055908203125,"y":-542.372314453125},"visible_rect":{"max":{"x":1032.1055908203125,"y":99.627685546875},"min":{"x":178.1055908203125,"y":-542.372314453125}},"zoom":1}}</mLayoutData>
-    <mNamedInputs>
+    <mContextualInputs>
         <Item serId=57>
             <mDescriptor serId=58>
                 <mName>Widget</mName>
-                <mType>Engine::ValueType</mType>
+                <mType>Engine::Widgets::WidgetBase</mType>
             </mDescriptor>
         </Item>
-    </mNamedInputs>
+    </mContextualInputs>
 </Graph>
