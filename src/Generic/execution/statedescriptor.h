@@ -36,6 +36,7 @@ namespace Execution {
             IndexType<size_t> *mLineFeedback;
             Debug::Continuation *mContinuation;
             CallableView<Closure<void()>()> mStopCallback;
+            bool mActive = true;
         };
         struct Marker {
         };

@@ -5,19 +5,24 @@
 #include "Madgine/debug/continuation.h"
 
 #include "Madgine_Tools/imguiicons.h"
+#include "debuggerview.h"
 #include "imgui/imgui.h"
 #include "imgui/imguiaddons.h"
 
 namespace Engine {
 namespace Tools {
 
-    ContinuationList::ContinuationList(ControlButton button)
-        : mButton(button)
+    ContinuationList::ContinuationList(const Debug::ContextInfo &context, ControlButton button)
+        : mContext(context)
+        , mButton(button)
     {
     }
 
     ContinuationList::~ContinuationList()
     {
+        assert(!mBreakpoint);
+        assert(!mIsMarker);
+
         for (auto &[continuation, mode, callback] : mContinuations) {
             if (callback)
                 callback();
@@ -25,27 +30,83 @@ namespace Tools {
         }
     }
 
-    void ContinuationList::controls(Debug::Continuation &continuation, Closure<void()> stopCallback)
+    void ContinuationList::breakpoint(float y0, float y1, size_t line, TypedPtr location)
+    {
+        assert(!mBreakpoint);
+        bool set = mContext.getBreakpoint(location.ptr(), line);
+        if (Breakpoint(y0, y1, &set))
+            mContext.setBreakpoint(location.ptr(), line, set);
+    }
+
+    void ContinuationList::lazyBreakpoint(const Execution::State::Breakpoint &bp, size_t line, TypedPtr location)
+    {
+        mLineFeedback = bp.mLineFeedback;
+        mBreakpoint = line;
+        mContinuation = bp.mContinuation;
+        mIsActive = bp.mActive;
+        mStopCallback = bp.mStopCallback();
+        mLocation = location;
+    }
+
+    void ContinuationList::marker()
+    {
+        mIsMarker = true;
+    }
+
+    void ContinuationList::flush(float y0, float y1)
+    {
+        if (mBreakpoint) {
+            if (mLineFeedback) {
+                assert(!*mLineFeedback || *mLineFeedback == mBreakpoint);
+                *mLineFeedback = mBreakpoint;
+            }
+            bool set = mContext.getBreakpoint(mLocation.ptr(), mBreakpoint);
+            if (Breakpoint(y0, y1, &set))
+                mContext.setBreakpoint(mLocation.ptr(), mBreakpoint, set);
+            mBreakpoint.reset();
+            if (mContinuation) {
+                if (*mContinuation)
+                    DrawDebugMarker(0.5f * (y0 + y1));
+
+                controls(*mContinuation, std::move(mStopCallback), mIsActive);
+                mContinuation = nullptr;
+                mStopCallback = {};
+                mIsActive = false;
+            }
+        }
+        if (mIsMarker) {
+            mIsMarker = false;
+            DrawDebugMarker(0.5f * (y0 + y1));
+        }
+    }
+
+    void ContinuationList::controls(Debug::Continuation &continuation, Closure<void()> stopCallback, bool isActive)
     {
         ControlButton button = mButton;
-        
-        if (continuation || ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
-            ImGui::PushID(&continuation);            
+
+        if ((continuation && isActive) || ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+            ImGui::PushID(&continuation);
 
             if (ImGui::InlineContextButton(IMGUI_ICON_STOP)) {
                 button = ControlButton::STOP;
             }
 
-            if (ImGui::InlineContextButton(IMGUI_ICON_STEP)) {
-                button = ControlButton::STEPOVER;
-            }
+            if (continuation && isActive) {
+                if (ImGui::InlineContextButton(IMGUI_ICON_STEP)) {
+                    button = ControlButton::STEPOVER;
+                }
 
-            if (ImGui::InlineContextButton(IMGUI_ICON_STEP "##1")) {
-                button = ControlButton::STEPINTO;
-            }
+                if (ImGui::InlineContextButton(IMGUI_ICON_STEP "##1")) {
+                    button = ControlButton::STEPINTO;
+                }
 
-            if (ImGui::InlineContextButton(IMGUI_ICON_PLAY)) {
-                button = ControlButton::PLAY;
+                if (ImGui::InlineContextButton(IMGUI_ICON_PLAY)) {
+                    button = ControlButton::PLAY;
+                }
+            } else {
+                if (ImGui::InlineContextButton(IMGUI_ICON_PAUSE)) {
+                    button = ControlButton::PAUSE;
+                }
             }
 
             ImGui::PopID();

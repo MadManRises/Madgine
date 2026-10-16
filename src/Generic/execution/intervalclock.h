@@ -115,7 +115,7 @@ namespace Execution {
                             if (state->mClock)
                                 progress = std::chrono::duration_cast<std::chrono::duration<double>>(state->mClock->lastTick().time_since_epoch()).count();
                         }
-                        visitor(Execution::State::Progress { static_cast<float>(progress), true });
+                        visitor(Execution::State::Progress { fmodf(static_cast<float>(progress), 1.0f), true });
                     } else {
                         std::stringstream title;
                         title << "Waiting ";

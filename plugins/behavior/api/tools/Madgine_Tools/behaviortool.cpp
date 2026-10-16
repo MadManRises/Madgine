@@ -11,6 +11,7 @@
 #include "Meta/reflect/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
+#include "Madgine_Tools/debugger/continuationlist.h"
 #include "Madgine_Tools/debugger/debuggerview.h"
 #include "Madgine_Tools/imguiicons.h"
 #include "Madgine_Tools/inspector/inspector.h"
@@ -34,12 +35,15 @@ SERIALIZETABLE_END(Engine::Tools::BehaviorTool)
 namespace Engine {
 namespace Tools {
 
-    std::vector<TypedPtr> visualizeCoroutineLocation(ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const Behavior::CoroutineLocation *location, TypedPtr inlineLocation)
+    std::vector<TypedPtr> visualizeCoroutineLocation(ContinuationList &continuations, DebuggerView &view, const Behavior::CoroutineLocation *location, TypedPtr inlineLocation)
     {
         if (!location)
             return {};
 
         ImGui::BeginGroupPanel(location->mLocation.function_name());
+
+        continuations.flush(ImGui::GetItemRectMin().y, ImGui::GetItemRectMax().y);
+
         std::vector<TypedPtr> content;
 
         if (ImGui::BeginTable("Code", 2, ImGuiTableFlags_SizingFixedFit)) {
@@ -77,9 +81,7 @@ namespace Tools {
 
                 ImGui::Text("%s", line.c_str());
 
-                bool set = context.getBreakpoint(location, baseLine);
-                if (Breakpoint(startY, ImGui::GetCursorScreenPos().y, &set))
-                    context.setBreakpoint(location, baseLine, set);
+                continuations.breakpoint(startY, ImGui::GetCursorScreenPos().y, baseLine, location);
 
                 if (baseLine == lineNr) {
                     DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY));
@@ -88,7 +90,8 @@ namespace Tools {
 
                     if (location->mChild) {
                         if (BeginDebuggablePanel("Sender")) {
-                            content = view.visualizeDebugLocation(continuations, context, location->mChild, inlineLocation);
+                            content = view.visualizeDebugLocation(continuations, location->mChild, inlineLocation);
+                            continuations.flush(ImGui::GetCursorScreenPos().y - 10.0f, ImGui::GetCursorScreenPos().y);
                             EndDebuggablePanel();
                         }
                     }

@@ -20,7 +20,7 @@ SERIALIZETABLE_END(Engine::Tools::Python3Editor)
 namespace Engine {
 namespace Tools {
 
-    std::vector<TypedPtr> visualizeBehaviorDebugLocation(ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const Behavior::Python3::Python3BehaviorState *location, TypedPtr inlineLocation);
+    std::vector<TypedPtr> visualizeBehaviorDebugLocation(ContinuationList &continuations, DebuggerView &view, const Behavior::Python3::Python3BehaviorState *location, TypedPtr inlineLocation);
 
     Python3Editor::Python3Editor(ImRoot &root)
         : Tool<Python3Editor, ResourceEditor>(root)

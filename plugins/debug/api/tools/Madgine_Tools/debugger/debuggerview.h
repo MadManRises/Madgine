@@ -44,15 +44,15 @@ namespace Tools {
         template <auto Visualizer>
         void registerDebugLocationVisualizer()
         {
-            using T = std::remove_reference_t<typename CallableTraits<decltype(Visualizer)>::argument_types::template select<3>>;
-            [[maybe_unused]] auto [it, b] = mDebugLocationVisualizers.try_emplace(typeid(std::remove_pointer_t<T>), [](ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const void *location, TypedPtr inlineLocation) -> std::vector<TypedPtr> {
+            using T = std::remove_reference_t<typename CallableTraits<decltype(Visualizer)>::argument_types::template select<2>>;
+            [[maybe_unused]] auto [it, b] = mDebugLocationVisualizers.try_emplace(typeid(std::remove_pointer_t<T>), [](ContinuationList &continuations, DebuggerView &view, const void *location, TypedPtr inlineLocation) -> std::vector<TypedPtr> {
                 T typedLocation = static_cast<T>(location);
-                return Visualizer(continuations, view, context, typedLocation, inlineLocation);
+                return Visualizer(continuations, view, typedLocation, inlineLocation);
             });
             assert(b);
         }
 
-        std::vector<TypedPtr> visualizeDebugLocation(ContinuationList &continuations, const Debug::ContextInfo &context, TypedPtr location, TypedPtr inlineLocation);
+        std::vector<TypedPtr> visualizeDebugLocation(ContinuationList &continuations, TypedPtr location, TypedPtr inlineLocation);
 
         static ControlButton contextControls(bool running);
 
@@ -61,7 +61,7 @@ namespace Tools {
         Debug::ContextInfo *mSelectedContext = nullptr;
         Debug::DebugLocation *mSelectedLocation = nullptr;
 
-        std::map<std::type_index, std::vector<TypedPtr> (*)(ContinuationList &, DebuggerView &, const Debug::ContextInfo &, const void *, TypedPtr), std::less<>> mDebugLocationVisualizers;
+        std::map<std::type_index, std::vector<TypedPtr> (*)(ContinuationList &, DebuggerView &, const void *, TypedPtr), std::less<>> mDebugLocationVisualizers;
 
         Inspector *mInspector = nullptr;
     };

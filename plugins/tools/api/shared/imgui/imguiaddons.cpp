@@ -343,17 +343,28 @@ bool LED(const char *label, bool *on, const ImVec2 &size)
 bool InlineContextButton(const char *text, bool checked)
 {
     ImGuiContext &g = *GImGui;
+    ImGuiWindow *window = g.CurrentWindow;
+
+    ImVec2 cursorMax = window->DC.CursorMaxPos;
+    ImVec2 pos = window->DC.CursorPos;
 
     static ImGuiID sLastButtonID = 0;
+    bool stacked = g.LastItemData.ID == sLastButtonID;
 
-    if (g.LastItemData.ID == sLastButtonID) {        
-        ImGui::SameLine(0.0f, 0.0f);    
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 2.0f * ImGui::GetTextLineHeight());
+    float h = ImGui::GetTextLineHeight();
+
+    ImGui::SameLine(0.0f, 0.0f);
+
+    float right, y;
+
+    if (stacked) {
+        right = g.LastItemData.Rect.Min.x;
+        y = g.LastItemData.Rect.Min.y;
     } else {
-        ImGui::SameLine(0.0f, 0.0f);
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - ImGui::GetTextLineHeight());
+        right = window->WorkRect.Max.x;
+        y = window->DC.CursorPos.y + window->DC.CurrLineSize.y - h;
     }
-
+    ImGui::SetCursorScreenPos({ ImFloor(right - h), ImFloor(y) });
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
@@ -368,6 +379,9 @@ bool InlineContextButton(const char *text, bool checked)
     ImGui::PopStyleVar(3);
 
     sLastButtonID = g.LastItemData.ID;
+
+    window->DC.CursorMaxPos = cursorMax;
+    window->DC.CursorPos = pos;
 
     return pressed;
 }
@@ -676,6 +690,8 @@ bool BeginPopupContextInteractiveView(ImGuiPopupFlags flags)
 
 void ImGui::BeginGroupPanel(const char *name, const ImVec2 &size, ImU32 backgroundColor)
 {
+    ImGuiWindow *window = ImGui::GetCurrentWindow();
+
     ImGui::BeginGroup();
 
     auto itemSpacing = ImGui::GetStyle().ItemSpacing;
@@ -716,18 +732,13 @@ void ImGui::BeginGroupPanel(const char *name, const ImVec2 &size, ImU32 backgrou
 
     ImGui::PopStyleVar(2);
 
-#if IMGUI_VERSION_NUM >= 17301
-    ImGui::GetCurrentWindow()->ContentRegionRect.Max.x -= frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->WorkRect.Max.x -= frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->InnerRect.Max.x -= frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->ContentRegionRect.Min.x += frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->WorkRect.Min.x += frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->InnerRect.Min.x += frameHeight * 0.5f;
-#else
-    ImGui::GetCurrentWindow()->ContentsRegionRect.Max.x -= frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->ContentsRegionRect.Min.x += frameHeight * 0.5f;
-#endif
-    ImGui::GetCurrentWindow()->Size.x -= frameHeight;
+    window->ContentRegionRect.Max.x -= frameHeight * 0.5f;
+    window->WorkRect.Max.x -= frameHeight * 0.5f;
+    window->InnerRect.Max.x -= frameHeight * 0.5f;
+    window->ContentRegionRect.Min.x += frameHeight * 0.5f;
+    window->WorkRect.Min.x += frameHeight * 0.5f;
+    window->InnerRect.Min.x += frameHeight * 0.5f;
+    window->Size.x -= frameHeight;
 
     auto itemWidth = ImGui::CalcItemWidth();
     ImGui::PushItemWidth(ImMax(0.0f, itemWidth - frameHeight));
@@ -740,6 +751,8 @@ void ImGui::BeginGroupPanel(const char *name, const ImVec2 &size, ImU32 backgrou
 
 void ImGui::EndGroupPanel()
 {
+    ImGuiWindow *window = ImGui::GetCurrentWindow();
+
     ImGui::PopItemWidth();
 
     auto itemSpacing = ImGui::GetStyle().ItemSpacing;
@@ -807,18 +820,13 @@ void ImGui::EndGroupPanel()
 
     ImGui::PopStyleVar(2);
 
-#if IMGUI_VERSION_NUM >= 17301
-    ImGui::GetCurrentWindow()->ContentRegionRect.Max.x += frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->WorkRect.Max.x += frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->InnerRect.Max.x += frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->ContentRegionRect.Min.x -= frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->WorkRect.Min.x -= frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->InnerRect.Min.x -= frameHeight * 0.5f;
-#else
-    ImGui::GetCurrentWindow()->ContentsRegionRect.Max.x += frameHeight * 0.5f;
-    ImGui::GetCurrentWindow()->ContentsRegionRect.Min.x -= frameHeight * 0.5f;
-#endif
-    ImGui::GetCurrentWindow()->Size.x += frameHeight;
+    window->ContentRegionRect.Max.x += frameHeight * 0.5f;
+    window->WorkRect.Max.x += frameHeight * 0.5f;
+    window->InnerRect.Max.x += frameHeight * 0.5f;
+    window->ContentRegionRect.Min.x -= frameHeight * 0.5f;
+    window->WorkRect.Min.x -= frameHeight * 0.5f;
+    window->InnerRect.Min.x -= frameHeight * 0.5f;
+    window->Size.x += frameHeight;
 
     ImGui::Dummy(ImVec2(0.0f, 0.0f));
 
@@ -1061,6 +1069,46 @@ bool WasMouseDragPastThreshold(ImGuiMouseButton button, float lock_threshold)
     if (lock_threshold < 0.0f)
         lock_threshold = g.IO.MouseDragThreshold;
     return MouseDragMaxDistanceSqr >= lock_threshold * lock_threshold;
+}
+
+struct RectState {
+    float mSavedWorkMaxX;
+    float mSavedContentMaxX;
+    bool mActive = false;
+};
+static RectState sRectState;
+
+void BeginRect()
+{
+    ImGuiWindow *window = ImGui::GetCurrentWindow();
+    IM_ASSERT(!sRectState.mActive && "BeginRect() can't be nested");
+    IM_ASSERT(ImGuiInternal::GetCurrentLayoutType(window->ID) == ImGuiLayoutType_Vertical && "BeginRect() can only be used in vertical layout");
+
+    ImGui::Spring(0.0f, 0.01f);
+    bool sized = ImGui::GetItemRectMax().x > ImGui::GetItemRectMin().x;
+
+    ImGui::BeginGroup();
+
+    sRectState = { window->WorkRect.Max.x, window->ContentRegionRect.Max.x, true };
+
+    float rightEdge = sized ? ImGui::GetItemRectMax().x : ImGui::GetItemRectMin().x + 1.0f;
+    window->WorkRect.Max.x = rightEdge;
+    window->ContentRegionRect.Max.x = rightEdge;
+
+    ImGui::SuspendLayout();
+}
+
+void EndRect()
+{
+    ImGuiWindow *window = ImGui::GetCurrentWindow();
+    IM_ASSERT(sRectState.mActive);
+
+    ImGui::ResumeLayout();
+    ImGui::EndGroup();
+
+    window->WorkRect.Max.x = sRectState.mSavedWorkMaxX;
+    window->ContentRegionRect.Max.x = sRectState.mSavedContentMaxX;
+    sRectState.mActive = false;
 }
 
 }

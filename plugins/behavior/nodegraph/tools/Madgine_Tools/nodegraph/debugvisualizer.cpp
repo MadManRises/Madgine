@@ -20,7 +20,7 @@
 namespace Engine {
 namespace Tools {
 
-    std::vector<TypedPtr> visualizeDebugLocation(ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const Behavior::NodeGraph::NodeDebugLocation *location, TypedPtr inlineLocation)
+    std::vector<TypedPtr> visualizeDebugLocation(ContinuationList &continuations, DebuggerView &view, const Behavior::NodeGraph::NodeDebugLocation *location, TypedPtr inlineLocation)
     {
         if (!location)
             return {};
@@ -76,14 +76,18 @@ namespace Tools {
                         BeginNode(childLocation->mNode, nodeId);
 
                         if (childLocation->mChild) {
-                            ImGui::BeginVertical("child");
+                            ImGui::BeginRect();
+
                             if (BeginDebuggablePanel("Node")) {
                                 ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + 300.0f);
-                                std::ranges::move(view.visualizeDebugLocation(continuations, context, childLocation->mChild, location), std::back_inserter(newChildren));
+                                std::ranges::move(view.visualizeDebugLocation(continuations, childLocation->mChild, location), std::back_inserter(newChildren));
                                 ImGui::PopTextWrapPos();
                                 EndDebuggablePanel();
                             }
-                            ImGui::EndVertical();
+
+                            continuations.controls(location->mContinuation, []() { /*nothing to do yet*/ });
+
+                            ImGui::EndRect();
                         }
 
                         EndNode();
@@ -112,9 +116,6 @@ namespace Tools {
                     ++handledIndex;
                 } else {
                     BeginNode(node, nodeId);
-
-                    if (location->mNode == node)
-                        continuations.controls(location->mContinuation, []() { /*nothing to do yet*/ });
 
                     EndNode();
                 }
@@ -157,7 +158,7 @@ namespace Tools {
         }
 
         for (const TypedPtr &child : children)
-            view.visualizeDebugLocation(continuations, context, child, {});
+            view.visualizeDebugLocation(continuations, child, {});
 
         return {};
     }

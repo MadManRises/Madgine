@@ -16,7 +16,7 @@
 namespace Engine {
 namespace Tools {
 
-    std::vector<TypedPtr> visualizeBehaviorDebugLocation(ContinuationList &continuations, DebuggerView &view, const Debug::ContextInfo &context, const Behavior::Python3::Python3BehaviorState *location, TypedPtr inlineLocation)
+    std::vector<TypedPtr> visualizeBehaviorDebugLocation(ContinuationList &continuations, DebuggerView &view, const Behavior::Python3::Python3BehaviorState *location, TypedPtr inlineLocation)
     {
         if (!location)
             return {};
@@ -28,6 +28,8 @@ namespace Tools {
         Behavior::Python3::PyObjectPtr coro = location->mCoroutine;
 
         ImGui::BeginGroupPanel(PyUnicode_AsUTF8(coro.get("__name__")));
+
+        continuations.flush(ImGui::GetItemRectMin().y, ImGui::GetItemRectMax().y);
 
         if (ImGui::BeginTable("Code", 2, ImGuiTableFlags_SizingFixedFit)) {
 
@@ -54,9 +56,7 @@ namespace Tools {
 
                 ImGui::Text("%s", PyUnicode_AsUTF8(line));
 
-                bool set = context.getBreakpoint(frame, baseLine);
-                if (Breakpoint(startY, ImGui::GetCursorScreenPos().y, &set))
-                    context.setBreakpoint(frame, baseLine, set);
+                continuations.breakpoint(startY, ImGui::GetCursorScreenPos().y, baseLine, location);
 
                 if (baseLine == lineNr) {
                     DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY));
@@ -69,7 +69,8 @@ namespace Tools {
                         Behavior::Python3::PyStateBase &state = reinterpret_cast<Behavior::Python3::PyStateHelper *>(static_cast<PyObject *>(next))->mState;
                         if (state.mChild) {
                             if (BeginDebuggablePanel("Sender")) {
-                                std::ranges::move(view.visualizeDebugLocation(continuations, context, state.mChild, location), std::back_inserter(children));
+                                std::ranges::move(view.visualizeDebugLocation(continuations, state.mChild, location), std::back_inserter(children));
+                                continuations.flush(ImGui::GetCursorScreenPos().y - 10.0f, ImGui::GetCursorScreenPos().y);
                                 EndDebuggablePanel();
                             }
                         }
@@ -77,7 +78,8 @@ namespace Tools {
                         continuations.controls(location->mContinuation, []() { /*nothing to do yet*/ });
                     } else if (!Py_IsNone(next)) {
                         if (BeginDebuggablePanel("Frame")) {
-                            std::ranges::move(view.visualizeDebugLocation(continuations, context, static_cast<PyObject *>(next), location), std::back_inserter(children));
+                            std::ranges::move(view.visualizeDebugLocation(continuations, static_cast<PyObject *>(next), location), std::back_inserter(children));
+                            continuations.flush(ImGui::GetCursorScreenPos().y - 10.0f, ImGui::GetCursorScreenPos().y);
                             EndDebuggablePanel();
                         }
                     }

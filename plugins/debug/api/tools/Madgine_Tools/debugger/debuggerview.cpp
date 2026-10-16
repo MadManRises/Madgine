@@ -59,45 +59,34 @@ namespace Tools {
         co_await ToolBase::finalize();
     }
 
-    std::vector<TypedPtr> DebuggerView::visualizeDebugLocation(ContinuationList &continuations, const Debug::ContextInfo &context, TypedPtr location, TypedPtr inlineLocation)
+    std::vector<TypedPtr> DebuggerView::visualizeDebugLocation(ContinuationList &continuations, TypedPtr location, TypedPtr inlineLocation)
     {
         if (const Debug::SenderLocation *senderLocation = location.as<const Debug::SenderLocation>()) {
             std::vector<TypedPtr> subLocations;
 
-            IndexType<size_t> breakpoint;
-            bool isMarker = false;
-            Debug::Continuation *continuation = nullptr;
-            IndexType<size_t> *lineFeedback = nullptr;
-            Closure<void()> stopCallback;
             size_t breakpointIndex = 0;
             bool lastWasText = false;
 
             auto visitor = [&, senderLocation, inlineLocation](auto &&val) {
                 float startY = ImGui::GetCursorScreenPos().y;
 
-                bool actualContent = false;
-
                 overloaded {
                     [&](const Execution::State::Text &text) {
                         ImGui::TextWrapped("%s", text.mText.c_str());
-                        actualContent = true;
                     },
                     [&](const Execution::State::Progress &progress) {
                         if (progress.mInfinite)
                             ImGui::SpinnerEx(progress.mRatio, "Test", 5.0f, 0.1f, ImGui::GetColorU32(ImGuiCol_PlotHistogram));
                         else
                             ImGui::ProgressBar(progress.mRatio, ImVec2 { 100.0f, 10.0f }, "");
-                        actualContent = true;
                     },
                     [&](const Execution::State::BeginBlock &begin) {
-                        ImGui::BeginGroupPanel(begin.mName.data(), {}, begin.mCompleted ? IM_COL32(20, 255, 20, 15) : 0);
-                        actualContent = true;
+                        ImGui::BeginGroupPanel(begin.mName.data(), {-1, -1}, begin.mCompleted ? IM_COL32(20, 255, 20, 15) : 0);
                     },
                     [&](const Execution::State::EndBlock &end) {
                         if (lastWasText)
                             ImGui::Dummy({ 0.0f, ImGui::GetStyle().ItemSpacing.y });
                         ImGui::EndGroupPanel();
-                        actualContent = true;
                     },
                     [](const Execution::State::PushDisabled &) {
                         ImGui::BeginDisabled();
@@ -106,8 +95,7 @@ namespace Tools {
                         ImGui::EndDisabled();
                     },
                     [&, inlineLocation](const Execution::State::DebugLocation &subLoc) {
-                        std::ranges::move(visualizeDebugLocation(continuations, context, subLoc.mLocation, inlineLocation), std::back_inserter(subLocations));
-                        actualContent = true;
+                        std::ranges::move(visualizeDebugLocation(continuations, subLoc.mLocation, inlineLocation), std::back_inserter(subLocations));
                     },
                     [&](const Execution::State::Breakpoint &bp) {
                         if (bp.mContinuation && *bp.mContinuation) {
@@ -138,16 +126,12 @@ namespace Tools {
                                 if (type != Debug::ContinuationType::Flow && type != Debug::ContinuationType::Cancelling) {
                                     ImGui::PopStyleColor(1);
                                 }
-                                actualContent = true;
                             }
                         }
-                        lineFeedback = bp.mLineFeedback;
-                        breakpoint = breakpointIndex++;
-                        continuation = bp.mContinuation;
-                        stopCallback = bp.mStopCallback();
+                        continuations.lazyBreakpoint(bp, breakpointIndex++, location);
                     },
                     [&](const Execution::State::Marker &m) {
-                        isMarker = true;
+                        continuations.marker();
                     },
                     [](const Execution::State::FunctionPtr &f) {
                         const char *name = "function";
@@ -176,56 +160,18 @@ namespace Tools {
                     }
                 }(std::forward<decltype(val)>(val));
 
-                if (actualContent) {
+                if (startY != ImGui::GetCursorScreenPos().y) {
                     lastWasText = std::same_as<std::decay_t<decltype(val)>, Execution::State::Text>;
-                    if (breakpoint) {
-                        if (lineFeedback) {
-                            assert(!*lineFeedback || *lineFeedback == breakpoint);
-                            *lineFeedback = breakpoint;
-                        }
-                        bool set = context.getBreakpoint(senderLocation, breakpoint);
-                        if (Breakpoint(startY, ImGui::GetCursorScreenPos().y, &set))
-                            context.setBreakpoint(senderLocation, breakpoint, set);
-                        breakpoint.reset();
-                        if (continuation) {
-                            if (*continuation)
-                                DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY));
-
-                            continuations.controls(*continuation, std::move(stopCallback));
-                            continuation = nullptr;
-                            stopCallback = {};
-                        }
-                    }
-                    if (isMarker) {
-                        isMarker = false;
-                        DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY));
-                    }
+                    continuations.flush(startY, ImGui::GetCursorScreenPos().y);
                 }
             };
             senderLocation->visit(visitor);
-
-            if (breakpoint) {
-                if (lineFeedback) {
-                    assert(!*lineFeedback || *lineFeedback == breakpoint);
-                    *lineFeedback = breakpoint;
-                }
-                bool set = context.getBreakpoint(senderLocation, breakpoint);
-                if (Breakpoint(ImGui::GetCursorScreenPos().y - 10.0f, ImGui::GetCursorScreenPos().y, &set))
-                    context.setBreakpoint(senderLocation, breakpoint, set);
-
-                if (continuation) {
-                    if (*continuation)
-                        DrawDebugMarker(ImGui::GetCursorScreenPos().y - 5.0f);
-
-                    continuations.controls(*continuation, std::move(stopCallback));
-                }
-            }
 
             return subLocations;
         } else {
             auto it = mDebugLocationVisualizers.find(location.type());
             if (it != mDebugLocationVisualizers.end()) {
-                return it->second(continuations, *this, context, location.ptr(), inlineLocation);
+                return it->second(continuations, *this, location.ptr(), inlineLocation);
             }
             ImGui::TextWrapped("Unknown [%s]", location.type().name());
             return {};
@@ -338,13 +284,14 @@ namespace Tools {
     void DebuggerView::renderDebugContext(const Debug::ContextInfo &context)
     {
         ControlButton control = contextControls(!context.isPaused());
-        ContinuationList continuations { control };
+        ContinuationList continuations { context, control };
 
         std::unique_lock guard { context.mMutex };
         if (context.mChild) {
             if (BeginDebuggablePanel("Debug Context")) {
-                [[maybe_unused]] std::vector<TypedPtr> children = visualizeDebugLocation(continuations, context, context.mChild, {});
+                [[maybe_unused]] std::vector<TypedPtr> children = visualizeDebugLocation(continuations, context.mChild, {});
                 assert(children.empty()); // Parents that allow inline rendering need to take care of child rendering.
+                continuations.flush(ImGui::GetCursorScreenPos().y - 10.0f, ImGui::GetCursorScreenPos().y);
                 EndDebuggablePanel();
             }
         }

@@ -34,7 +34,10 @@ IMGUI_API void RightAlignBytes(size_t bytes);
 IMGUI_API void RightAlignText(const char *s, ...);
 IMGUI_API void RightAlign(float size);
 
-IMGUI_API void BeginGroupPanel(const char *name = "", const ImVec2 &size = ImVec2(0.0f, 0.0f), ImU32 backgroundColor = 0);
+IMGUI_API void BeginRect();
+IMGUI_API void EndRect();
+
+IMGUI_API void BeginGroupPanel(const char *name = "", const ImVec2 &size = ImVec2(-1.0f, -1.0f), ImU32 backgroundColor = 0);
 IMGUI_API void EndGroupPanel();
 
 IMGUI_API bool BeginPopupCompoundContextItem(const char *str_id = nullptr);

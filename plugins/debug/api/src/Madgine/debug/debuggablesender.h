@@ -254,15 +254,19 @@ namespace Execution {
 
             friend auto tag_invoke(visit_state_t, state *state, auto &&visitor)
             {
+                bool pausedAtStart = state && state->mPausedAtStart;
+
                 visitor(Execution::State::Breakpoint {
                     &sStartBreakpoint,
                     state ? &state->mContinuation : nullptr,
-                    [state]() { return Closure<void()> { [state]() { state->mState.stop(); } }; } });
+                    [state]() { return Closure<void()> { [state]() { state->mState.stop(); } }; },
+                    pausedAtStart });
                 visit_state(state ? &state->mState : nullptr, std::forward<decltype(visitor)>(visitor));
                 visitor(Execution::State::Breakpoint {
                     &sEndBreakpoint,
                     state ? &state->mContinuation : nullptr,
-                    [state]() { return Closure<void()> { [state]() { state->mState.stop(); } }; } });
+                    [state]() { return Closure<void()> { [state]() { state->mState.stop(); } }; },
+                    !pausedAtStart });
             }
 
             Rec mRec;
