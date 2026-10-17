@@ -1,0 +1,14 @@
+.. meta::0eceafc08f351d39ec772c81a50049d55db1c985508802d7b160965b7746938f8b5b39b0b320044a9d6f5958353942b8491d737d328d8e1029512111d885055b
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Engine::Behavior::Behavior::rec_helper&lt; Rec &gt; Struct Template Reference
+
+rec\_helper&lt; Rec &gt; Struct Template Reference
+==================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_behavior_1_1_behavior_1_1rec__helper.html

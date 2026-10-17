@@ -1,0 +1,14 @@
+.. meta::2268c267b2a9c933d42178929bf6687112717c52ee609c8bd3a9189a642d16670ca830860473f139e70017622de793a49213a8e7fe0cacde1609d100fc8af62c
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Engine::Debug::get_debug_child_location_t Struct Reference
+
+get\_debug\_child\_location\_t Struct Reference
+===============================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_debug_1_1get__debug__child__location__t.html

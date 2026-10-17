@@ -249,8 +249,8 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="struct_engine_1_1_behavior_1_1_behavior_state_base-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Engine::Behavior::BehaviorStateBase Struct Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
@@ -264,60 +264,22 @@ Inheritance diagram for Engine::Behavior::BehaviorStateBase:</div>
 </div>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:a6507ab59f1c85df9a73d6973cd5e18cb"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a6507ab59f1c85df9a73d6973cd5e18cb">CB</a> = typename Execution::StateTypes::prepend&lt; <a class="el" href="struct_engine_1_1_execution_1_1_state_1_1_value.html">Execution::State::Value</a> &gt;::template transform&lt; <a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a7359a6feb553dd1115103922f123126e">helper</a> &gt;::template instantiate&lt; <a class="el" href="struct_engine_1_1_callable_view.html">CallableView</a> &gt;</td></tr>
-<tr class="separator:a6507ab59f1c85df9a73d6973cd5e18cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7359a6feb553dd1115103922f123126e"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a7359a6feb553dd1115103922f123126e"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a7359a6feb553dd1115103922f123126e">helper</a> = <a class="el" href="classvoid.html">void</a>(const T &amp;)</td></tr>
-<tr class="separator:a7359a6feb553dd1115103922f123126e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ade5a7385b24e4eedcaa7bb7804716004"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#ade5a7385b24e4eedcaa7bb7804716004">~BehaviorStateBase</a> ()=default</td></tr>
 <tr class="separator:ade5a7385b24e4eedcaa7bb7804716004"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedf52dc51590752adabd048dccc7266f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#aedf52dc51590752adabd048dccc7266f">connect</a> (<a class="el" href="struct_engine_1_1_behavior_1_1_behavior_receiver.html">BehaviorReceiver</a> &amp;rec)=0</td></tr>
-<tr class="separator:aedf52dc51590752adabd048dccc7266f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad86868c7c873fc5ee0917d33931de510"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#ad86868c7c873fc5ee0917d33931de510">destroy</a> ()</td></tr>
 <tr class="separator:ad86868c7c873fc5ee0917d33931de510"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8b885d13e1035e7ab076918f7291967"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#ae8b885d13e1035e7ab076918f7291967">start</a> ()=0</td></tr>
 <tr class="separator:ae8b885d13e1035e7ab076918f7291967"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5744a47d8b2b0f9c28dd67adcf557f5"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#af5744a47d8b2b0f9c28dd67adcf557f5">stop</a> ()=0</td></tr>
 <tr class="separator:af5744a47d8b2b0f9c28dd67adcf557f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae85b5051eda0a6bbb36dbff43fc897e0"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#ae85b5051eda0a6bbb36dbff43fc897e0">visitState</a> (<a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a6507ab59f1c85df9a73d6973cd5e18cb">CB</a> visitor)=0</td></tr>
-<tr class="separator:ae85b5051eda0a6bbb36dbff43fc897e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a3ad88fb2dad689cc2217edeecfbdbfe8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_execution_1_1deferred__receiver.html">Execution::deferred_receiver</a>&lt; <a class="el" href="struct_engine_1_1_behavior_1_1_behavior_receiver.html">BehaviorReceiver</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a3ad88fb2dad689cc2217edeecfbdbfe8">mReceiver</a></td></tr>
+<tr class="separator:a3ad88fb2dad689cc2217edeecfbdbfe8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Typedef Documentation</h2>
-<a id="a7359a6feb553dd1115103922f123126e" name="a7359a6feb553dd1115103922f123126e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7359a6feb553dd1115103922f123126e">&#9670;&#160;</a></span>helper</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a7359a6feb553dd1115103922f123126e">Engine::Behavior::BehaviorStateBase::helper</a> =  <a class="el" href="classvoid.html">void</a>(const T &amp;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a6507ab59f1c85df9a73d6973cd5e18cb" name="a6507ab59f1c85df9a73d6973cd5e18cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6507ab59f1c85df9a73d6973cd5e18cb">&#9670;&#160;</a></span>CB</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a6507ab59f1c85df9a73d6973cd5e18cb">Engine::Behavior::BehaviorStateBase::CB</a> =  typename Execution::StateTypes::prepend&lt;<a class="el" href="struct_engine_1_1_execution_1_1_state_1_1_value.html">Execution::State::Value</a>&gt;::template transform&lt;<a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a7359a6feb553dd1115103922f123126e">helper</a>&gt;::template instantiate&lt;<a class="el" href="struct_engine_1_1_callable_view.html">CallableView</a>&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ade5a7385b24e4eedcaa7bb7804716004" name="ade5a7385b24e4eedcaa7bb7804716004"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ade5a7385b24e4eedcaa7bb7804716004">&#9670;&#160;</a></span>~BehaviorStateBase()</h2>
@@ -345,34 +307,6 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aedf52dc51590752adabd048dccc7266f" name="aedf52dc51590752adabd048dccc7266f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aedf52dc51590752adabd048dccc7266f">&#9670;&#160;</a></span>connect()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classvoid.html">void</a> Engine::Behavior::BehaviorStateBase::connect </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_receiver.html">BehaviorReceiver</a> &amp;&#160;</td>
-          <td class="paramname"><em>rec</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="struct_engine_1_1_behavior_1_1_sender_behavior_state.html#a1e7ab613fe6c2caea43c64e7f8028ab1">Engine::Behavior::SenderBehaviorState&lt; Sender &gt;</a>, and <a class="el" href="struct_engine_1_1_behavior_1_1_coroutine_behavior_state.html#ac63a525c19d291befe4064a56b4e3270">Engine::Behavior::CoroutineBehaviorState</a>.</p>
-
-</div>
-</div>
 <a id="ae8b885d13e1035e7ab076918f7291967" name="ae8b885d13e1035e7ab076918f7291967"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae8b885d13e1035e7ab076918f7291967">&#9670;&#160;</a></span>start()</h2>
 
@@ -454,31 +388,18 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ae85b5051eda0a6bbb36dbff43fc897e0" name="ae85b5051eda0a6bbb36dbff43fc897e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae85b5051eda0a6bbb36dbff43fc897e0">&#9670;&#160;</a></span>visitState()</h2>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a3ad88fb2dad689cc2217edeecfbdbfe8" name="a3ad88fb2dad689cc2217edeecfbdbfe8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ad88fb2dad689cc2217edeecfbdbfe8">&#9670;&#160;</a></span>mReceiver</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="classvoid.html">void</a> Engine::Behavior::BehaviorStateBase::visitState </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior_state_base.html#a6507ab59f1c85df9a73d6973cd5e18cb">CB</a>&#160;</td>
-          <td class="paramname"><em>visitor</em></td><td>)</td>
-          <td></td>
+          <td class="memname"><a class="el" href="struct_engine_1_1_execution_1_1deferred__receiver.html">Execution::deferred_receiver</a>&lt;<a class="el" href="struct_engine_1_1_behavior_1_1_behavior_receiver.html">BehaviorReceiver</a>&gt; Engine::Behavior::BehaviorStateBase::mReceiver</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="struct_engine_1_1_behavior_1_1_sender_behavior_state.html#ab427a2e3b722cad761ab89346a92321f">Engine::Behavior::SenderBehaviorState&lt; Sender &gt;</a>, and <a class="el" href="struct_engine_1_1_behavior_1_1_coroutine_behavior_state.html#afd04c9c19bebafe4dabc6196f72958bf">Engine::Behavior::CoroutineBehaviorState</a>.</p>
 
 </div>
 </div>
@@ -488,7 +409,7 @@ template&lt;typename T &gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Oct 16 2026 15:47:19 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Sat Oct 17 2026 16:52:40 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

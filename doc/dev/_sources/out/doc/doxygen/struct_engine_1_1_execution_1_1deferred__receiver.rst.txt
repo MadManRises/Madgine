@@ -1,0 +1,14 @@
+.. meta::deccdcada8260346668c56b59adb1bc665439750942935638fa8bf745fdaf09e812e7cc83f22f672032e4da0dfd5fa80fd93b78d53a7e2485901a68d5d008557
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Engine::Execution::deferred_receiver&lt; Rec &gt; Struct Template Reference
+
+deferred\_receiver&lt; Rec &gt; Struct Template Reference
+=========================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_execution_1_1deferred__receiver.html

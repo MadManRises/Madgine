@@ -251,6 +251,7 @@ $(function() {
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="struct_engine_1_1_debug_1_1_context_info-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Engine::Debug::ContextInfo Struct Reference<span class="mlabels"><span class="mlabel">final</span></span></div></div>
 </div><!--header-->
@@ -268,6 +269,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7f162460777e9fb161a233eea7febef8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a401355fec290500b2514ae5014cd0c85"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#a401355fec290500b2514ae5014cd0c85">setBreakpoint</a> (const <a class="el" href="classvoid.html">void</a> *location, size_t index, bool set) const</td></tr>
 <tr class="separator:a401355fec290500b2514ae5014cd0c85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab04dd5e4831a85b1b2871841b909669b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#ab04dd5e4831a85b1b2871841b909669b">stepInto</a> (<a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> &amp;parent, <a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> location)</td></tr>
+<tr class="separator:ab04dd5e4831a85b1b2871841b909669b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b8e9095e20797db5418c35fa5cf9a26"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#a6b8e9095e20797db5418c35fa5cf9a26">stepOut</a> (<a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> &amp;parent, <a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> location)</td></tr>
+<tr class="separator:a6b8e9095e20797db5418c35fa5cf9a26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d78829daee09ec998faf47b5e1ea270"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#a5d78829daee09ec998faf47b5e1ea270">suspend</a> (<a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> location, <a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1">ContinuationType</a> type)</td></tr>
 <tr class="separator:a5d78829daee09ec998faf47b5e1ea270"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab54942ef4e43fce43e78d5b798a061ee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#ab54942ef4e43fce43e78d5b798a061ee">wantsPause</a> (<a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> location, <a class="el" href="namespace_engine_1_1_debug.html#a67581ff14ecb24a87badb4fe4b01b6c1">ContinuationType</a> type, <a class="el" href="struct_engine_1_1_index_type.html">IndexType</a>&lt; size_t &gt; line)</td></tr>
@@ -275,10 +280,15 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a4ed2f752dc63c73089b5a827bb2c277d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_debug_1_1_sender_location.html">Debug::SenderLocation</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#a4ed2f752dc63c73089b5a827bb2c277d">mChild</a> = nullptr</td></tr>
-<tr class="separator:a4ed2f752dc63c73089b5a827bb2c277d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab162b305b3220f64d811a89ec2914ea9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#ab162b305b3220f64d811a89ec2914ea9">mChild</a></td></tr>
+<tr class="separator:ab162b305b3220f64d811a89ec2914ea9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaee7421ad832e949972ae393300b624e"><td class="memItemLeft" align="right" valign="top">std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#aaee7421ad832e949972ae393300b624e">mMutex</a></td></tr>
 <tr class="separator:aaee7421ad832e949972ae393300b624e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:abdfb4530ce1cb17f61fb22c9774d3374"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html#abdfb4530ce1cb17f61fb22c9774d3374">tag_invoke</a> (<a class="el" href="struct_engine_1_1_debug_1_1get__debug__child__location__t.html">get_debug_child_location_t</a>, <a class="el" href="struct_engine_1_1_debug_1_1_context_info.html">ContextInfo</a> &amp;info)</td></tr>
+<tr class="separator:abdfb4530ce1cb17f61fb22c9774d3374"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="ab54942ef4e43fce43e78d5b798a061ee" name="ab54942ef4e43fce43e78d5b798a061ee"></a>
@@ -439,6 +449,99 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ab04dd5e4831a85b1b2871841b909669b" name="ab04dd5e4831a85b1b2871841b909669b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab04dd5e4831a85b1b2871841b909669b">&#9670;&#160;</a></span>stepInto()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Debug::ContextInfo::stepInto </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> &amp;&#160;</td>
+          <td class="paramname"><em>parent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a>&#160;</td>
+          <td class="paramname"><em>location</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6b8e9095e20797db5418c35fa5cf9a26" name="a6b8e9095e20797db5418c35fa5cf9a26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b8e9095e20797db5418c35fa5cf9a26">&#9670;&#160;</a></span>stepOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Debug::ContextInfo::stepOut </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> &amp;&#160;</td>
+          <td class="paramname"><em>parent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a>&#160;</td>
+          <td class="paramname"><em>location</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Friends And Related Function Documentation</h2>
+<a id="abdfb4530ce1cb17f61fb22c9774d3374" name="abdfb4530ce1cb17f61fb22c9774d3374"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdfb4530ce1cb17f61fb22c9774d3374">&#9670;&#160;</a></span>tag_invoke</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> &amp; tag_invoke </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_debug_1_1get__debug__child__location__t.html">get_debug_child_location_t</a>&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_debug_1_1_context_info.html">ContextInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>info</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="aaee7421ad832e949972ae393300b624e" name="aaee7421ad832e949972ae393300b624e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaee7421ad832e949972ae393300b624e">&#9670;&#160;</a></span>mMutex</h2>
@@ -462,14 +565,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a4ed2f752dc63c73089b5a827bb2c277d" name="a4ed2f752dc63c73089b5a827bb2c277d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ed2f752dc63c73089b5a827bb2c277d">&#9670;&#160;</a></span>mChild</h2>
+<a id="ab162b305b3220f64d811a89ec2914ea9" name="ab162b305b3220f64d811a89ec2914ea9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab162b305b3220f64d811a89ec2914ea9">&#9670;&#160;</a></span>mChild</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="struct_engine_1_1_debug_1_1_sender_location.html">Debug::SenderLocation</a>* Engine::Debug::ContextInfo::mChild = nullptr</td>
+          <td class="memname"><a class="el" href="struct_engine_1_1_typed_ptr.html">TypedPtr</a> Engine::Debug::ContextInfo::mChild</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -483,7 +586,7 @@ Public Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Oct 16 2026 15:47:20 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Sat Oct 17 2026 16:52:41 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>
