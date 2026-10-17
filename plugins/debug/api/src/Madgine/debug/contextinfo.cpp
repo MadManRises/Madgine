@@ -62,5 +62,19 @@ namespace Debug {
         return it->second.mBreakpoints.size() > index && it->second.mBreakpoints[index];
     }
 
+    void ContextInfo::stepInto(TypedPtr &parent, TypedPtr location)
+    {
+        std::unique_lock lock { mMutex };
+        assert(!parent);
+        parent = location;
+    }
+
+    void ContextInfo::stepOut(TypedPtr &parent, TypedPtr location)
+    {
+        std::unique_lock lock { mMutex };
+        assert(parent == location);
+        parent = nullptr;
+    }
+
 }
 }

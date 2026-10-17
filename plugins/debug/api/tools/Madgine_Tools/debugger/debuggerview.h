@@ -16,6 +16,7 @@ namespace Tools {
     MADGINE_DEBUGGER_TOOLS_EXPORT void EndDebuggablePanel();
     MADGINE_DEBUGGER_TOOLS_EXPORT void DrawDebugMarker(float y);
     MADGINE_DEBUGGER_TOOLS_EXPORT bool Breakpoint(float startY, float endY, bool *set);
+    MADGINE_DEBUGGER_TOOLS_EXPORT void ErrorMarker(float startY, float endY);
 
 
     struct MADGINE_DEBUGGER_TOOLS_EXPORT DebuggerView : Tool<DebuggerView>, Debug::DebugListener {

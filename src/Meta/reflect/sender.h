@@ -19,7 +19,6 @@ namespace Reflect {
     };
 
     struct SenderStateBase {
-        virtual void connect(Receiver &receiver) = 0;
         virtual void start() = 0;
         virtual void stop() = 0;
 
@@ -27,40 +26,36 @@ namespace Reflect {
         using helper = void(const T &);
         using CB = typename Execution::StateTypes::template transform<helper>::template instantiate<CallableView>;
         virtual void visitState(CB visitor) = 0;
+
+        Execution::deferred_receiver<Receiver> mReceiver;
     };
 
     template <typename Sender>
     struct SenderState : SenderStateBase {
 
-        using State = Execution::connect_result_t<Sender, Receiver &>;
+        using State = Execution::connect_result_t<Sender, Execution::deferred_receiver<Receiver>&>;
 
         SenderState(Sender &&sender)
-            : mState(std::forward<Sender>(sender))
+            : mState(Execution::connect(std::forward<Sender>(sender), mReceiver))
         {
-        }
-
-        void connect(Receiver &receiver) override
-        {
-            mState.template emplace<State>(DelayedConstruct {
-                [&, sender { std::move(std::get<forward_ref_t<Sender>>(mState)) }]() mutable { return Execution::connect(std::forward<Sender>(sender), receiver); } });
         }
 
         void start() override
         {
-            std::get<State>(mState).start();
+            mState.start();
         }
 
         void stop() override
         {
-            std::get<State>(mState).stop();
+            mState.stop();
         }
 
         void visitState(SenderStateBase::CB visitor) override
         {
-            Execution::visit_state(&std::get<State>(mState), visitor);
+            Execution::visit_state(&mState, visitor);
         }
 
-        std::variant<forward_ref_t<Sender>, State> mState;
+        State mState;        
     };
 
     struct Sender {
@@ -72,7 +67,7 @@ namespace Reflect {
 
         template <Execution::AnySender Inner>
             requires Concepts::DecayedNoneOf<Inner, Sender>
-        Sender(Inner &&sender)
+        explicit Sender(Inner &&sender)
             : mState(std::make_shared<SenderState<Inner>>(std::forward<Inner>(sender)))
         {
         }
@@ -90,7 +85,7 @@ namespace Reflect {
                 : Execution::VirtualState<Receiver, Rec>(std::forward<Rec>(rec))
                 , mState(std::move(state))
             {
-                mState->connect(*this);
+                mState->mReceiver.set(*this);
             }
 
             void start()
@@ -115,7 +110,7 @@ namespace Reflect {
             std::shared_ptr<SenderStateBase> mState;
         };
 
-        template <typename Rec>
+        template <typename Rec, Concepts::DecayedOneOf<Sender> Sender>
         friend auto tag_invoke(Execution::connect_t, const Sender &sender, Rec &&rec)
         {
             return state<Rec> { std::forward<Rec>(rec), sender.mState };

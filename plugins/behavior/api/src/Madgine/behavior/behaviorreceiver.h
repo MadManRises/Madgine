@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Behavior {
 
-    struct MADGINE_BEHAVIOR_EXPORT BehaviorReceiver : Execution::VirtualReceiverBaseEx<type_pack<Reflect::Error>, type_pack<Reflect::ArgumentList>, Execution::get_stop_token, Debug::get_debug_context, Platform::Log::get_log, Reflect::get_reflect_contextual, Debug::get_continuation> {
+    struct MADGINE_BEHAVIOR_EXPORT BehaviorReceiver : Execution::VirtualReceiverBaseEx<type_pack<Reflect::Error>, type_pack<Reflect::ArgumentList>, Execution::get_stop_token, Debug::get_debug_context, Debug::get_debug_child_location, Platform::Log::get_log, Reflect::get_reflect_contextual, Debug::get_continuation> {
         template <typename... Args>
         void set_value(Args &&...args)
         {

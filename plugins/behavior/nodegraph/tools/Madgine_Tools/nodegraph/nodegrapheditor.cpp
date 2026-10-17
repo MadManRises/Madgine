@@ -92,7 +92,7 @@ namespace Tools {
                         Execution::detach(
                             Behavior::Behavior { mGraph.interpret({}) }
                             | Execution::then([](Reflect::ArgumentList) { LOG("SUCCESS"); })
-                            | Execution::with_debug_location(context.mChild)
+                            | Execution::with_debug_location()
                             | Debug::with_debug_context(context)
                             | Platform::Log::log_result());
                     }

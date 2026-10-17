@@ -12,20 +12,6 @@ namespace Debug {
     {
     }
 
-    void SenderLocation::stepInto(Debug::SenderLocation *&location, ContextInfo &context)
-    {
-        std::unique_lock lock { context.mMutex };
-        assert(!location);
-        location = this;
-    }
-
-    void SenderLocation::stepOut(Debug::SenderLocation *&location, ContextInfo &context)
-    {
-        std::unique_lock lock { context.mMutex };
-        assert(location == this);
-        location = nullptr;
-    }
-
     void SenderLocation::visit(CB visitor) const
     {
         mState(std::move(visitor));

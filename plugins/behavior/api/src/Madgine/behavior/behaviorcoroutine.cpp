@@ -12,22 +12,19 @@ namespace Behavior {
         return Behavior::StatePtr { this };
     }
 
-    void CoroutineBehaviorState::connect(BehaviorReceiver &rec)
-    {
-        mReceiver = &rec;
-    }
-
     void CoroutineBehaviorState::start()
     {
         if (mResolveNames) {
-            Reflect::Result result = mResolveNames(*mReceiver);
+            Reflect::Result result = mResolveNames(*mReceiver.mReceiver);
             if (result) {
-                mDebugLocation.mContinuation.returnError(&mDebugLocation, *mReceiver, {}, std::move(*result.mError));
+                mDebugLocation.mContinuation.returnError(&mDebugLocation, mReceiver, {}, std::move(*result.mError));
                 return;
             }
         }
 
-        mDebugLocation.mContinuation.start(*mReceiver);
+        Debug::stepInto(mReceiver, &mDebugLocation);        
+
+        mDebugLocation.mContinuation.start(mReceiver);
         std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).resume();
     }
 
@@ -41,19 +38,14 @@ namespace Behavior {
         std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).destroy();
     }
 
-    void CoroutineBehaviorState::visitState(CB visitor)
-    {
-        visitor(Execution::State::DebugLocation { &mDebugLocation });
-    }
-
     bool CoroutineBehaviorState::wantsPause()
     {
-        return Debug::get_debug_context(*mReceiver).wantsPause(&mDebugLocation, Debug::ContinuationType::Flow, mDebugLocation.mLine);
+        return Debug::get_debug_context(mReceiver).wantsPause(&mDebugLocation, Debug::ContinuationType::Flow, mDebugLocation.mLine);
     }
 
     void CoroutineBehaviorState::pass(Closure<void()> callback)
     {
-        mDebugLocation.mContinuation.pass(&mDebugLocation, *mReceiver, [this, callback { std::move(callback) }](BehaviorReceiver &rec) { callback(); }, mDebugLocation.mLine);
+        mDebugLocation.mContinuation.pass(&mDebugLocation, mReceiver, [this, callback { std::move(callback) }](auto &rec) { callback(); }, mDebugLocation.mLine);
     }
 
     CoroutineBehaviorState::InitialSuspend CoroutineBehaviorState::initial_suspend() noexcept
@@ -68,7 +60,9 @@ namespace Behavior {
 
     void CoroutineBehaviorState::FinalSuspend::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept
     {
-        handle.promise().mDebugLocation.mContinuation.returnValue(&handle.promise().mDebugLocation, *handle.promise().mReceiver);
+        Debug::stepOut(handle.promise().mReceiver, &handle.promise().mDebugLocation);
+        
+        handle.promise().mDebugLocation.mContinuation.returnValue(&handle.promise().mDebugLocation, handle.promise().mReceiver);
     }
 
     void CoroutineBehaviorState::FinalSuspend::await_resume() noexcept
@@ -93,13 +87,17 @@ namespace Behavior {
 
     std::bool_constant<true> CoroutineBehaviorState::set_error(Reflect::Error result)
     {
-        mDebugLocation.mContinuation.returnError(&mDebugLocation, *mReceiver, {}, std::move(result));
+        Debug::stepOut(mReceiver, &mDebugLocation);        
+
+        mDebugLocation.mContinuation.returnError(&mDebugLocation, mReceiver, {}, std::move(result));
         return {};
     }
 
     std::bool_constant<true> CoroutineBehaviorState::set_done()
-    {
-        mDebugLocation.mContinuation.returnDone(&mDebugLocation, *mReceiver);
+    {   
+        Debug::stepOut(mReceiver, &mDebugLocation);        
+
+        mDebugLocation.mContinuation.returnDone(&mDebugLocation, mReceiver);
         return {};
     }
 
@@ -160,6 +158,11 @@ namespace Behavior {
     CoroutineBehaviorState &BehaviorCoroutineHandle::promise() const
     {
         return mHandle.promise();
+    }
+
+    TypedPtr &tag_invoke(Debug::get_debug_child_location_t, CoroutineBehaviorState &state)
+    {
+        return state.mDebugLocation.mChild;
     }
 
 }

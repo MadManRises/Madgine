@@ -24,6 +24,7 @@ namespace Behavior {
     Behavior::state::state(StatePtr state)
         : mState(std::move(state))
     {
+        mState->mReceiver.set(*this);
     }
 
     void Behavior::state::start()
@@ -36,22 +37,9 @@ namespace Behavior {
         mState->stop();
     }
 
-    void Behavior::state::connect()
-    {
-        mState->connect(*this);
-    }
-
-    void tag_invoke(Execution::visit_state_t, Behavior::state *state, BehaviorStateBase::CB visitor)
-    {
-        if (state)
-            state->mState->visitState(std::move(visitor));
-        else
-            visitor(Execution::State::Text { "Behavior" });
-    }
-
     Behavior::StatePtr Behavior::connect(BehaviorReceiver &receiver)
     {
-        mState->connect(receiver);
+        mState->mReceiver.set(receiver);
         return std::move(mState);
     }
 

@@ -369,6 +369,11 @@ namespace Behavior {
                     {
                         return f(receiver.mReceiver, std::forward<Args>(args)...);
                     }
+
+                    friend TypedPtr &tag_invoke(Debug::get_debug_child_location_t, Receiver &rec)
+                    {
+                        return rec.mReceiver.mReceiver.mDebugLocation.mChild;
+                    }
                 };
 
                 using State = Execution::connect_result_t<Execution::with_debug_location_t::sender<Execution::stoppable_t::sender<Sender>>, Receiver>;
@@ -385,7 +390,7 @@ namespace Behavior {
                 {
                     const NodeBase &node = Execution::get_context(receiver).mNode;
                     construct(mState,
-                        DelayedConstruct { [&]() { return Execution::connect(buildSender(node, std::move(args), &mResults) | Execution::stoppable | Execution::with_debug_location(receiver.mReceiver.mDebugLocation.mChild), Receiver { this, std::move(receiver) }); } });
+                        DelayedConstruct { [&]() { return Execution::connect(buildSender(node, std::move(args), &mResults) | Execution::stoppable | Execution::with_debug_location(), Receiver { this, std::move(receiver) }); } });
                     mState->start();
                 }
 

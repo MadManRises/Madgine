@@ -222,6 +222,46 @@ namespace Execution {
         Sender mSender;
     };
 
+    template <typename Rec>
+    struct deferred_receiver {
+        
+        deferred_receiver() = default;
+        deferred_receiver(const deferred_receiver &) = delete;
+
+        void set(Rec& rec) {
+            assert(!mReceiver);
+            mReceiver = &rec;
+        }
+
+        template <typename... Args>
+        void set_value(Args &&...args)
+        {
+            assert(mReceiver);
+            mReceiver->set_value(std::forward<Args>(args)...);
+        }
+        void set_done()
+        {
+            assert(mReceiver);
+            mReceiver->set_done();
+        }
+        template <typename... Args>
+        void set_error(Args &&... result)
+        {
+            assert(mReceiver);
+            mReceiver->set_error(std::forward<Args>(result)...);
+        }
+
+        template <typename CPO, typename... Args>
+        friend auto tag_invoke(CPO f, deferred_receiver &rec, Args &&...args)
+            -> tag_invoke_result_t<CPO, Rec &, Args...>
+        {
+            assert(rec.mReceiver);
+            return f(*rec.mReceiver, std::forward<Args>(args)...);
+        }
+
+        Rec *mReceiver = nullptr;
+    };
+
     template <typename... T>
     struct signature : type_pack<T...> {
     };

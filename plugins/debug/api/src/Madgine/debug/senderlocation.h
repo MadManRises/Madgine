@@ -13,9 +13,6 @@ namespace Debug {
         using CB = typename Execution::StateTypes::prepend<Execution::State::Value>::template transform<helper>::template instantiate<CallableView>;
         SenderLocation(Closure<void(CB)> state);
 
-        void stepInto(Debug::SenderLocation *&location, ContextInfo &context);
-        void stepOut(Debug::SenderLocation *&location, ContextInfo &context);
-
         void visit(CB visitor) const;
 
         Closure<void(CB)> mState;

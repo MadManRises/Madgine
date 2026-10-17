@@ -43,7 +43,7 @@ namespace Behavior {
             Python3BehaviorState *mState = nullptr;            
             PyObjectPtr mResult;
 
-            Debug::SenderLocation *mChild = nullptr;
+            TypedPtr mChild;
 
             void (*mDestruct)(PyStateBase &) = nullptr;
         };
@@ -70,6 +70,11 @@ namespace Behavior {
             friend Debug::Continuation *tag_invoke(Debug::get_continuation_t, PyReceiver &rec)
             {
                 return &rec.mContinuation;
+            }
+
+            friend TypedPtr &tag_invoke(Debug::get_debug_child_location_t, PyReceiver &rec)
+            {
+                return rec.mState.mChild;
             }
 
             PyStateBase &mState;
@@ -112,7 +117,7 @@ namespace Behavior {
             PyState<Sender> *state = &reinterpret_cast<PyStateWrapper<Sender> *>(obj)->mState;
             new (state) PyState<Sender>;
 
-            construct(state->mInnerState, DelayedConstruct { [&]() { return Execution::connect(std::forward<Sender>(sender) | Execution::stoppable | Execution::with_debug_location(state->mChild), PyReceiver { *state, *receiver, *continuation }); } });
+            construct(state->mInnerState, DelayedConstruct { [&]() { return Execution::connect(std::forward<Sender>(sender) | Execution::stoppable | Execution::with_debug_location(), PyReceiver { *state, *receiver, *continuation }); } });
             state->mDestruct = [](PyStateBase &state) { destruct(static_cast<PyState<Sender> &>(state).mInnerState); };
             state->mInnerState->start();
 

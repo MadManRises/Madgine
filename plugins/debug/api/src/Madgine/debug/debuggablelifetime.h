@@ -72,7 +72,7 @@ namespace Debug {
         void attach(Sender &&sender)
         {
             ContextInfo &context = createContext();
-            mLifetime.attach(std::forward<Sender>(sender) | Execution::with_debug_location(context.mChild) | Debug::with_debug_context(context));
+            mLifetime.attach(std::forward<Sender>(sender) | Execution::with_debug_location() | Debug::with_debug_context(context));
         }
 
         bool end()

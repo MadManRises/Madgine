@@ -39,20 +39,36 @@ namespace Behavior {
             void start();
             void stop();
 
-            friend MADGINE_BEHAVIOR_EXPORT void tag_invoke(Execution::visit_state_t, state *state, BehaviorStateBase::CB visitor);
+            friend void tag_invoke(Execution::visit_state_t, state *state, auto &&visitor)
+            {
+                if (state)
+                    visitor(Execution::State::DebugLocation { state->mChild });
+                else
+                    visitor(Execution::State::Text { "Behavior" });
+            }
 
-        protected:
-            void connect();
+            TypedPtr mChild;
 
+        protected:           
             StatePtr mState;
         };
 
         template <typename Rec>
-        struct state_helper : VirtualBehaviorState<Rec, state> {
-            state_helper(Rec &&rec, StatePtr statePtr)
-                : VirtualBehaviorState<Rec, state>(std::forward<Rec>(rec), std::move(statePtr))
+        struct rec_helper : Execution::algorithm_receiver<Rec> {
+
+            friend TypedPtr &tag_invoke(Debug::get_debug_child_location_t, rec_helper &rec)
             {
-                this->connect();
+                return rec.mState.mChild;
+            }
+
+            state &mState;
+        };
+
+        template <typename Rec>
+        struct state_helper : VirtualBehaviorState<rec_helper<Rec>, state> {
+            state_helper(Rec &&rec, StatePtr statePtr)
+                : VirtualBehaviorState<rec_helper<Rec>, state> { { std::forward<Rec>(rec), *this }, std::move(statePtr) }
+            {
             }
         };
 
@@ -77,36 +93,25 @@ namespace Behavior {
     template <Execution::AnySender Sender>
     struct SenderBehaviorState : BehaviorStateBase {
 
-        using State = Execution::connect_result_t<Sender, BehaviorReceiver &>;
+        using State = Execution::connect_result_t<Execution::with_debug_location_t::sender<Sender>, Execution::deferred_receiver<BehaviorReceiver>&>;
 
         SenderBehaviorState(Sender &&sender)
-            : mData(std::forward<Sender>(sender))
+            : mState(Execution::connect(std::forward<Sender>(sender) | Execution::with_debug_location(), mReceiver))
         {
-        }
-
-        void connect(BehaviorReceiver &rec) override
-        {
-            Sender sender = std::forward<Sender>(std::get<Sender>(mData));
-            mData.template emplace<State>(
-                DelayedConstruct { [&]() { return Execution::connect(std::forward<Sender>(sender), rec); } });
         }
 
         void start() override
         {
-            std::get<State>(mData).start();
+
+            mState.start();
         }
 
         void stop() override
         {
-            std::get<State>(mData).stop();
+            mState.stop();
         }
 
-        void visitState(CB visitor) override
-        {
-            Execution::visit_state(std::holds_alternative<State>(mData) ? &std::get<State>(mData) : nullptr, visitor);
-        }
-
-        std::variant<Sender, State> mData;
+        State mState;        
     };
 
 }

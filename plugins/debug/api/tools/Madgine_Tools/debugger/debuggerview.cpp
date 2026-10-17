@@ -81,7 +81,7 @@ namespace Tools {
                             ImGui::ProgressBar(progress.mRatio, ImVec2 { 100.0f, 10.0f }, "");
                     },
                     [&](const Execution::State::BeginBlock &begin) {
-                        ImGui::BeginGroupPanel(begin.mName.data(), {-1, -1}, begin.mCompleted ? IM_COL32(20, 255, 20, 15) : 0);
+                        ImGui::BeginGroupPanel(begin.mName.data(), { -1, -1 }, begin.mCompleted ? IM_COL32(20, 255, 20, 15) : 0);
                     },
                     [&](const Execution::State::EndBlock &end) {
                         if (lastWasText)
@@ -96,6 +96,11 @@ namespace Tools {
                     },
                     [&, inlineLocation](const Execution::State::DebugLocation &subLoc) {
                         std::ranges::move(visualizeDebugLocation(continuations, subLoc.mLocation, inlineLocation), std::back_inserter(subLocations));
+                        if (startY == ImGui::GetCursorScreenPos().y)
+                            ImGui::Dummy({
+                                0.0f,
+                                0.1f,
+                            });
                     },
                     [&](const Execution::State::Breakpoint &bp) {
                         if (bp.mContinuation && *bp.mContinuation) {
@@ -378,5 +383,11 @@ namespace Tools {
 
         return clicked;
     }
+
+    void Engine::Tools::ErrorMarker(float startY, float endY)
+    {
+        ImGui::GetCurrentWindow()->DrawList->AddRect({ sDebugStartX.back() - 4.0f, startY - 1 }, { sDebugStartX.back() + 4.0f, endY + 1 }, IM_COL32(255, 0, 0, 255), 0.0f, ImDrawFlags_None, 2.0f);
+    }
+
 }
 }

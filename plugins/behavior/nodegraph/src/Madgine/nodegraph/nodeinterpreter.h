@@ -26,7 +26,7 @@ namespace Behavior {
             {
             }
 
-            Debug::SenderLocation *mChild = nullptr;
+            TypedPtr mChild;
 
             const NodeBase *mNode = nullptr;
             NodeInterpreterStateBase *mInterpreter;

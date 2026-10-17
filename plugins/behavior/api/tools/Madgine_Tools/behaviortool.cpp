@@ -40,6 +40,9 @@ namespace Tools {
         if (!location)
             return {};
 
+        if (inlineLocation)
+            return { location };
+
         ImGui::BeginGroupPanel(location->mLocation.function_name());
 
         continuations.flush(ImGui::GetItemRectMin().y, ImGui::GetItemRectMax().y);

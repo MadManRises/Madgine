@@ -7,6 +7,7 @@
 #include "Madgine_Tools/imguiicons.h"
 #include "debuggerview.h"
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "imgui/imguiaddons.h"
 
 namespace Engine {
@@ -57,8 +58,15 @@ namespace Tools {
     {
         if (mBreakpoint) {
             if (mLineFeedback) {
-                assert(!*mLineFeedback || *mLineFeedback == mBreakpoint);
-                *mLineFeedback = mBreakpoint;
+                if (!*mLineFeedback) {
+                    *mLineFeedback = mBreakpoint;
+                } else if (*mLineFeedback != mBreakpoint) {
+                    if (ImGui::BeginErrorTooltip()) {
+                        ImGui::Text("Conflicting Lines: " + std::to_string(*mLineFeedback) + " vs " + std::to_string(mBreakpoint));
+                        ImGui::EndErrorTooltip();
+                    }
+                    ErrorMarker(y0, y1);
+                }
             }
             bool set = mContext.getBreakpoint(mLocation.ptr(), mBreakpoint);
             if (Breakpoint(y0, y1, &set))
