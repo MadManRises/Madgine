@@ -1,0 +1,4 @@
+ImageLoader
+===========
+
+.. plugin:: ImageLoader

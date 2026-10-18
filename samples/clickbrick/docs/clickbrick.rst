@@ -1,0 +1,4 @@
+ClickBrick
+==========
+
+.. plugin:: ClickBrick

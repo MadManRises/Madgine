@@ -1,2 +1,4 @@
 Server
 ======
+
+.. plugin:: Server

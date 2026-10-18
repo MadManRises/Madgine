@@ -1,9 +1,6 @@
 Plugins
 =======
 
-
-.. toctree::
-   :glob:
-   
-   /plugins/**/docs/*
-   
+.. plugin-index::
+   :caption: Plugins
+   :maxdepth: 1

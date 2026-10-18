@@ -1,0 +1,4 @@
+Tanks
+=====
+
+.. plugin:: Tanks

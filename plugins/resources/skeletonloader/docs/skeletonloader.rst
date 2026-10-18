@@ -1,0 +1,4 @@
+SkeletonLoader
+==============
+
+.. plugin:: SkeletonLoader

@@ -1,0 +1,4 @@
+Resources Tools
+===============
+
+.. plugin:: ResourcesTools

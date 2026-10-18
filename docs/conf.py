@@ -7,6 +7,10 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 import os
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path('_ext').resolve()))
 
 project = 'Madgine'
 copyright = '2025, Martin Schütz'
@@ -18,7 +22,8 @@ version = os.getenv("MADGINE_VERSION")
 
 extensions = [
 	'sphinx_rtd_theme',
-	'sphinx.ext.graphviz'
+	'sphinx.ext.graphviz',
+	'madgine_plugins'
 ]
 
 templates_path = ['_templates']
@@ -34,3 +39,6 @@ html_theme_options = {
     "collapse_navigation" : False
 }
 html_static_path = ['_static']
+
+primary_domain = 'mad'
+madgine_plugin_data = 'docs/plugins.json'

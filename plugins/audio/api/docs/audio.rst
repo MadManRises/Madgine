@@ -1,2 +1,4 @@
 Audio
 =====
+
+.. plugin:: Audio

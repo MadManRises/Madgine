@@ -1,0 +1,249 @@
+{
+    "plugins": {
+       "Audio" : {
+           "path" : "plugins/audio/api",
+           "dependencies" : ["Behavior", "Resources"],
+           "tools" : ""
+        },
+       "OboeApi" : {
+           "path" : "plugins/audio/oboe",
+           "dependencies" : ["Audio"],
+           "tools" : ""
+        },
+       "PortAudioApi" : {
+           "path" : "plugins/audio/portaudio",
+           "dependencies" : ["Audio"],
+           "tools" : ""
+        },
+       "Handler" : {
+           "path" : "plugins/behavior/handler",
+           "dependencies" : ["Behavior", "Client", "App"],
+           "tools" : ""
+        },
+       "NodeGraph" : {
+           "path" : "plugins/behavior/nodegraph",
+           "dependencies" : ["Resources", "Behavior"],
+           "tools" : "NodeGraphTools"
+        },
+       "Python3" : {
+           "path" : "plugins/behavior/python3",
+           "dependencies" : ["Root", "Resources", "Debugger", "Behavior"],
+           "tools" : "Python3Tools"
+        },
+       "App" : {
+           "path" : "plugins/app/api",
+           "dependencies" : ["Debugger"],
+           "tools" : ""
+        },
+       "Behavior" : {
+           "path" : "plugins/behavior/api",
+           "dependencies" : ["Debugger"],
+           "tools" : "BehaviorTools"
+        },
+       "Client" : {
+           "path" : "plugins/client/api",
+           "dependencies" : ["Render"],
+           "tools" : "ClientTools"
+        },
+       "Debugger" : {
+           "path" : "plugins/debug/api",
+           "dependencies" : ["Root"],
+           "tools" : "DebuggerTools"
+        },
+       "Render" : {
+           "path" : "plugins/renderer/api",
+           "dependencies" : ["Debugger", "MeshLoader", "ImageLoader"],
+           "tools" : "RenderTools"
+        },
+       "Resources" : {
+           "path" : "plugins/resources/api",
+           "dependencies" : ["Root"],
+           "tools" : "ResourcesTools"
+        },
+       "Root" : {
+           "path" : "plugins/root/api",
+           "dependencies" : [],
+           "tools" : "RootTools"
+        },
+       "Server" : {
+           "path" : "plugins/server/api",
+           "dependencies" : [],
+           "tools" : ""
+        },
+       "Tools" : {
+           "path" : "plugins/tools/api",
+           "dependencies" : [],
+           "tools" : ""
+        },
+       "ClickBrick" : {
+           "path" : "samples/clickbrick",
+           "dependencies" : ["SceneRenderer", "NodeGraph", "WidgetHandler"],
+           "tools" : ""
+        },
+       "Scene" : {
+           "path" : "plugins/misc/scene",
+           "dependencies" : ["MeshLoader", "AnimationLoader", "App", "Behavior"],
+           "tools" : ""
+        },
+       "SceneRenderer" : {
+           "path" : "plugins/misc/scene",
+           "dependencies" : ["Scene", "Client"],
+           "tools" : "SceneRendererTools"
+        },
+       "Sentry" : {
+           "path" : "",
+           "dependencies" : ["Root"],
+           "tools" : "SentryTools"
+        },
+       "WidgetHandler" : {
+           "path" : "plugins/misc/widgets",
+           "dependencies" : ["Widgets", "Handler"],
+           "tools" : ""
+        },
+       "Widgets" : {
+           "path" : "plugins/misc/widgets",
+           "dependencies" : ["Client", "Behavior"],
+           "tools" : "WidgetsTools"
+        },
+       "DirectX12" : {
+           "path" : "plugins/renderer/directx12",
+           "dependencies" : [],
+           "tools" : "DirectX12Tools"
+        },
+       "OpenGL" : {
+           "path" : "plugins/renderer/opengl",
+           "dependencies" : [],
+           "tools" : "OpenGLTools"
+        },
+       "Vulkan" : {
+           "path" : "plugins/renderer/vulkan",
+           "dependencies" : [],
+           "tools" : "VulkanTools"
+        },
+       "AnimationLoader" : {
+           "path" : "plugins/resources/animationloader",
+           "dependencies" : ["SkeletonLoader"],
+           "tools" : ""
+        },
+       "ImageLoader" : {
+           "path" : "plugins/resources/imageloader",
+           "dependencies" : ["Resources"],
+           "tools" : ""
+        },
+       "MeshLoader" : {
+           "path" : "plugins/resources/meshloader",
+           "dependencies" : ["Resources"],
+           "tools" : ""
+        },
+       "SkeletonLoader" : {
+           "path" : "plugins/resources/skeletonloader",
+           "dependencies" : ["Resources"],
+           "tools" : ""
+        },
+       "Tanks" : {
+           "path" : "samples/Tanks",
+           "dependencies" : ["Scene", "Bullet"],
+           "tools" : ""
+        },
+       "LibA" : {
+           "path" : "test/Modules",
+           "dependencies" : [],
+           "tools" : ""
+        },
+       "LibB" : {
+           "path" : "test/Modules",
+           "dependencies" : ["LibA"],
+           "tools" : ""
+        },
+       "BehaviorTools" : {
+           "path" : "plugins/behavior/api",
+           "dependencies" : ["Behavior", "Tools", "DebuggerTools", "TextEditor"],
+           "tools" : ""
+        },
+       "ClientTools" : {
+           "path" : "plugins/client/api",
+           "dependencies" : ["Client", "Tools", "Resources", "Templates"],
+           "tools" : ""
+        },
+       "DebuggerTools" : {
+           "path" : "plugins/debug/api",
+           "dependencies" : ["Debugger", "Tools"],
+           "tools" : ""
+        },
+       "DirectX12Tools" : {
+           "path" : "plugins/renderer/directx12",
+           "dependencies" : ["DirectX12", "Tools", "RenderTools"],
+           "tools" : ""
+        },
+       "MadgineLauncherTools" : {
+           "path" : ".",
+           "dependencies" : ["ClientTools"],
+           "tools" : ""
+        },
+       "MadgineServerTools" : {
+           "path" : ".",
+           "dependencies" : ["ClientTools"],
+           "tools" : ""
+        },
+       "NodeGraphTools" : {
+           "path" : "plugins/behavior/nodegraph",
+           "dependencies" : ["NodeGraph", "Tools", "DebuggerTools", "BehaviorTools", "ResourcesTools"],
+           "tools" : ""
+        },
+       "OpenGLTools" : {
+           "path" : "plugins/renderer/opengl",
+           "dependencies" : ["OpenGL", "Tools", "RenderTools"],
+           "tools" : ""
+        },
+       "Python3Tools" : {
+           "path" : "plugins/behavior/python3",
+           "dependencies" : ["Python3", "Tools", "TextEditor", "DebuggerTools", "ResourcesTools"],
+           "tools" : ""
+        },
+       "RenderTools" : {
+           "path" : "plugins/renderer/api",
+           "dependencies" : ["Render", "Tools"],
+           "tools" : ""
+        },
+       "ResourcesTools" : {
+           "path" : "plugins/resources/api",
+           "dependencies" : ["Resources", "Tools"],
+           "tools" : ""
+        },
+       "RootTools" : {
+           "path" : "plugins/root/api",
+           "dependencies" : ["Root", "Tools"],
+           "tools" : ""
+        },
+       "SceneRendererTools" : {
+           "path" : "plugins/misc/scene",
+           "dependencies" : ["SceneRenderer", "Tools", "RenderTools", "ClientTools", "DebuggerTools", "BehaviorTools", "ResourcesTools"],
+           "tools" : ""
+        },
+       "SentryTools" : {
+           "path" : "",
+           "dependencies" : ["Sentry", "Tools"],
+           "tools" : ""
+        },
+       "VulkanTools" : {
+           "path" : "plugins/renderer/vulkan",
+           "dependencies" : ["Vulkan", "Tools", "RenderTools"],
+           "tools" : ""
+        },
+       "WidgetsTools" : {
+           "path" : "plugins/misc/widgets",
+           "dependencies" : ["Widgets", "Tools", "ClientTools", "BehaviorTools", "ResourcesTools"],
+           "tools" : ""
+        },
+       "Templates" : {
+           "path" : "plugins/tools/templates",
+           "dependencies" : ["Tools"],
+           "tools" : ""
+        },
+       "TextEditor" : {
+           "path" : "plugins/tools/texteditor",
+           "dependencies" : ["Tools"],
+           "tools" : ""
+        }
+    }
+}

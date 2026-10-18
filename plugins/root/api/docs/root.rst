@@ -1,2 +1,4 @@
 Root
 ====
+
+.. plugin:: Root

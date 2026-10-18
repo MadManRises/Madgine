@@ -4,9 +4,11 @@
 
 #include "Platform/filesystem/fsapi.h"
 
-#include "Modules/plugins/inifile.h"
 #include "Modules/plugins/binaryinfo.h"
+#include "Modules/plugins/inifile.h"
+#include "Modules/plugins/plugin.h"
 #include "Modules/plugins/pluginmanager.h"
+#include "Modules/plugins/pluginsection.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
@@ -29,10 +31,11 @@ namespace Tools {
 
     Core::Parameter<Platform::Filesystem::Path> exportPlugins { { "--export-plugins", "-ep" }, "", "If set, the pluginmanager will save the current plugin selection after the boot to the specified config file." };
     Core::Parameter<Platform::Filesystem::Path> generatePluginsCode { { "--generate-plugins-code", "-epc" }, "", "If set, the pluginmanager will export a uniquecomponent configuration source file for the current plugin selection to the specified path." };
+    Core::Parameter<Platform::Filesystem::Path> generatePluginsMetadata { { "--generate-plugins-metadata", "-epm" }, "", "If set, the pluginmanager will export a JSON file with metadata for all available plugins, including disabled ones." };
 
     PluginExporter::PluginExporter(Core::Root &root)
         : RootComponent(root)
-    {
+    {        
     }
 
     std::string_view PluginExporter::key() const
@@ -55,6 +58,9 @@ namespace Tools {
         }
         if (!generatePluginsCode->empty()) {
             exportStaticComponentHeader(generatePluginsCode);
+        }
+        if (!generatePluginsMetadata->empty()) {
+            exportPluginsMetadata(generatePluginsMetadata);
         }
         co_return 0;
     }
@@ -233,6 +239,60 @@ const std::map<std::string_view, IndexType<uint32_t>> &)"
         assert(stream);
 
         file.generate(stream);
+    }
+
+    void PluginExporter::exportPluginsMetadata(const Platform::Filesystem::Path &outFile)
+    {
+        LOG("Exporting plugin metadata JSON file '" << outFile << "'");
+
+        std::set<const Plugins::BinaryInfo *> binaries;
+
+        for (Plugins::RegistryBase *reg : Plugins::registryRegistry()) {
+            binaries.insert(reg->mBinary);
+
+            for (Plugins::CollectorInfoBase *collector : *reg) {
+                if (!StringUtil::endsWith(collector->mBinary->mName, "Tools"))
+                    binaries.insert(collector->mBinary);
+            }
+        }
+
+        std::ofstream stream(outFile.str());
+
+        stream << R"({
+    "plugins": {)";
+
+        bool first = true;
+
+        for (Plugins::PluginSection &section : Plugins::PluginManager::getSingleton()) {
+            for (Plugins::Plugin &plugin : section) {
+                plugin.ensureModule(Plugins::PluginManager::getSingleton());
+                const Plugins::BinaryInfo *info = plugin.info();
+                if (first) {
+                    first = false;
+                } else {
+                    stream << ",";
+                }
+                stream << "\n       \"" << info->mName << "\" : {";
+                stream << "\n           \"path\" : \"" << Platform::Filesystem::Path { info->mProjectRoot }.relative(SOURCE_DIR) << "\",";
+                stream << "\n           \"dependencies\" : [";
+                bool innerFirst = true;
+                for (const char** dep = info->mPluginDependencies; *dep; ++dep) {
+                    if (innerFirst) {
+                        innerFirst = false;
+                    } else {
+                        stream << ", ";
+                    }
+                    stream << "\"" << *dep << "\"";
+                }
+                stream << "],";
+                stream << "\n           \"tools\" : \"" << info->mToolsName << "\"";
+                stream << "\n        }";
+            }
+        }
+
+        stream << R"(
+    }
+})";
     }
 
 }

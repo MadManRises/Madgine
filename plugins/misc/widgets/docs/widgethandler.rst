@@ -1,0 +1,4 @@
+WidgetHandler
+=============
+
+.. plugin:: WidgetHandler

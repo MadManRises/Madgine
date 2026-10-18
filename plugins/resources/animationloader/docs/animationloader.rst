@@ -1,0 +1,4 @@
+AnimationLoader
+===============
+
+.. plugin:: AnimationLoader

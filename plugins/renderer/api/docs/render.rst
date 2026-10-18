@@ -1,3 +1,4 @@
 Render
 ======
 
+.. plugin:: Render

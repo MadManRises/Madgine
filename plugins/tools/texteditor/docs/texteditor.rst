@@ -1,0 +1,4 @@
+TextEditor
+==========
+
+.. plugin:: TextEditor
