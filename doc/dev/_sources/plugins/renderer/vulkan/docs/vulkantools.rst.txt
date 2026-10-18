@@ -1,0 +1,4 @@
+VulkanTools
+===========
+
+.. plugin:: VulkanTools

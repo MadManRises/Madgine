@@ -1,0 +1,4 @@
+Widgets Tools
+=============
+
+.. plugin:: WidgetsTools

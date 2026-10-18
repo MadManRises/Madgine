@@ -1,0 +1,4 @@
+BehaviorTools
+=============
+
+.. plugin:: BehaviorTools

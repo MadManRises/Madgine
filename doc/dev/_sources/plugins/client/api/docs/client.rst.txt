@@ -1,3 +1,4 @@
 Client
 ======
 
+.. plugin:: Client

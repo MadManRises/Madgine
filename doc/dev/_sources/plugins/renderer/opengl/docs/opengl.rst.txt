@@ -1,0 +1,4 @@
+OpenGL
+======
+
+.. plugin:: OpenGL

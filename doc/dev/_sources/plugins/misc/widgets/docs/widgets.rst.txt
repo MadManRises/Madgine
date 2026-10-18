@@ -1,3 +1,4 @@
 Widgets
 =======
 
+.. plugin:: Widgets

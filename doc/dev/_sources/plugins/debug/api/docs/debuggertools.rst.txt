@@ -1,0 +1,4 @@
+DebuggerTools
+=============
+
+.. plugin:: DebuggerTools

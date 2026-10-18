@@ -1,0 +1,4 @@
+SceneRenderer
+=============
+
+.. plugin:: SceneRenderer

@@ -1,5 +1,5 @@
 Architecture Overview
-==================
+======================
 
 Folder hierarchy
 ~~~~~~~~~~~~~~~~~
@@ -25,6 +25,7 @@ The framework is strongly plugin-oriented. It contains a set of core libraries t
 
 .. toctree::
    :hidden:
+
    generic
    meta
    modules

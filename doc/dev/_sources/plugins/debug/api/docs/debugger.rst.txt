@@ -1,0 +1,4 @@
+Debugging
+=========
+
+.. plugin:: Debugger

@@ -1,0 +1,4 @@
+Behavior
+=========
+
+.. plugin:: Behavior

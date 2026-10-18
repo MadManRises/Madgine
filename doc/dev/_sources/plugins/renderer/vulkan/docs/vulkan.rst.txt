@@ -1,0 +1,4 @@
+Vulkan
+======
+
+.. plugin:: Vulkan

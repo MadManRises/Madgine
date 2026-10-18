@@ -1,3 +1,4 @@
 App
 ===
 
+.. plugin:: App

@@ -1,6 +1,8 @@
 Tools
 =====
 
+.. plugin:: Tools
+
 .. _log-viewer:
 
 Log Viewer

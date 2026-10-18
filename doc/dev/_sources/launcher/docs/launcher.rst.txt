@@ -8,6 +8,7 @@ Core Plugins
 The engine comes with a set of plugins that build the base architecture of the Madgine. Each plugin makes use of the UniqueComponent and defines at least one UniqueComponent type that can be used to extend the respective feature set. The launcher project creates all the top-level objects of each plugin, which in turn instantiate their UniqueComponentContainers. This also means that using the launcher will result in having dependencies to all base plugins. The engine uses the Model-View-Controller pattern, where every component is represented by a different plugin (see figure).
 
 .. graphviz::
+
    digraph example {
       Base [ label="Base\n(Model)"];
       Client [ label="Client\n(View)"];

@@ -1,0 +1,4 @@
+OpenGLTools
+===========
+
+.. plugin:: OpenGLTools
