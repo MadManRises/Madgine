@@ -1,7 +1,9 @@
 
 struct BloomData
 {
+    float4x4 clipSpace;
     float exposure;
+    float bloomIntensity;
 };
 ConstantBuffer<BloomData> data : register(b0);
 
@@ -29,7 +31,8 @@ export FragmentData bloom_VS(AppData IN)
     FragmentData OUT;
 
     OUT.texCoord = (IN.aPos.xy * float2(1.0, -1.0) + float2(1.0, 1.0)) * 0.5;
-    OUT.position = float4(IN.aPos, 1.0);
+    // Same orientation as the input on every backend
+    OUT.position = mul(data.clipSpace, float4(IN.aPos, 1.0));
 
     return OUT;
 }
@@ -54,7 +57,7 @@ export float4 bloom_PS(FragmentData IN) : SV_TARGET
 
     float3 hdrColor = input.Sample(texSampler, IN.texCoord).rgb;
     float3 bloomColor = blurred.Sample(texSampler, IN.texCoord).rgb;
-    hdrColor += bloomColor; // additive blending
+    hdrColor += bloomColor * data.bloomIntensity; // additive blending
     // tone mapping
 
     hdrColor *= data.exposure; // Hardcoded Exposure Adjustment

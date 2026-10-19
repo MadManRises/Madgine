@@ -27,8 +27,8 @@ namespace Render {
         int mPriority;
         size_t mIterations;
 
-        size_t mInputIndex;
-        RenderTarget *mInput;
+        size_t mInputIndex = 0;
+        RenderTarget *mInput = nullptr;
     };
 
 }

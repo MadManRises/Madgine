@@ -2,6 +2,8 @@
 
 #include "bloompass.h"
 
+#include "Meta/math/matrix4.h"
+
 #include "Madgine/render/texture.h"
 
 #include "Meta/reflect/metatable_impl.h"
@@ -13,6 +15,7 @@
 
 METATABLE_BEGIN(Engine::Render::BloomPass)
     MEMBER(mExposure)
+    MEMBER(mBloomIntensity)
 METATABLE_END(Engine::Render::BloomPass)
 
 namespace Engine {
@@ -43,7 +46,12 @@ namespace Render {
         mPipeline->bindResources(target, 2, mInput->texture(mInputIndex)->resourceBlock());
         mPipeline->bindResources(target, 3, target->texture(1)->resourceBlock());
 
-        mPipeline->mapParameters<HLSL::BloomData>(0)->exposure = mExposure;
+        {
+            auto data = mPipeline->mapParameters<HLSL::BloomData>(0);
+            data->clipSpace = target->getClipSpaceMatrix();
+            data->exposure = mExposure;
+            data->bloomIntensity = mBloomIntensity;
+        }
 
         mPipeline->renderQuad(target);
     }
@@ -70,8 +78,11 @@ namespace Render {
 
     void BloomPass::setInput(RenderTarget *input, size_t inputIndex, RenderTarget *blurInput, size_t blurIndex)
     {
+        // The input has to be rendered before this pass
+        if (mInput)
+            removeDependency(mInput);
         mInput = input;
-        // addDependency(input);
+        addDependency(input);
         mInputIndex = inputIndex;
         mBlur.setInput(blurInput ? blurInput : input, blurIndex);
     }
