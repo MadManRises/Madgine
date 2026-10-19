@@ -155,6 +155,7 @@ namespace Render {
                         mv.Inverse() /*.Transpose().Transpose()*/,
                         o.mDiffuseColor,
                         Math::Vector4 { 1.0f, 1.0f, 1.0f, 1.0f },
+                        Math::Vector4 { o.mEmissiveColor, 0.0f },
                         // o.mBones
                     };
                 });

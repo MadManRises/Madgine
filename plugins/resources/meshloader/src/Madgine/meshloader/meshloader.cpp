@@ -263,6 +263,10 @@ namespace Render {
             if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuseColor)) {
                 targetMat.mDiffuseColor = { aiDiffuseColor.r, aiDiffuseColor.g, aiDiffuseColor.b, 1.0f };
             }
+            aiColor3D aiEmissiveColor;
+            if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_EMISSIVE, aiEmissiveColor)) {
+                targetMat.mEmissiveColor = { aiEmissiveColor.r, aiEmissiveColor.g, aiEmissiveColor.b };
+            }
             size_t count = mat->GetTextureCount(aiTextureType_DIFFUSE);
             for (size_t i = 0; i < count; ++i) {
                 aiString diffuseTexturePath;

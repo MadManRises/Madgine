@@ -54,10 +54,12 @@ namespace Render {
                 }
                 ResourceBlock resource;
                 Math::Vector4 diffuseColor { 1.0f, 1.0f, 1.0f, 1.0f };
+                Math::Vector3 emissiveColor = Math::Vector3::ZERO;
                 if (material) {
                     if (material->mResourceBlock)
                         resource = material->mResourceBlock->mResourceBlock;
                     diffuseColor = material->mDiffuseColor;
+                    emissiveColor = material->mEmissiveColor;
                 }
 
                 Scene::Entity::Skeleton *skeleton = entity.getComponent<Scene::Entity::Skeleton>();
@@ -65,7 +67,7 @@ namespace Render {
                 if (skeleton)
                     bones = skeleton->mBoneMatrices;
 
-                mInstances[NonInstancedData { mesh.mMesh, resource }].push_back({ transform->worldMatrix(entity), diffuseColor, bones });
+                mInstances[NonInstancedData { mesh.mMesh, resource }].push_back({ transform->worldMatrix(entity), diffuseColor, emissiveColor, bones });
             }
         });
 
