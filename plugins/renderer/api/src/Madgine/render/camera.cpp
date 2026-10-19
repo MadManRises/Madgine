@@ -57,7 +57,7 @@ namespace Render {
             mOrthographic };
     }
 
-    Math::Ray3 Camera::mousePointToRay(const Math::Vector2 &mousePos, const Math::Vector2 &viewportSize)
+    Math::Ray3 Camera::mousePointToRay(const Math::Vector2 &mousePos, const Math::Vector2 &viewportSize) const
     {
         float aspectRatio = viewportSize.x / viewportSize.y;
 
