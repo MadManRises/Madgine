@@ -67,7 +67,9 @@ namespace Memory {
 
             static size_t select(size_t size)
             {
-                return Math::clamp<size_t>((size - BucketSizeBegin - 1) / BucketSizeStep, 0, sizes::size - 1);
+                if (size <= BucketSizeBegin)
+                    return 0;
+                return std::min((size - BucketSizeBegin - 1) / BucketSizeStep + 1, sizes::size - 1);
             }
 
             using sizes = typename BucketStrategyLinear<BucketSizeBegin + BucketSizeStep, BucketSizeEnd, BucketSizeStep>::sizes::template prepend<std::integral_constant<size_t, BucketSizeBegin>>;

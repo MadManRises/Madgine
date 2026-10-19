@@ -88,9 +88,7 @@ namespace Render {
 
     bool OpenGLRenderWindow::skipFrame()
     {
-        if (mOsWindow->isMinimized())
-            return true;
-        return false;
+        return mOsWindow->isMinimized() || RenderTarget::skipFrame();
     }
 
     void OpenGLRenderWindow::beginFrame()

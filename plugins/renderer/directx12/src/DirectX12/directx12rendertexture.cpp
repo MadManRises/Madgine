@@ -152,7 +152,7 @@ namespace Render {
             resizeBuffers(mResizeTarget);
         }
 
-        return mResizePending;
+        return mResizePending || RenderTarget::skipFrame();
     }
 
     void DirectX12RenderTexture::beginFrame()

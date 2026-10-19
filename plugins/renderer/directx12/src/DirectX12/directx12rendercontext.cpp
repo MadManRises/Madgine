@@ -227,7 +227,7 @@ namespace Render {
 
             std::vector<CD3DX12_DESCRIPTOR_RANGE> ranges;
             size_t count = 0;
-            for (const ResourceBlockSignature& blockSignature : signature.mResourceBlocks) {
+            for (const ResourceBlockSignature &blockSignature : signature.mResourceBlocks) {
                 count += blockSignature.mTypes.size();
             }
             ranges.resize(count);
@@ -362,6 +362,16 @@ namespace Render {
         Memory::Block uploadAllocation = mUploadAllocator.allocate(buffer.size());
 
         struct Deleter {
+            struct InnerDeleter {
+                void operator()(void *ptr)
+                {
+                    mContext->mUploadAllocator.deallocate({ ptr, mAllocationSize });
+                }
+
+                size_t mAllocationSize;
+                DirectX12RenderContext *mContext;
+            };
+
             void operator()(void *ptr)
             {
                 auto [resource, offset] = mContext->mBufferMemoryHeap.resolve(mGPUAddress.get());
@@ -372,28 +382,41 @@ namespace Render {
                 list->CopyBufferRegion(resource, offset, heap, heapOffset, mGPUAddress.size());
                 list.Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 
+                list.attachResource(std::unique_ptr<void, InnerDeleter> { ptr, { mAllocationSize, mContext } });
                 list.attachResource(std::move(mGPUAddress));
                 list.execute();
             }
 
             GPUPtr<void> mGPUAddress;
+            size_t mAllocationSize;
             DirectX12RenderContext *mContext;
         };
 
         return {
             std::unique_ptr<void, Deleter> { uploadAllocation.mAddress, {
                                                                             buffer,
+                                                                            uploadAllocation.mSize,
                                                                             this,
                                                                         } },
             buffer.size()
         };
     }
 
-     Memory::WritableByteBuffer DirectX12RenderContext::mapBufferImpl(const GPUPtr<Void[]> &buffer)
+    Memory::WritableByteBuffer DirectX12RenderContext::mapBufferImpl(const GPUPtr<Void[]> &buffer)
     {
-         Memory::Block uploadAllocation = mUploadAllocator.allocate(buffer.size());
+        Memory::Block uploadAllocation = mUploadAllocator.allocate(buffer.size());
 
         struct Deleter {
+            struct InnerDeleter {
+                void operator()(void *ptr)
+                {
+                    mContext->mUploadAllocator.deallocate({ ptr, mAllocationSize });
+                }
+
+                size_t mAllocationSize;
+                DirectX12RenderContext *mContext;
+            };
+
             void operator()(void *ptr)
             {
                 auto [resource, offset] = mContext->mBufferMemoryHeap.resolve(mGPUAddress.get());
@@ -404,17 +427,20 @@ namespace Render {
                 list->CopyBufferRegion(resource, offset, heap, heapOffset, mGPUAddress.size());
                 list.Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 
+                list.attachResource(std::unique_ptr<void, InnerDeleter> { ptr, { mAllocationSize, mContext } });
                 list.attachResource(std::move(mGPUAddress));
                 list.execute();
             }
 
             GPUPtr<Void[]> mGPUAddress;
+            size_t mAllocationSize;
             DirectX12RenderContext *mContext;
         };
 
         return {
             std::unique_ptr<void, Deleter> { uploadAllocation.mAddress, {
                                                                             buffer,
+                                                                            uploadAllocation.mSize,
                                                                             this,
                                                                         } },
             buffer.size()
@@ -476,7 +502,7 @@ namespace Render {
 
                                block->mResources[i] = buf;
                            } },
-                data[i]);            
+                data[i]);
         }
 
         UniqueResourceBlock result;

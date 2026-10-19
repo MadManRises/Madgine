@@ -68,7 +68,7 @@ namespace Render {
 
     bool DirectX12RenderWindow::skipFrame()
     {
-        if (mWindow->isMinimized())
+        if (mWindow->isMinimized() || RenderTarget::skipFrame())
             return true;
         if (mTargetViews.empty() && context()->graphicsQueue()->isComplete(mResizeFence)) {
 

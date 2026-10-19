@@ -614,6 +614,27 @@ namespace Render {
         return static_cast<OpenGLRenderContext &>(RenderContext::getSingleton());
     }
 
+    bool OpenGLRenderContext::beginFrame()
+    {
+        if (mFences[1 - (mFrame % 2)]) {
+            GLenum r = glClientWaitSync(mFences[1 - (mFrame % 2)], GL_SYNC_FLUSH_COMMANDS_BIT, 0);
+            GL_CHECK();
+            assert(r != GL_WAIT_FAILED);
+            if (r == GL_TIMEOUT_EXPIRED)
+                return false;
+            glDeleteSync(mFences[1 - (mFrame % 2)]);
+            GL_CHECK();
+        }
+        return RenderContext::beginFrame();
+    }
+
+    void OpenGLRenderContext::endFrame()
+    {
+        RenderContext::endFrame();
+
+        mFences[mFrame % 2] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    }
+
     std::unique_ptr<RenderTarget> OpenGLRenderContext::createRenderWindow(Platform::Window::OSWindow *w, size_t samples)
     {
         checkThread();

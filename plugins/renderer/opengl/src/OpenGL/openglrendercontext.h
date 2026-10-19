@@ -29,6 +29,9 @@ namespace Render {
 
         OpenGLRenderContext &operator=(const OpenGLRenderContext &) = delete;
 
+        bool beginFrame() override;
+        void endFrame() override;
+
         std::unique_ptr<RenderTarget> createRenderWindow(Platform::Window::OSWindow *w, size_t samples) override;
         std::unique_ptr<RenderTarget> createRenderTexture(const Math::Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) override;
 
@@ -69,6 +72,8 @@ namespace Render {
 
     private:
         std::map<VertexFormat, OpenGLVertexArray> mVAOs;
+
+        GLsync mFences[2] = {};
     };
 
 }
