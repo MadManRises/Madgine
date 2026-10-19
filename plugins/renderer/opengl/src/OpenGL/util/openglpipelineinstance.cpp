@@ -44,7 +44,7 @@ namespace Render {
     {
     }
 
-    bool OpenGLPipelineInstance::bind(VertexFormat format, size_t offset) const
+    bool OpenGLPipelineInstance::bind(VertexFormat format, uintptr_t offset) const
     {
         glUseProgram(mHandle);
         GL_CHECK();
@@ -100,7 +100,7 @@ namespace Render {
             }
 
             GLuint mBuffer;
-            size_t mOffset;
+            uintptr_t mOffset;
             size_t mSize;
         };
 
@@ -244,7 +244,7 @@ namespace Render {
             }
 
             GLuint mBuffer;
-            size_t mOffset;
+            uintptr_t mOffset;
             size_t mSize;
         };
 

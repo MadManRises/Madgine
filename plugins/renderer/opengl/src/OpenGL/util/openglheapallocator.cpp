@@ -20,6 +20,8 @@ namespace Render {
     {
     }
 
+    static constexpr size_t sOffsetBitCount = sizeof(uintptr_t) * 8 - 8;
+
     Memory::Block OpenGLHeapAllocator::allocate(size_t size, size_t alignment)
     {
         GLuint buffer;
@@ -39,25 +41,25 @@ namespace Render {
         glBufferData(target, size, nullptr, GL_DYNAMIC_COPY);
         GL_CHECK();
 
-        return { reinterpret_cast<void *>(static_cast<uintptr_t>(buffer) << 24), size };
+        return { reinterpret_cast<void *>(static_cast<uintptr_t>(buffer) << sOffsetBitCount), size };
     }
 
     void OpenGLHeapAllocator::deallocate(Memory::Block block)
     {
         uintptr_t ptr = reinterpret_cast<uintptr_t>(block.mAddress);
-        uint32_t buffer = ptr >> 24;
-        uint32_t offset = ptr & ((1 << 24) - 1);
+        uint32_t buffer = ptr >> sOffsetBitCount;
+        uintptr_t offset = ptr & ((1 << sOffsetBitCount) - 1);
         assert(offset == 0 && buffer != 0);
 
         glDeleteBuffers(1, &buffer);
         GL_CHECK();
     }
 
-    std::pair<GLuint, size_t> OpenGLHeapAllocator::resolve(void *ptr)
+    std::pair<GLuint, uintptr_t> OpenGLHeapAllocator::resolve(void *ptr)
     {
         uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
-        uint32_t buffer = address >> 24;
-        uint32_t offset = address & ((1 << 24) - 1);
+        uint32_t buffer = address >> sOffsetBitCount;
+        uintptr_t offset = address & ((1 << sOffsetBitCount) - 1);
         return { buffer, offset };
     }
 
@@ -126,7 +128,7 @@ namespace Render {
 #endif
     }
 
-    std::pair<GLuint, size_t> OpenGLMappedHeapAllocator::resolve(void *ptr)
+    std::pair<GLuint, uintptr_t> OpenGLMappedHeapAllocator::resolve(void *ptr)
     {
 #if !OPENGL_ES
         auto it = std::ranges::find_if(mPages, [=](const Page &page) {
@@ -136,7 +138,7 @@ namespace Render {
         return { it->mBuffer, static_cast<std::byte *>(ptr) - static_cast<std::byte *>(it->mMappedAddress) };
 #else
         GLuint handle = reinterpret_cast<uintptr_t>(ptr) >> 24;
-        uint32_t offset = reinterpret_cast<uintptr_t>(ptr) & ((1 << 24) - 1);
+        uintptr_t offset = reinterpret_cast<uintptr_t>(ptr) & ((1 << 24) - 1);
 
         return { handle, offset };
 #endif

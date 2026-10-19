@@ -50,7 +50,7 @@ namespace Render {
         UniqueResourceBlock createResourceBlock(std::vector<std::variant<ConstTexturePtr, GPUPtr<void>, GPUPtr<Void[]>>> textures) override;
         void destroyResourceBlock(UniqueResourceBlock &block) override;
 
-        void bindFormat(VertexFormat format, size_t offset = 0);
+        void bindFormat(VertexFormat format, uintptr_t offset = 0);
         void unbindFormat();
 
         OpenGLHeapAllocator mBufferMemoryHeap;

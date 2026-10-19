@@ -7,7 +7,7 @@ namespace Render {
 
     struct OpenGLHeapAllocator {
 
-        static constexpr size_t goodSize = 8 * 1024 * 1024; // 8MB
+        static constexpr size_t goodSize = 256 * 1024 * 1024; // 256MB
 
         OpenGLHeapAllocator(
 #if OPENGL_ES
@@ -18,7 +18,7 @@ namespace Render {
         Memory::Block allocate(size_t size, size_t alignment = 1);
         void deallocate(Memory::Block block);
 
-        std::pair<GLuint, size_t> resolve(void *ptr);
+        std::pair<GLuint, uintptr_t> resolve(void *ptr);
 
     private:
 #if OPENGL_ES
@@ -39,7 +39,7 @@ namespace Render {
         Memory::Block allocate(size_t size, size_t alignment = 1);
         void deallocate(Memory::Block block);
 
-        std::pair<GLuint, size_t> resolve(void *ptr);
+        std::pair<GLuint, uintptr_t> resolve(void *ptr);
 
     private:
 #if !OPENGL_ES

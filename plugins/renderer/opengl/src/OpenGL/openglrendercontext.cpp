@@ -799,7 +799,7 @@ namespace Render {
         GL_FLOAT
     };
 
-    void OpenGLRenderContext::bindFormat(VertexFormat format, size_t bufferOffset)
+    void OpenGLRenderContext::bindFormat(VertexFormat format, uintptr_t bufferOffset)
     {
 #if !OPENGL_ES || OPENGL_ES >= 31
 

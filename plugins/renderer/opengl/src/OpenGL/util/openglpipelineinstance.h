@@ -33,12 +33,12 @@ namespace Render {
         mutable GLenum mMode;
         mutable bool mHasIndices = false;
         mutable GLsizei mElementCount;
-        mutable size_t mIndexOffset = 0;
+        mutable uintptr_t mIndexOffset = 0;
 
 #if OPENGL_ES && OPENGL_ES < 32
         mutable GLuint mBuffer;
         mutable size_t mStride;
-        mutable size_t mBufferOffset;
+        mutable uintptr_t mBufferOffset;
 #    if OPENGL_ES < 31
         mutable VertexFormat mFormat;
 #    endif
