@@ -170,7 +170,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#locking">Locking</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/resources/skeletonloader/docs/skeletonloader.html">SkeletonLoader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../samples/Tanks/docs/tanks.html">Tanks</a></li>
@@ -306,6 +309,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a949ecb0a75c3aa0eb69f47c200821b71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6056dd0547edc6384b1832b92567ef70"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a6056dd0547edc6384b1832b92567ef70">setup</a> (<a class="el" href="struct_engine_1_1_render_1_1_render_target.html">RenderTarget</a> *target) override</td></tr>
 <tr class="separator:a6056dd0547edc6384b1832b92567ef70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd08a485921f27f28ef75a9e2fd4a649"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html">ShadowRenderPass</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#acd08a485921f27f28ef75a9e2fd4a649">shadowPass</a> ()</td></tr>
+<tr class="separator:acd08a485921f27f28ef75a9e2fd4a649"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f6f76ae2a9e96496af13138d4375579"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a6f6f76ae2a9e96496af13138d4375579">shutdown</a> (<a class="el" href="struct_engine_1_1_render_1_1_render_target.html">RenderTarget</a> *target) override</td></tr>
 <tr class="separator:a6f6f76ae2a9e96496af13138d4375579"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a573a55edea0ad387ab68a24137b2af5b"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a573a55edea0ad387ab68a24137b2af5b">targetCount</a> (size_t) const override</td></tr>
@@ -662,6 +667,31 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a id="acd08a485921f27f28ef75a9e2fd4a649" name="acd08a485921f27f28ef75a9e2fd4a649"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd08a485921f27f28ef75a9e2fd4a649">&#9670;&#160;</a></span>shadowPass()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html">ShadowRenderPass</a> &amp; Engine::Render::SceneRenderPass::shadowPass </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="a4e4a3527d47e25cbc75bd0e1df93cf8e" name="a4e4a3527d47e25cbc75bd0e1df93cf8e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4e4a3527d47e25cbc75bd0e1df93cf8e">&#9670;&#160;</a></span>mLightConstantFactor</h2>
@@ -712,7 +742,7 @@ Additional Inherited Members</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Oct 19 2026 18:35:07 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Mon Oct 19 2026 21:15:22 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

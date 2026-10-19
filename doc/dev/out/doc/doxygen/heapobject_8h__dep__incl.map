@@ -39,7 +39,7 @@
 <area shape="rect" id="node39" href="$util_8cpp.html" title=" " alt="" coords="3572,460,3729,485"/>
 <area shape="rect" id="node40" href="$value_8cpp.html" title=" " alt="" coords="3753,460,3924,485"/>
 <area shape="rect" id="node16" href="$nodebase_8cpp.html" title=" " alt="" coords="7827,555,8072,595"/>
-<area shape="rect" id="node17" href="$sendernode__impl_8h.html" title=" " alt="" coords="11819,548,12019,603"/>
+<area shape="rect" id="node17" href="$sendernode__impl_8h.html" title=" " alt="" coords="11780,548,11980,603"/>
 <area shape="rect" id="node42" href="$plugins_2behavior_2api_2src_2_madgine_2behavior_2context_8h.html" title=" " alt="" coords="6142,240,6293,295"/>
 <area shape="rect" id="node54" href="$typedparametertuple_8h.html" title=" " alt="" coords="8217,240,8370,295"/>
 <area shape="rect" id="node59" href="$plugins_2debug_2api_2src_2_madgine_2debug_2statedescriptor_8h.html" title=" " alt="" coords="7459,247,7674,287"/>
@@ -67,11 +67,11 @@
 <area shape="rect" id="node61" href="$senderlocation_8h.html" title=" " alt="" coords="7879,350,8091,390"/>
 <area shape="rect" id="node62" href="$statedescriptor_8cpp.html" title=" " alt="" coords="7453,350,7681,390"/>
 <area shape="rect" id="node64" href="$function_8cpp.html" title=" " alt="" coords="4529,357,4716,383"/>
-<area shape="rect" id="node67" href="$application_8cpp.html" title=" " alt="" coords="14771,453,14962,493"/>
-<area shape="rect" id="node68" href="$globalapibase_8cpp.html" title=" " alt="" coords="14986,453,15193,493"/>
-<area shape="rect" id="node69" href="$audioloader_8cpp.html" title=" " alt="" coords="15217,453,15421,493"/>
-<area shape="rect" id="node70" href="$oboeapi_8cpp.html" title=" " alt="" coords="15445,453,15651,493"/>
-<area shape="rect" id="node71" href="$portaudioapi_8cpp.html" title=" " alt="" coords="15675,453,15906,493"/>
+<area shape="rect" id="node67" href="$application_8cpp.html" title=" " alt="" coords="14695,453,14886,493"/>
+<area shape="rect" id="node68" href="$globalapibase_8cpp.html" title=" " alt="" coords="14910,453,15117,493"/>
+<area shape="rect" id="node69" href="$audioloader_8cpp.html" title=" " alt="" coords="15141,453,15345,493"/>
+<area shape="rect" id="node70" href="$oboeapi_8cpp.html" title=" " alt="" coords="15369,453,15575,493"/>
+<area shape="rect" id="node71" href="$portaudioapi_8cpp.html" title=" " alt="" coords="15599,453,15830,493"/>
 <area shape="rect" id="node72" href="$behaviorhandle_8cpp.html" title=" " alt="" coords="8897,445,9047,500"/>
 <area shape="rect" id="node73" href="$behaviorlist_8cpp.html" title=" " alt="" coords="9071,445,9222,500"/>
 <area shape="rect" id="node74" href="$behaviorsender_8cpp.html" title=" " alt="" coords="9246,445,9397,500"/>
@@ -91,12 +91,12 @@
 <area shape="rect" id="node88" href="$mesh_8cpp.html" title=" " alt="" coords="12208,445,12379,500"/>
 <area shape="rect" id="node89" href="$pointlight_8cpp.html" title=" " alt="" coords="12403,445,12581,500"/>
 <area shape="rect" id="node90" href="$skeleton_8cpp.html" title=" " alt="" coords="12605,445,12779,500"/>
-<area shape="rect" id="node91" href="$entity_2components_2transform_8cpp.html" title=" " alt="" coords="12803,445,12983,500"/>
-<area shape="rect" id="node92" href="$entity_8cpp.html" title=" " alt="" coords="13008,445,13179,500"/>
-<area shape="rect" id="node93" href="$entitycomponentbase_8cpp.html" title=" " alt="" coords="13203,445,13376,500"/>
-<area shape="rect" id="node94" href="$entitydescriptor_8cpp.html" title=" " alt="" coords="13400,445,13571,500"/>
-<area shape="rect" id="node95" href="$scenecomponentbase_8cpp.html" title=" " alt="" coords="13595,453,13885,493"/>
-<area shape="rect" id="node96" href="$scenecontainer_8cpp.html" title=" " alt="" coords="13910,453,14162,493"/>
-<area shape="rect" id="node97" href="$sceneloader_8cpp.html" title=" " alt="" coords="14187,453,14421,493"/>
-<area shape="rect" id="node98" href="$scenemanager_8cpp.html" title=" " alt="" coords="14446,453,14695,493"/>
+<area shape="rect" id="node91" href="$spotlight_8cpp.html" title=" " alt="" coords="12803,445,12978,500"/>
+<area shape="rect" id="node92" href="$entity_2components_2transform_8cpp.html" title=" " alt="" coords="13002,445,13182,500"/>
+<area shape="rect" id="node93" href="$entity_8cpp.html" title=" " alt="" coords="13207,445,13377,500"/>
+<area shape="rect" id="node94" href="$entitycomponentbase_8cpp.html" title=" " alt="" coords="13401,445,13575,500"/>
+<area shape="rect" id="node95" href="$entitydescriptor_8cpp.html" title=" " alt="" coords="13599,445,13769,500"/>
+<area shape="rect" id="node96" href="$scenecomponentbase_8cpp.html" title=" " alt="" coords="13793,453,14084,493"/>
+<area shape="rect" id="node97" href="$scenecontainer_8cpp.html" title=" " alt="" coords="14109,453,14361,493"/>
+<area shape="rect" id="node98" href="$sceneloader_8cpp.html" title=" " alt="" coords="14385,453,14620,493"/>
 </map>

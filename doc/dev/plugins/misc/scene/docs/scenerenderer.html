@@ -172,7 +172,10 @@
 <li class="toctree-l3"><a class="reference internal" href="scene.html#locking">Locking</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">SceneRenderer</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SceneRenderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../server/api/docs/server.html">Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../resources/skeletonloader/docs/skeletonloader.html">SkeletonLoader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../samples/Tanks/docs/tanks.html">Tanks</a></li>
@@ -238,6 +241,41 @@
 </dl>
 </dd></dl>
 
+<p>The SceneRenderer plugin draws the scene of a SceneManager into a RenderTarget.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SceneRenderPass</span></code> is a forward renderer with the directional light (<code class="docutils literal notranslate"><span class="pre">SceneManager::mAmbientLightDirection</span></code>) and up to
+two shadow casting <code class="docutils literal notranslate"><span class="pre">PointLight</span></code> components. It writes the HDR image into target 0 and its bright parts (emissive colour
+and pixels brighter than 1) into target 1 of the RenderTarget it is added to. Bloom and tone mapping are up to the user,
+e.g. with a <code class="docutils literal notranslate"><span class="pre">BloomPass</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">hdr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="o">-&gt;</span><span class="n">createRenderTexture</span><span class="p">(</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">.</span><span class="n">mFormat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FORMAT_RGBA16F</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">mTextureCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">});</span>
+<span class="n">hdr</span><span class="o">-&gt;</span><span class="n">addRenderPass</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sceneRenderPass</span><span class="p">);</span>
+
+<span class="n">bloom</span><span class="p">.</span><span class="n">setInput</span><span class="p">(</span><span class="n">hdr</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">hdr</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="o">-&gt;</span><span class="n">createRenderTexture</span><span class="p">(</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">.</span><span class="n">mFormat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FORMAT_RGBA16F</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">mTextureCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">mFlipFlop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="p">});</span>
+<span class="n">output</span><span class="o">-&gt;</span><span class="n">addRenderPass</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bloom</span><span class="p">);</span>
+</pre></div>
+</div>
+<section id="custom-lighting">
+<h2>Custom lighting<a class="headerlink" href="#custom-lighting" title="Permalink to this heading"></a></h2>
+<p>For a lighting model of its own (e.g. deferred shading with many lights), a project can combine these building blocks
+with a render pass of its own:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">GBufferRenderPass</span></code> renders the surface attributes of all meshes into the target it is added to (three colour
+textures and depth, optionally multisampled): albedo, view space normal (octahedral encoded, see
+<code class="docutils literal notranslate"><span class="pre">Madgine/render/shadinglanguage/normalencoding.hlsl</span></code>) and shininess, emissive colour. The layout is documented in
+<code class="docutils literal notranslate"><span class="pre">gbufferrenderpass.h</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ShadowRenderPass</span></code> renders the shadow map of the directional light. <code class="docutils literal notranslate"><span class="pre">mBounds</span></code> optionally limits it to the part of
+the view inside a world box. <code class="docutils literal notranslate"><span class="pre">light.hlsl</span></code> provides the light structures and the filtered shadow lookup; define
+<code class="docutils literal notranslate"><span class="pre">LIGHT_NO_RESOURCES</span></code> before including it to leave out the resources of the forward renderer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ShadowSceneRenderData</span></code> collects the shadow casting meshes, e.g. for shadow maps of further lights.</p></li>
+</ul>
+<p>Lights are entity components at the position of the entity’s <code class="docutils literal notranslate"><span class="pre">Transform</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PointLight</span></code>: <code class="docutils literal notranslate"><span class="pre">mColor</span></code>, <code class="docutils literal notranslate"><span class="pre">mIntensity</span></code>, <code class="docutils literal notranslate"><span class="pre">mRange</span></code>, <code class="docutils literal notranslate"><span class="pre">mCastShadows</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SpotLight</span></code>: like <code class="docutils literal notranslate"><span class="pre">PointLight</span></code>, shining along the local +Z axis, with <code class="docutils literal notranslate"><span class="pre">mInnerAngle</span></code>/<code class="docutils literal notranslate"><span class="pre">mOuterAngle</span></code> (half angles in
+degrees).</p></li>
+</ul>
+<p>Materials can emit light with <code class="docutils literal notranslate"><span class="pre">GPUMeshData::Material::mEmissiveColor</span></code>.</p>
+</section>
 </section>
 
 

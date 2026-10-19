@@ -46,7 +46,7 @@ if (edges && edges.length) {
         </defs>
 
 <script type="text/javascript">
-var viewWidth = 2315;
+var viewWidth = 2466;
 var viewHeight = 434;
 var sectionId = 'dynsection-1';
 </script>
@@ -58,10 +58,10 @@ var sectionId = 'dynsection-1';
 <g id="node1" class="node">
 <title>Node1</title>
 <g id="a_node1"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="1150,-426 1012,-426 1012,-385 1150,-385 1150,-426"/>
-<text text-anchor="start" x="1020" y="-414" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1020" y="-403" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1081" y="-392" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentcontainer.h</text>
+<polygon fill="#999999" stroke="#666666" points="1296,-426 1158,-426 1158,-385 1296,-385 1296,-426"/>
+<text text-anchor="start" x="1166" y="-414" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1166" y="-403" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1227" y="-392" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentcontainer.h</text>
 </a>
 </g>
 </g>
@@ -69,618 +69,652 @@ var sectionId = 'dynsection-1';
 <g id="node2" class="node">
 <title>Node2</title>
 <g id="a_node2"><a xlink:href="entitycomponentbase_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1410,-349 1282,-349 1282,-308 1410,-308 1410,-349"/>
-<text text-anchor="start" x="1290" y="-337" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1290" y="-326" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1346" y="-315" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentbase.h</text>
+<polygon fill="white" stroke="#666666" points="1557,-349 1429,-349 1429,-308 1557,-308 1557,-349"/>
+<text text-anchor="start" x="1437" y="-337" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1437" y="-326" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1493" y="-315" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentbase.h</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node2 -->
 <g id="edge1" class="edge">
 <title>Node1&#45;&gt;Node2</title>
-<path fill="none" stroke="#63b8ff" d="M1160.97,-381.87C1199.6,-370.93 1245.34,-357.99 1281.67,-347.71"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1160.4,-378.39 1151.74,-384.48 1162.31,-385.12 1160.4,-378.39"/>
+<path fill="none" stroke="#63b8ff" d="M1306.97,-381.95C1345.91,-370.97 1392.1,-357.95 1428.72,-347.62"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1306.33,-378.5 1297.65,-384.58 1308.23,-385.23 1306.33,-378.5"/>
 </g>
-<!-- Node30 -->
-<g id="node30" class="node">
-<title>Node30</title>
-<g id="a_node30"><a xlink:href="entitycomponentlist_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="999,-349 871,-349 871,-308 999,-308 999,-349"/>
-<text text-anchor="start" x="879" y="-337" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="879" y="-326" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="935" y="-315" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentlist.h</text>
+<!-- Node32 -->
+<g id="node32" class="node">
+<title>Node32</title>
+<g id="a_node32"><a xlink:href="entitycomponentlist_8h.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="1145,-349 1017,-349 1017,-308 1145,-308 1145,-349"/>
+<text text-anchor="start" x="1025" y="-337" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1025" y="-326" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1081" y="-315" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentlist.h</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node30 -->
-<g id="edge45" class="edge">
-<title>Node1&#45;&gt;Node30</title>
-<path fill="none" stroke="#63b8ff" d="M1032.03,-379.35C1013.11,-369.63 991.77,-358.66 973.92,-349.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1030.42,-382.45 1040.91,-383.91 1033.62,-376.22 1030.42,-382.45"/>
+<!-- Node1&#45;&gt;Node32 -->
+<g id="edge47" class="edge">
+<title>Node1&#45;&gt;Node32</title>
+<path fill="none" stroke="#63b8ff" d="M1178.03,-379.35C1159.11,-369.63 1137.77,-358.66 1119.92,-349.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1176.42,-382.45 1186.91,-383.91 1179.62,-376.22 1176.42,-382.45"/>
 </g>
 <!-- Node3 -->
 <g id="node3" class="node">
 <title>Node3</title>
 <g id="a_node3"><a xlink:href="entity_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1556,-272 1428,-272 1428,-231 1556,-231 1556,-272"/>
-<text text-anchor="start" x="1436" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1436" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1492" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entity.cpp</text>
+<polygon fill="white" stroke="#666666" points="1703,-272 1575,-272 1575,-231 1703,-231 1703,-272"/>
+<text text-anchor="start" x="1583" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1583" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1639" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entity.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node2&#45;&gt;Node3 -->
 <g id="edge2" class="edge">
 <title>Node2&#45;&gt;Node3</title>
-<path fill="none" stroke="#63b8ff" d="M1394.97,-302.35C1413.89,-292.63 1435.23,-281.66 1453.08,-272.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1393.38,-299.22 1386.09,-306.91 1396.58,-305.45 1393.38,-299.22"/>
+<path fill="none" stroke="#63b8ff" d="M1541.97,-302.35C1560.89,-292.63 1582.23,-281.66 1600.08,-272.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1540.38,-299.22 1533.09,-306.91 1543.58,-305.45 1540.38,-299.22"/>
 </g>
 <!-- Node4 -->
 <g id="node4" class="node">
 <title>Node4</title>
 <g id="a_node4"><a xlink:href="entitycomponent_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1118,-272 990,-272 990,-231 1118,-231 1118,-272"/>
-<text text-anchor="start" x="998" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="998" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1054" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponent.h</text>
+<polygon fill="white" stroke="#666666" points="1265,-272 1137,-272 1137,-231 1265,-231 1265,-272"/>
+<text text-anchor="start" x="1145" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1145" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1201" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponent.h</text>
 </a>
 </g>
 </g>
 <!-- Node2&#45;&gt;Node4 -->
 <g id="edge3" class="edge">
 <title>Node2&#45;&gt;Node4</title>
-<path fill="none" stroke="#63b8ff" d="M1270.69,-308.67C1228.42,-298.04 1174.74,-284.42 1127,-272 1124.21,-271.27 1121.36,-270.53 1118.47,-269.77"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1269.72,-312.03 1280.27,-311.08 1271.43,-305.24 1269.72,-312.03"/>
-</g>
-<!-- Node26 -->
-<g id="node26" class="node">
-<title>Node26</title>
-<g id="a_node26"><a xlink:href="entitycomponentbase_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1704,-272 1574,-272 1574,-231 1704,-231 1704,-272"/>
-<text text-anchor="start" x="1582" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1582" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1639" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentbase.cpp</text>
-</a>
-</g>
-</g>
-<!-- Node2&#45;&gt;Node26 -->
-<g id="edge41" class="edge">
-<title>Node2&#45;&gt;Node26</title>
-<path fill="none" stroke="#63b8ff" d="M1421.29,-308.61C1463.56,-297.95 1517.24,-284.34 1565,-272 1567.83,-271.27 1570.72,-270.52 1573.64,-269.76"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1420.56,-305.18 1411.71,-311.02 1422.26,-311.97 1420.56,-305.18"/>
-</g>
-<!-- Node27 -->
-<g id="node27" class="node">
-<title>Node27</title>
-<g id="a_node27"><a xlink:href="entitycomponenthandle_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1859.5,-272 1722.5,-272 1722.5,-231 1859.5,-231 1859.5,-272"/>
-<text text-anchor="start" x="1730.5" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1730.5" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1791" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponenthandle.cpp</text>
-</a>
-</g>
-</g>
-<!-- Node2&#45;&gt;Node27 -->
-<g id="edge42" class="edge">
-<title>Node2&#45;&gt;Node27</title>
-<path fill="none" stroke="#63b8ff" d="M1421.42,-318.22C1495.87,-308.57 1612.78,-292.06 1713,-272 1716.01,-271.4 1719.08,-270.75 1722.18,-270.08"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1421.27,-314.71 1411.8,-319.46 1422.17,-321.66 1421.27,-314.71"/>
+<path fill="none" stroke="#63b8ff" d="M1417.69,-308.67C1375.42,-298.04 1321.74,-284.42 1274,-272 1271.21,-271.27 1268.36,-270.53 1265.47,-269.77"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1416.72,-312.03 1427.27,-311.08 1418.43,-305.24 1416.72,-312.03"/>
 </g>
 <!-- Node28 -->
 <g id="node28" class="node">
 <title>Node28</title>
-<g id="a_node28"><a xlink:href="entitydescriptor_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1264,-272 1136,-272 1136,-231 1264,-231 1264,-272"/>
-<text text-anchor="start" x="1144" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1144" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1200" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitydescriptor.cpp</text>
+<g id="a_node28"><a xlink:href="entitycomponentbase_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="1851,-272 1721,-272 1721,-231 1851,-231 1851,-272"/>
+<text text-anchor="start" x="1729" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1729" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1786" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentbase.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node2&#45;&gt;Node28 -->
 <g id="edge43" class="edge">
 <title>Node2&#45;&gt;Node28</title>
-<path fill="none" stroke="#63b8ff" d="M1297.03,-302.35C1278.11,-292.63 1256.77,-281.66 1238.92,-272.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1295.42,-305.45 1305.91,-306.91 1298.62,-299.22 1295.42,-305.45"/>
+<path fill="none" stroke="#63b8ff" d="M1568.29,-308.61C1610.56,-297.95 1664.24,-284.34 1712,-272 1714.83,-271.27 1717.72,-270.52 1720.64,-269.76"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1567.56,-305.18 1558.71,-311.02 1569.26,-311.97 1567.56,-305.18"/>
 </g>
 <!-- Node29 -->
 <g id="node29" class="node">
 <title>Node29</title>
-<g id="a_node29"><a xlink:href="entityhandle_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1410,-272 1282,-272 1282,-231 1410,-231 1410,-272"/>
-<text text-anchor="start" x="1290" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1290" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1346" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entityhandle.cpp</text>
+<g id="a_node29"><a xlink:href="entitycomponenthandle_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="2006.5,-272 1869.5,-272 1869.5,-231 2006.5,-231 2006.5,-272"/>
+<text text-anchor="start" x="1877.5" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1877.5" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1938" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponenthandle.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node2&#45;&gt;Node29 -->
 <g id="edge44" class="edge">
 <title>Node2&#45;&gt;Node29</title>
-<path fill="none" stroke="#63b8ff" d="M1346,-296.36C1346,-288.24 1346,-279.7 1346,-272.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1342.5,-296.28 1346,-306.28 1349.5,-296.28 1342.5,-296.28"/>
+<path fill="none" stroke="#63b8ff" d="M1568.42,-318.22C1642.87,-308.57 1759.78,-292.06 1860,-272 1863.01,-271.4 1866.08,-270.75 1869.18,-270.08"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1568.27,-314.71 1558.8,-319.46 1569.17,-321.66 1568.27,-314.71"/>
+</g>
+<!-- Node30 -->
+<g id="node30" class="node">
+<title>Node30</title>
+<g id="a_node30"><a xlink:href="entitydescriptor_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="1411,-272 1283,-272 1283,-231 1411,-231 1411,-272"/>
+<text text-anchor="start" x="1291" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1291" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1347" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitydescriptor.cpp</text>
+</a>
+</g>
+</g>
+<!-- Node2&#45;&gt;Node30 -->
+<g id="edge45" class="edge">
+<title>Node2&#45;&gt;Node30</title>
+<path fill="none" stroke="#63b8ff" d="M1444.03,-302.35C1425.11,-292.63 1403.77,-281.66 1385.92,-272.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1442.42,-305.45 1452.91,-306.91 1445.62,-299.22 1442.42,-305.45"/>
+</g>
+<!-- Node31 -->
+<g id="node31" class="node">
+<title>Node31</title>
+<g id="a_node31"><a xlink:href="entityhandle_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="1557,-272 1429,-272 1429,-231 1557,-231 1557,-272"/>
+<text text-anchor="start" x="1437" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1437" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1493" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entityhandle.cpp</text>
+</a>
+</g>
+</g>
+<!-- Node2&#45;&gt;Node31 -->
+<g id="edge46" class="edge">
+<title>Node2&#45;&gt;Node31</title>
+<path fill="none" stroke="#63b8ff" d="M1493,-296.36C1493,-288.24 1493,-279.7 1493,-272.33"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1489.5,-296.28 1493,-306.28 1496.5,-296.28 1489.5,-296.28"/>
 </g>
 <!-- Node5 -->
 <g id="node5" class="node">
 <title>Node5</title>
 <g id="a_node5"><a xlink:href="material_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1410,-195 1282,-195 1282,-154 1410,-154 1410,-195"/>
-<text text-anchor="start" x="1290" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1290" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1346" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/material.h</text>
+<polygon fill="white" stroke="#666666" points="1484,-195 1356,-195 1356,-154 1484,-154 1484,-195"/>
+<text text-anchor="start" x="1364" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1364" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1420" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/material.h</text>
 </a>
 </g>
 </g>
 <!-- Node4&#45;&gt;Node5 -->
 <g id="edge4" class="edge">
 <title>Node4&#45;&gt;Node5</title>
-<path fill="none" stroke="#63b8ff" d="M1129.6,-230.36C1193.61,-214.05 1211.68,-210.75 1273,-195 1275.8,-194.28 1278.65,-193.54 1281.53,-192.79"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1128.76,-226.96 1119.94,-232.83 1130.49,-233.74 1128.76,-226.96"/>
+<path fill="none" stroke="#63b8ff" d="M1269.75,-226.95C1299.26,-216.85 1333.36,-205.17 1361.62,-195.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1268.87,-223.56 1260.54,-230.11 1271.14,-230.18 1268.87,-223.56"/>
 </g>
 <!-- Node10 -->
 <g id="node10" class="node">
 <title>Node10</title>
 <g id="a_node10"><a xlink:href="mesh_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1118,-195 990,-195 990,-154 1118,-154 1118,-195"/>
-<text text-anchor="start" x="998" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="998" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1054" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/mesh.h</text>
+<polygon fill="white" stroke="#666666" points="1192,-195 1064,-195 1064,-154 1192,-154 1192,-195"/>
+<text text-anchor="start" x="1072" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1072" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1128" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/mesh.h</text>
 </a>
 </g>
 </g>
 <!-- Node4&#45;&gt;Node10 -->
 <g id="edge9" class="edge">
 <title>Node4&#45;&gt;Node10</title>
-<path fill="none" stroke="#63b8ff" d="M1054,-219.36C1054,-211.24 1054,-202.7 1054,-195.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1050.5,-219.28 1054,-229.28 1057.5,-219.28 1050.5,-219.28"/>
+<path fill="none" stroke="#63b8ff" d="M1173.98,-222.74C1165.12,-213.64 1155.47,-203.72 1147.31,-195.33"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1171.28,-224.99 1180.76,-229.71 1176.3,-220.1 1171.28,-224.99"/>
 </g>
 <!-- Node14 -->
 <g id="node14" class="node">
 <title>Node14</title>
 <g id="a_node14"><a xlink:href="pointlight_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1738,-195 1610,-195 1610,-154 1738,-154 1738,-195"/>
-<text text-anchor="start" x="1618" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1618" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1674" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/pointlight.h</text>
+<polygon fill="white" stroke="#666666" points="1746,-195 1618,-195 1618,-154 1746,-154 1746,-195"/>
+<text text-anchor="start" x="1626" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1626" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1682" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/pointlight.h</text>
 </a>
 </g>
 </g>
 <!-- Node4&#45;&gt;Node14 -->
 <g id="edge16" class="edge">
 <title>Node4&#45;&gt;Node14</title>
-<path fill="none" stroke="#63b8ff" d="M1129.5,-230.75C1236.84,-212.68 1490.29,-190.63 1609.79,-180.72"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1129.09,-227.27 1119.85,-232.45 1130.31,-234.16 1129.09,-227.27"/>
+<path fill="none" stroke="#63b8ff" d="M1276.37,-230.64C1402.4,-205.89 1539.16,-189.88 1617.63,-181.72"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1275.99,-227.15 1266.87,-232.54 1277.36,-234.02 1275.99,-227.15"/>
 </g>
 <!-- Node16 -->
 <g id="node16" class="node">
 <title>Node16</title>
 <g id="a_node16"><a xlink:href="skeleton_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1264,-195 1136,-195 1136,-154 1264,-154 1264,-195"/>
-<text text-anchor="start" x="1144" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1144" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1200" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/skeleton.h</text>
+<polygon fill="white" stroke="#666666" points="1338,-195 1210,-195 1210,-154 1338,-154 1338,-195"/>
+<text text-anchor="start" x="1218" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1218" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1274" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/skeleton.h</text>
 </a>
 </g>
 </g>
 <!-- Node4&#45;&gt;Node16 -->
 <g id="edge20" class="edge">
 <title>Node4&#45;&gt;Node16</title>
-<path fill="none" stroke="#63b8ff" d="M1102.97,-225.35C1121.89,-215.63 1143.23,-204.66 1161.08,-195.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1101.38,-222.22 1094.09,-229.91 1104.58,-228.45 1101.38,-222.22"/>
+<path fill="none" stroke="#63b8ff" d="M1228.02,-222.74C1236.88,-213.64 1246.53,-203.72 1254.69,-195.33"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1225.7,-220.1 1221.24,-229.71 1230.72,-224.99 1225.7,-220.1"/>
 </g>
 <!-- Node21 -->
 <g id="node21" class="node">
 <title>Node21</title>
-<g id="a_node21"><a xlink:href="entity_2components_2transform_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="972,-195 844,-195 844,-154 972,-154 972,-195"/>
-<text text-anchor="start" x="852" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="852" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="908" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/transform.h</text>
+<g id="a_node21"><a xlink:href="spotlight_8h.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="2174,-195 2046,-195 2046,-154 2174,-154 2174,-195"/>
+<text text-anchor="start" x="2054" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="2054" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="2110" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/spotlight.h</text>
 </a>
 </g>
 </g>
 <!-- Node4&#45;&gt;Node21 -->
 <g id="edge30" class="edge">
 <title>Node4&#45;&gt;Node21</title>
-<path fill="none" stroke="#63b8ff" d="M1005.03,-225.35C986.11,-215.63 964.77,-204.66 946.92,-195.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1003.42,-228.45 1013.91,-229.91 1006.62,-222.22 1003.42,-228.45"/>
+<path fill="none" stroke="#63b8ff" d="M1276.42,-230.96C1386.97,-216.41 1869.8,-188.84 2045.7,-179.04"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1276.22,-227.46 1266.84,-232.37 1277.24,-234.38 1276.22,-227.46"/>
+</g>
+<!-- Node23 -->
+<g id="node23" class="node">
+<title>Node23</title>
+<g id="a_node23"><a xlink:href="entity_2components_2transform_8h.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="1043,-195 915,-195 915,-154 1043,-154 1043,-195"/>
+<text text-anchor="start" x="923" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="923" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="979" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/components/transform.h</text>
+</a>
+</g>
+</g>
+<!-- Node4&#45;&gt;Node23 -->
+<g id="edge32" class="edge">
+<title>Node4&#45;&gt;Node23</title>
+<path fill="none" stroke="#63b8ff" d="M1131.3,-226.95C1101.4,-216.85 1066.82,-205.17 1038.18,-195.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1130.06,-230.23 1140.66,-230.11 1132.3,-223.6 1130.06,-230.23"/>
 </g>
 <!-- Node6 -->
 <g id="node6" class="node">
 <title>Node6</title>
 <g id="a_node6"><a xlink:href="litscenerenderdata_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1192.5,-118 1067.5,-118 1067.5,-77 1192.5,-77 1192.5,-118"/>
-<text text-anchor="start" x="1075.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1075.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
-<text text-anchor="middle" x="1130" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/litscenerenderdata.cpp</text>
+<polygon fill="white" stroke="#666666" points="1193.5,-118 1068.5,-118 1068.5,-77 1193.5,-77 1193.5,-118"/>
+<text text-anchor="start" x="1076.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1076.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
+<text text-anchor="middle" x="1131" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/litscenerenderdata.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node5&#45;&gt;Node6 -->
 <g id="edge5" class="edge">
 <title>Node5&#45;&gt;Node6</title>
-<path fill="none" stroke="#63b8ff" d="M1278.19,-149.95C1249.09,-139.85 1215.45,-128.17 1187.58,-118.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1276.66,-153.13 1287.25,-153.1 1278.95,-146.52 1276.66,-153.13"/>
+<path fill="none" stroke="#63b8ff" d="M1344.53,-153.38C1281.28,-137.15 1263.47,-133.75 1203,-118 1199.99,-117.22 1196.92,-116.41 1193.81,-115.59"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1343.51,-156.73 1354.06,-155.84 1345.25,-149.96 1343.51,-156.73"/>
 </g>
 <!-- Node7 -->
 <g id="node7" class="node">
 <title>Node7</title>
 <g id="a_node7"><a xlink:href="scenerenderpass_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1848.5,-118 1723.5,-118 1723.5,-77 1848.5,-77 1848.5,-118"/>
-<text text-anchor="start" x="1731.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1731.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
-<text text-anchor="middle" x="1786" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/scenerenderpass.cpp</text>
+<polygon fill="white" stroke="#666666" points="1861.5,-118 1736.5,-118 1736.5,-77 1861.5,-77 1861.5,-118"/>
+<text text-anchor="start" x="1744.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1744.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
+<text text-anchor="middle" x="1799" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/scenerenderpass.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node5&#45;&gt;Node7 -->
 <g id="edge6" class="edge">
 <title>Node5&#45;&gt;Node7</title>
-<path fill="none" stroke="#63b8ff" d="M1421.6,-164.8C1496.52,-155.55 1614.33,-139.32 1715,-118 1717.75,-117.42 1720.55,-116.79 1723.38,-116.13"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1421.41,-161.29 1411.91,-165.98 1422.26,-168.24 1421.41,-161.29"/>
+<path fill="none" stroke="#63b8ff" d="M1495.72,-161.67C1558.08,-151.48 1648.66,-135.66 1727,-118 1730.03,-117.32 1733.13,-116.59 1736.25,-115.83"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1495.22,-158.2 1485.91,-163.26 1496.34,-165.11 1495.22,-158.2"/>
 </g>
 <!-- Node8 -->
 <g id="node8" class="node">
 <title>Node8</title>
 <g id="a_node8"><a xlink:href="shadowscenerenderdata_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1049.5,-118 906.5,-118 906.5,-77 1049.5,-77 1049.5,-118"/>
-<text text-anchor="start" x="914.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="914.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
-<text text-anchor="middle" x="978" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/shadowscenerenderdata.cpp</text>
+<polygon fill="white" stroke="#666666" points="1050.5,-118 907.5,-118 907.5,-77 1050.5,-77 1050.5,-118"/>
+<text text-anchor="start" x="915.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="915.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
+<text text-anchor="middle" x="979" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/shadowscenerenderdata.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node5&#45;&gt;Node8 -->
 <g id="edge7" class="edge">
 <title>Node5&#45;&gt;Node8</title>
-<path fill="none" stroke="#63b8ff" d="M1270.46,-153.55C1176.78,-133.78 1149.99,-136.58 1059,-118 1056.02,-117.39 1052.99,-116.75 1049.93,-116.09"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1269.6,-156.95 1280.11,-155.62 1271.07,-150.1 1269.6,-156.95"/>
+<path fill="none" stroke="#63b8ff" d="M1344.37,-153.63C1218.36,-129.95 1182.28,-140.65 1059,-118 1056.33,-117.51 1053.61,-116.98 1050.87,-116.43"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1343.66,-157.06 1354.14,-155.51 1344.98,-150.18 1343.66,-157.06"/>
 </g>
 <!-- Node9 -->
 <g id="node9" class="node">
 <title>Node9</title>
 <g id="a_node9"><a xlink:href="material_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="2155,-118 2027,-118 2027,-77 2155,-77 2155,-118"/>
-<text text-anchor="start" x="2035" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="2035" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="2091" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/material.cpp</text>
+<polygon fill="white" stroke="#666666" points="2157,-118 2029,-118 2029,-77 2157,-77 2157,-118"/>
+<text text-anchor="start" x="2037" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="2037" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="2093" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/material.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node5&#45;&gt;Node9 -->
 <g id="edge8" class="edge">
 <title>Node5&#45;&gt;Node9</title>
-<path fill="none" stroke="#63b8ff" d="M1421.7,-167.61C1591.25,-154.38 1989.02,-123.03 2018,-118 2020.84,-117.51 2023.74,-116.95 2026.65,-116.36"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1421.58,-164.11 1411.89,-168.38 1422.13,-171.09 1421.58,-164.11"/>
+<path fill="none" stroke="#63b8ff" d="M1495.71,-165.42C1530.24,-161.8 1571.68,-157.56 1609,-154 1791.54,-136.59 1839.41,-149.78 2020,-118 2022.84,-117.5 2025.74,-116.94 2028.65,-116.34"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1495.36,-161.94 1485.78,-166.46 1496.09,-168.9 1495.36,-161.94"/>
 </g>
 <!-- Node10&#45;&gt;Node6 -->
 <g id="edge10" class="edge">
 <title>Node10&#45;&gt;Node6</title>
-<path fill="none" stroke="#63b8ff" d="M1082.13,-145.74C1091.35,-136.64 1101.4,-126.72 1109.9,-118.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1079.7,-143.22 1075.05,-152.73 1084.62,-148.2 1079.7,-143.22"/>
+<path fill="none" stroke="#63b8ff" d="M1129.25,-142.36C1129.57,-134.24 1129.91,-125.7 1130.21,-118.33"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1125.75,-142.15 1128.85,-152.28 1132.75,-142.43 1125.75,-142.15"/>
 </g>
 <!-- Node10&#45;&gt;Node7 -->
 <g id="edge12" class="edge">
 <title>Node10&#45;&gt;Node7</title>
-<path fill="none" stroke="#63b8ff" d="M1129.56,-153.77C1387.49,-113.37 1460.37,-160.29 1715,-118 1717.65,-117.56 1720.34,-117.06 1723.05,-116.52"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1129.15,-150.29 1119.83,-155.33 1130.26,-157.21 1129.15,-150.29"/>
+<path fill="none" stroke="#63b8ff" d="M1203.45,-153.78C1434.19,-116.85 1499.52,-156.21 1727,-118 1730.07,-117.49 1733.19,-116.9 1736.33,-116.25"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1203.14,-150.28 1193.83,-155.35 1204.27,-157.19 1203.14,-150.28"/>
 </g>
 <!-- Node10&#45;&gt;Node8 -->
 <g id="edge14" class="edge">
 <title>Node10&#45;&gt;Node8</title>
-<path fill="none" stroke="#63b8ff" d="M1025.87,-145.74C1016.65,-136.64 1006.6,-126.72 998.1,-118.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1023.38,-148.2 1032.95,-152.73 1028.3,-143.22 1023.38,-148.2"/>
+<path fill="none" stroke="#63b8ff" d="M1078.3,-148.48C1058.92,-138.73 1037.02,-127.7 1018.72,-118.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1076.6,-151.55 1087.11,-152.92 1079.75,-145.3 1076.6,-151.55"/>
 </g>
 <!-- Node11 -->
 <g id="node11" class="node">
 <title>Node11</title>
 <g id="a_node11"><a xlink:href="pointshadowrenderpass_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1351,-118 1211,-118 1211,-77 1351,-77 1351,-118"/>
-<text text-anchor="start" x="1219" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1219" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
-<text text-anchor="middle" x="1281" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/pointshadowrenderpass.cpp</text>
+<polygon fill="white" stroke="#666666" points="1352,-118 1212,-118 1212,-77 1352,-77 1352,-118"/>
+<text text-anchor="start" x="1220" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1220" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
+<text text-anchor="middle" x="1282" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/pointshadowrenderpass.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node10&#45;&gt;Node11 -->
 <g id="edge11" class="edge">
 <title>Node10&#45;&gt;Node11</title>
-<path fill="none" stroke="#63b8ff" d="M1124.86,-150.09C1155.54,-139.95 1191.07,-128.21 1220.48,-118.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1124.07,-146.66 1115.67,-153.12 1126.27,-153.31 1124.07,-146.66"/>
+<path fill="none" stroke="#63b8ff" d="M1179.1,-148.62C1199.19,-138.83 1221.95,-127.75 1240.94,-118.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1177.68,-145.41 1170.23,-152.94 1180.75,-151.7 1177.68,-145.41"/>
 </g>
 <!-- Node12 -->
 <g id="node12" class="node">
 <title>Node12</title>
 <g id="a_node12"><a xlink:href="shadowrenderpass_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="888.5,-118 763.5,-118 763.5,-77 888.5,-77 888.5,-118"/>
-<text text-anchor="start" x="771.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="771.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
-<text text-anchor="middle" x="826" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/shadowrenderpass.cpp</text>
+<polygon fill="white" stroke="#666666" points="742.5,-118 617.5,-118 617.5,-77 742.5,-77 742.5,-118"/>
+<text text-anchor="start" x="625.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="625.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
+<text text-anchor="middle" x="680" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/shadowrenderpass.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node10&#45;&gt;Node12 -->
 <g id="edge13" class="edge">
 <title>Node10&#45;&gt;Node12</title>
-<path fill="none" stroke="#63b8ff" d="M982.82,-150.09C952.02,-139.95 916.33,-128.21 886.78,-118.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="981.47,-153.33 992.06,-153.13 983.66,-146.68 981.47,-153.33"/>
+<path fill="none" stroke="#63b8ff" d="M1052.73,-154.14C1052.49,-154.09 1052.24,-154.05 1052,-154 920.01,-129.26 883.82,-143.62 752,-118 748.95,-117.41 745.84,-116.75 742.7,-116.06"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1051.88,-157.54 1062.38,-156.11 1053.28,-150.68 1051.88,-157.54"/>
 </g>
 <!-- Node13 -->
 <g id="node13" class="node">
 <title>Node13</title>
 <g id="a_node13"><a xlink:href="mesh_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="745,-118 617,-118 617,-77 745,-77 745,-118"/>
-<text text-anchor="start" x="625" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="625" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="681" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/mesh.cpp</text>
+<polygon fill="white" stroke="#666666" points="889,-118 761,-118 761,-77 889,-77 889,-118"/>
+<text text-anchor="start" x="769" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="769" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="825" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/mesh.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node10&#45;&gt;Node13 -->
 <g id="edge15" class="edge">
 <title>Node10&#45;&gt;Node13</title>
-<path fill="none" stroke="#63b8ff" d="M978.49,-153.58C879.53,-133.25 851.02,-138.25 755,-118 751.88,-117.34 748.69,-116.64 745.48,-115.9"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="977.61,-156.98 988.12,-155.6 979.05,-150.13 977.61,-156.98"/>
+<path fill="none" stroke="#63b8ff" d="M1052.72,-154.18C1052.48,-154.12 1052.24,-154.06 1052,-154 983.73,-137.26 966.18,-135.07 898,-118 895.2,-117.3 892.34,-116.57 889.46,-115.84"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1051.74,-157.54 1062.29,-156.55 1053.42,-150.74 1051.74,-157.54"/>
 </g>
 <!-- Node14&#45;&gt;Node7 -->
 <g id="edge18" class="edge">
 <title>Node14&#45;&gt;Node7</title>
-<path fill="none" stroke="#63b8ff" d="M1713.18,-147.26C1727.29,-137.82 1742.96,-127.32 1756.14,-118.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1711.34,-144.28 1704.98,-152.76 1715.23,-150.1 1711.34,-144.28"/>
+<path fill="none" stroke="#63b8ff" d="M1722.51,-147.53C1737.35,-138.02 1753.91,-127.41 1767.81,-118.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1720.85,-144.44 1714.32,-152.78 1724.63,-150.33 1720.85,-144.44"/>
 </g>
 <!-- Node14&#45;&gt;Node11 -->
 <g id="edge17" class="edge">
 <title>Node14&#45;&gt;Node11</title>
-<path fill="none" stroke="#63b8ff" d="M1598.51,-161.5C1534.95,-151.06 1441.75,-134.98 1361,-118 1357.78,-117.32 1354.5,-116.61 1351.18,-115.87"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1597.7,-164.91 1608.13,-163.07 1598.83,-158 1597.7,-164.91"/>
+<path fill="none" stroke="#63b8ff" d="M1606.8,-162.04C1541.57,-151.73 1444.72,-135.55 1361,-118 1358.1,-117.39 1355.14,-116.75 1352.15,-116.09"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1605.88,-165.44 1616.3,-163.54 1606.97,-158.52 1605.88,-165.44"/>
 </g>
 <!-- Node15 -->
 <g id="node15" class="node">
 <title>Node15</title>
 <g id="a_node15"><a xlink:href="pointlight_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="2306.5,-118 2173.5,-118 2173.5,-77 2306.5,-77 2306.5,-118"/>
-<text text-anchor="start" x="2181.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="2181.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="2240" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/pointlight.cpp</text>
+<polygon fill="white" stroke="#666666" points="2308.5,-118 2175.5,-118 2175.5,-77 2308.5,-77 2308.5,-118"/>
+<text text-anchor="start" x="2183.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="2183.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="2242" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/pointlight.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node14&#45;&gt;Node15 -->
 <g id="edge19" class="edge">
 <title>Node14&#45;&gt;Node15</title>
-<path fill="none" stroke="#63b8ff" d="M1749.64,-168.2C1846.31,-160.68 2018.56,-144.76 2164,-118 2167.08,-117.43 2170.22,-116.81 2173.39,-116.15"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1749.45,-164.7 1739.74,-168.96 1749.98,-171.68 1749.45,-164.7"/>
+<path fill="none" stroke="#63b8ff" d="M1757.51,-168.06C1853.15,-160.44 2022.74,-144.46 2166,-118 2169.08,-117.43 2172.22,-116.81 2175.39,-116.14"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1757.43,-164.56 1747.73,-168.83 1757.98,-171.54 1757.43,-164.56"/>
 </g>
 <!-- Node16&#45;&gt;Node6 -->
 <g id="edge21" class="edge">
 <title>Node16&#45;&gt;Node6</title>
-<path fill="none" stroke="#63b8ff" d="M1173.83,-145.46C1165.41,-136.44 1156.26,-126.64 1148.51,-118.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1171.19,-147.77 1180.58,-152.69 1176.31,-142.99 1171.19,-147.77"/>
+<path fill="none" stroke="#63b8ff" d="M1226.04,-148.35C1207.51,-138.63 1186.6,-127.66 1169.12,-118.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1224.23,-151.35 1234.71,-152.9 1227.48,-145.15 1224.23,-151.35"/>
 </g>
 <!-- Node16&#45;&gt;Node7 -->
 <g id="edge24" class="edge">
 <title>Node16&#45;&gt;Node7</title>
-<path fill="none" stroke="#63b8ff" d="M1275.49,-153.75C1469.26,-121.59 1524.5,-151.61 1715,-118 1717.64,-117.53 1720.33,-117.01 1723.04,-116.45"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1275.11,-150.26 1265.84,-155.39 1276.28,-157.16 1275.11,-150.26"/>
+<path fill="none" stroke="#63b8ff" d="M1349.5,-153.72C1516.01,-125.02 1563.67,-147.63 1727,-118 1730.06,-117.45 1733.18,-116.82 1736.31,-116.15"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1349.09,-150.24 1339.85,-155.42 1350.3,-157.13 1349.09,-150.24"/>
 </g>
 <!-- Node16&#45;&gt;Node8 -->
 <g id="edge26" class="edge">
 <title>Node16&#45;&gt;Node8</title>
-<path fill="none" stroke="#63b8ff" d="M1130.3,-149.95C1100.4,-139.85 1065.82,-128.17 1037.18,-118.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1129.06,-153.23 1139.66,-153.11 1131.3,-146.6 1129.06,-153.23"/>
+<path fill="none" stroke="#63b8ff" d="M1198.54,-153.38C1143.77,-139.26 1091.38,-126.18 1050.56,-116.08"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1197.51,-156.73 1208.06,-155.84 1199.26,-149.95 1197.51,-156.73"/>
 </g>
 <!-- Node16&#45;&gt;Node11 -->
 <g id="edge22" class="edge">
 <title>Node16&#45;&gt;Node11</title>
-<path fill="none" stroke="#63b8ff" d="M1229.68,-146.02C1239.59,-136.84 1250.43,-126.81 1259.58,-118.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1227.35,-143.4 1222.39,-152.77 1232.11,-148.54 1227.35,-143.4"/>
+<path fill="none" stroke="#63b8ff" d="M1277.32,-142.36C1278.19,-134.24 1279.1,-125.7 1279.88,-118.33"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1273.84,-141.97 1276.26,-152.29 1280.8,-142.72 1273.84,-141.97"/>
 </g>
 <!-- Node16&#45;&gt;Node12 -->
 <g id="edge25" class="edge">
 <title>Node16&#45;&gt;Node12</title>
-<path fill="none" stroke="#63b8ff" d="M1124.36,-153.56C1024.18,-133.12 995.22,-138.74 898,-118 894.96,-117.35 891.86,-116.65 888.73,-115.92"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1123.62,-156.98 1134.12,-155.6 1125.04,-150.13 1123.62,-156.98"/>
+<path fill="none" stroke="#63b8ff" d="M1198.34,-153.72C1001.64,-121.2 945.57,-151.68 752,-118 748.94,-117.47 745.82,-116.86 742.68,-116.21"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1197.72,-157.17 1208.16,-155.38 1198.88,-150.26 1197.72,-157.17"/>
 </g>
 <!-- Node17 -->
 <g id="node17" class="node">
 <title>Node17</title>
 <g id="a_node17"><a xlink:href="scenerenderdata_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="598.5,-118 473.5,-118 473.5,-77 598.5,-77 598.5,-118"/>
-<text text-anchor="start" x="481.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="481.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
-<text text-anchor="middle" x="536" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/scenerenderdata.cpp</text>
+<polygon fill="white" stroke="#666666" points="599.5,-118 474.5,-118 474.5,-77 599.5,-77 599.5,-118"/>
+<text text-anchor="start" x="482.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="482.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/renderer/Madgine/render</text>
+<text text-anchor="middle" x="537" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/scenerenderdata.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node16&#45;&gt;Node17 -->
 <g id="edge23" class="edge">
 <title>Node16&#45;&gt;Node17</title>
-<path fill="none" stroke="#63b8ff" d="M1124.35,-153.74C896.85,-117.27 832.34,-155.79 608,-118 604.94,-117.48 601.81,-116.89 598.67,-116.25"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1123.73,-157.19 1134.17,-155.35 1124.86,-150.28 1123.73,-157.19"/>
+<path fill="none" stroke="#63b8ff" d="M1198.34,-153.76C938.29,-113.1 864.79,-160.58 608,-118 605.35,-117.56 602.66,-117.06 599.95,-116.52"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1197.74,-157.21 1208.17,-155.33 1198.85,-150.29 1197.74,-157.21"/>
 </g>
 <!-- Node18 -->
 <g id="node18" class="node">
 <title>Node18</title>
 <g id="a_node18"><a xlink:href="animation_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="2009,-118 1867,-118 1867,-77 2009,-77 2009,-118"/>
-<text text-anchor="start" x="1875" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1875" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/behavior</text>
-<text text-anchor="middle" x="1938" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/animation.cpp</text>
+<polygon fill="white" stroke="#666666" points="1718,-118 1576,-118 1576,-77 1718,-77 1718,-118"/>
+<text text-anchor="start" x="1584" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1584" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/behavior</text>
+<text text-anchor="middle" x="1647" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/animation.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node16&#45;&gt;Node18 -->
 <g id="edge27" class="edge">
 <title>Node16&#45;&gt;Node18</title>
-<path fill="none" stroke="#63b8ff" d="M1275.51,-153.78C1532.14,-113.43 1604.09,-156.45 1858,-118 1860.83,-117.57 1863.7,-117.09 1866.6,-116.57"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1275.15,-150.29 1265.83,-155.33 1276.26,-157.2 1275.15,-150.29"/>
+<path fill="none" stroke="#63b8ff" d="M1349.53,-153.57C1445.84,-133.49 1473.42,-137.03 1567,-118 1569.8,-117.43 1572.65,-116.83 1575.53,-116.21"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1348.94,-150.11 1339.88,-155.61 1350.39,-156.96 1348.94,-150.11"/>
 </g>
 <!-- Node19 -->
 <g id="node19" class="node">
 <title>Node19</title>
 <g id="a_node19"><a xlink:href="skeleton_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1500.5,-118 1369.5,-118 1369.5,-77 1500.5,-77 1500.5,-118"/>
-<text text-anchor="start" x="1377.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="1377.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="1435" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/skeleton.cpp</text>
+<polygon fill="white" stroke="#666666" points="2010.5,-118 1879.5,-118 1879.5,-77 2010.5,-77 2010.5,-118"/>
+<text text-anchor="start" x="1887.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="1887.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="1945" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/skeleton.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node16&#45;&gt;Node19 -->
 <g id="edge28" class="edge">
 <title>Node16&#45;&gt;Node19</title>
-<path fill="none" stroke="#63b8ff" d="M1272.95,-150.22C1304.79,-140.06 1341.77,-128.26 1372.35,-118.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1272.26,-146.76 1263.8,-153.14 1274.39,-153.43 1272.26,-146.76"/>
+<path fill="none" stroke="#63b8ff" d="M1349.41,-153.78C1579.3,-116.94 1644.26,-155.32 1871,-118 1873.75,-117.55 1876.55,-117.04 1879.37,-116.48"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1349.14,-150.28 1339.83,-155.35 1350.27,-157.19 1349.14,-150.28"/>
 </g>
 <!-- Node20 -->
 <g id="node20" class="node">
 <title>Node20</title>
 <g id="a_node20"><a xlink:href="scenemanager_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1705.5,-112.5 1518.5,-112.5 1518.5,-82.5 1705.5,-82.5 1705.5,-112.5"/>
-<text text-anchor="start" x="1526.5" y="-100.5" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="middle" x="1612" y="-89.5" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/scenemanager.cpp</text>
+<polygon fill="white" stroke="#666666" points="1557.5,-112.5 1370.5,-112.5 1370.5,-82.5 1557.5,-82.5 1557.5,-112.5"/>
+<text text-anchor="start" x="1378.5" y="-100.5" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="middle" x="1464" y="-89.5" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/scenemanager.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node16&#45;&gt;Node20 -->
 <g id="edge29" class="edge">
 <title>Node16&#45;&gt;Node20</title>
-<path fill="none" stroke="#63b8ff" d="M1275.36,-153.62C1379.22,-132.45 1408.48,-135.41 1510,-118 1519.06,-116.45 1528.56,-114.74 1537.97,-113"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1274.96,-150.13 1265.88,-155.58 1276.38,-156.98 1274.96,-150.13"/>
-</g>
-<!-- Node21&#45;&gt;Node6 -->
-<g id="edge31" class="edge">
-<title>Node21&#45;&gt;Node6</title>
-<path fill="none" stroke="#63b8ff" d="M977.7,-149.95C1007.6,-139.85 1042.18,-128.17 1070.82,-118.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="976.7,-146.6 968.34,-153.11 978.94,-153.23 976.7,-146.6"/>
-</g>
-<!-- Node21&#45;&gt;Node7 -->
-<g id="edge34" class="edge">
-<title>Node21&#45;&gt;Node7</title>
-<path fill="none" stroke="#63b8ff" d="M983.4,-153.82C1305.72,-105.04 1396.1,-168.98 1715,-118 1717.65,-117.58 1720.34,-117.09 1723.06,-116.56"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="983.17,-150.31 973.82,-155.29 984.24,-157.23 983.17,-150.31"/>
-</g>
-<!-- Node21&#45;&gt;Node8 -->
-<g id="edge36" class="edge">
-<title>Node21&#45;&gt;Node8</title>
-<path fill="none" stroke="#63b8ff" d="M934.17,-145.46C942.59,-136.44 951.74,-126.64 959.49,-118.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="931.69,-142.99 927.42,-152.69 936.81,-147.77 931.69,-142.99"/>
-</g>
-<!-- Node21&#45;&gt;Node11 -->
-<g id="edge32" class="edge">
-<title>Node21&#45;&gt;Node11</title>
-<path fill="none" stroke="#63b8ff" d="M983.58,-153.56C1080.29,-133.45 1108.02,-137.22 1202,-118 1204.91,-117.41 1207.87,-116.78 1210.86,-116.13"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="982.94,-150.12 973.88,-155.61 984.39,-156.96 982.94,-150.12"/>
-</g>
-<!-- Node21&#45;&gt;Node12 -->
-<g id="edge35" class="edge">
-<title>Node21&#45;&gt;Node12</title>
-<path fill="none" stroke="#63b8ff" d="M878.26,-146.29C868.15,-137.05 857.04,-126.89 847.69,-118.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="875.6,-148.61 885.34,-152.77 880.32,-143.44 875.6,-148.61"/>
-</g>
-<!-- Node21&#45;&gt;Node17 -->
-<g id="edge33" class="edge">
-<title>Node21&#45;&gt;Node17</title>
-<path fill="none" stroke="#63b8ff" d="M832.98,-154.62C831.98,-154.41 830.99,-154.2 830,-154 732.09,-133.86 705.7,-139.09 608,-118 604.96,-117.34 601.86,-116.64 598.73,-115.9"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="831.83,-157.95 842.35,-156.68 833.33,-151.11 831.83,-157.95"/>
+<path fill="none" stroke="#63b8ff" d="M1334.95,-149.44C1365.45,-137.4 1401.33,-123.24 1427.51,-112.9"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1333.84,-146.12 1325.83,-153.04 1336.41,-152.63 1333.84,-146.12"/>
 </g>
 <!-- Node22 -->
 <g id="node22" class="node">
 <title>Node22</title>
-<g id="a_node22"><a xlink:href="scenesenders_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="142,-118 0,-118 0,-77 142,-77 142,-118"/>
-<text text-anchor="start" x="8" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="8" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/behavior</text>
-<text text-anchor="middle" x="71" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/scenesenders.cpp</text>
+<g id="a_node22"><a xlink:href="spotlight_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="2457.5,-118 2326.5,-118 2326.5,-77 2457.5,-77 2457.5,-118"/>
+<text text-anchor="start" x="2334.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="2334.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="2392" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/spotlight.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node21&#45;&gt;Node22 -->
-<g id="edge37" class="edge">
+<g id="edge31" class="edge">
 <title>Node21&#45;&gt;Node22</title>
-<path fill="none" stroke="#63b8ff" d="M832.39,-172.1C695.62,-168.65 398.37,-156.94 151,-118 148.18,-117.56 145.3,-117.06 142.41,-116.53"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="831.94,-175.59 842.02,-172.34 832.11,-168.59 831.94,-175.59"/>
+<path fill="none" stroke="#63b8ff" d="M2185.28,-153.48C2229.27,-141.78 2284.26,-127.15 2326.47,-115.93"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="2184.57,-150.05 2175.81,-156 2186.37,-156.81 2184.57,-150.05"/>
 </g>
-<!-- Node23 -->
-<g id="node23" class="node">
-<title>Node23</title>
-<g id="a_node23"><a xlink:href="behavior_2transform_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="302,-118 160,-118 160,-77 302,-77 302,-118"/>
-<text text-anchor="start" x="168" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="168" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/behavior</text>
-<text text-anchor="middle" x="231" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/transform.h</text>
-</a>
+<!-- Node23&#45;&gt;Node6 -->
+<g id="edge33" class="edge">
+<title>Node23&#45;&gt;Node6</title>
+<path fill="none" stroke="#63b8ff" d="M1029.43,-148.62C1049.27,-138.83 1071.73,-127.75 1090.48,-118.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1028.11,-145.36 1020.69,-152.93 1031.21,-151.64 1028.11,-145.36"/>
 </g>
+<!-- Node23&#45;&gt;Node7 -->
+<g id="edge36" class="edge">
+<title>Node23&#45;&gt;Node7</title>
+<path fill="none" stroke="#63b8ff" d="M1054.27,-154.11C1054.51,-154.08 1054.76,-154.04 1055,-154 1350.63,-108.61 1431.68,-165.36 1727,-118 1730.07,-117.51 1733.2,-116.94 1736.34,-116.31"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1053.81,-150.64 1044.57,-155.84 1055.03,-157.53 1053.81,-150.64"/>
 </g>
-<!-- Node21&#45;&gt;Node23 -->
+<!-- Node23&#45;&gt;Node8 -->
 <g id="edge38" class="edge">
-<title>Node21&#45;&gt;Node23</title>
-<path fill="none" stroke="#63b8ff" d="M832.35,-169.94C718.74,-163.8 497.59,-148.82 312,-118 308.86,-117.48 305.66,-116.9 302.44,-116.29"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="831.98,-173.42 842.16,-170.46 832.36,-166.43 831.98,-173.42"/>
+<title>Node23&#45;&gt;Node8</title>
+<path fill="none" stroke="#63b8ff" d="M979,-142.36C979,-134.24 979,-125.7 979,-118.33"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="975.5,-142.28 979,-152.28 982.5,-142.28 975.5,-142.28"/>
 </g>
-<!-- Node25 -->
-<g id="node25" class="node">
-<title>Node25</title>
-<g id="a_node25"><a xlink:href="entity_2components_2transform_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="455.5,-118 320.5,-118 320.5,-77 455.5,-77 455.5,-118"/>
-<text text-anchor="start" x="328.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="328.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="388" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/transform.cpp</text>
-</a>
+<!-- Node23&#45;&gt;Node11 -->
+<g id="edge34" class="edge">
+<title>Node23&#45;&gt;Node11</title>
+<path fill="none" stroke="#63b8ff" d="M1054.28,-154.18C1054.52,-154.12 1054.76,-154.06 1055,-154 1070.3,-150.17 1150.77,-130.51 1211.59,-115.67"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1053.57,-150.75 1044.72,-156.59 1055.28,-157.54 1053.57,-150.75"/>
 </g>
+<!-- Node23&#45;&gt;Node12 -->
+<g id="edge37" class="edge">
+<title>Node23&#45;&gt;Node12</title>
+<path fill="none" stroke="#63b8ff" d="M903.95,-154.73C902.96,-154.48 901.98,-154.24 901,-154 834.84,-137.74 818,-134.91 752,-118 748.99,-117.23 745.91,-116.43 742.8,-115.62"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="902.72,-158.03 913.27,-157.03 904.4,-151.23 902.72,-158.03"/>
 </g>
-<!-- Node21&#45;&gt;Node25 -->
-<g id="edge40" class="edge">
-<title>Node21&#45;&gt;Node25</title>
-<path fill="none" stroke="#63b8ff" d="M832.52,-166.91C743.99,-158.51 593.06,-142.14 465,-118 462.02,-117.44 458.98,-116.83 455.92,-116.18"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="832,-170.37 842.28,-167.82 832.65,-163.4 832,-170.37"/>
+<!-- Node23&#45;&gt;Node17 -->
+<g id="edge35" class="edge">
+<title>Node23&#45;&gt;Node17</title>
+<path fill="none" stroke="#63b8ff" d="M903.99,-154.57C902.99,-154.37 901.99,-154.18 901,-154 772,-130.04 736.71,-143.44 608,-118 605.37,-117.48 602.69,-116.91 599.99,-116.31"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="902.88,-157.91 913.38,-156.5 904.29,-151.06 902.88,-157.91"/>
 </g>
 <!-- Node24 -->
 <g id="node24" class="node">
 <title>Node24</title>
-<g id="a_node24"><a xlink:href="behavior_2transform_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="302,-41 160,-41 160,0 302,0 302,-41"/>
-<text text-anchor="start" x="168" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="168" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/behavior</text>
-<text text-anchor="middle" x="231" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/transform.cpp</text>
+<g id="a_node24"><a xlink:href="scenesenders_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="456,-118 314,-118 314,-77 456,-77 456,-118"/>
+<text text-anchor="start" x="322" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="322" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/behavior</text>
+<text text-anchor="middle" x="385" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/scenesenders.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node23&#45;&gt;Node24 -->
 <g id="edge39" class="edge">
 <title>Node23&#45;&gt;Node24</title>
-<path fill="none" stroke="#63b8ff" d="M231,-65.36C231,-57.24 231,-48.7 231,-41.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="227.5,-65.28 231,-75.28 234.5,-65.28 227.5,-65.28"/>
+<path fill="none" stroke="#63b8ff" d="M903.25,-168.45C802.61,-161.03 619.51,-145.05 465,-118 462.18,-117.51 459.32,-116.97 456.43,-116.4"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="902.78,-171.93 913,-169.16 903.28,-164.95 902.78,-171.93"/>
 </g>
-<!-- Node30&#45;&gt;Node4 -->
-<g id="edge47" class="edge">
-<title>Node30&#45;&gt;Node4</title>
-<path fill="none" stroke="#63b8ff" d="M976.2,-301.53C991.3,-292.02 1008.14,-281.41 1022.28,-272.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="974.45,-298.5 967.86,-306.79 978.18,-304.42 974.45,-298.5"/>
-</g>
-<!-- Node30&#45;&gt;Node17 -->
-<g id="edge46" class="edge">
-<title>Node30&#45;&gt;Node17</title>
-<path fill="none" stroke="#63b8ff" d="M899.87,-300.87C872.51,-280.65 833.23,-252.71 797,-231 723.12,-186.71 632.65,-142.99 579.95,-118.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="897.7,-303.62 907.81,-306.78 901.87,-298 897.7,-303.62"/>
-</g>
-<!-- Node31 -->
-<g id="node31" class="node">
-<title>Node31</title>
-<g id="a_node31"><a xlink:href="entitycomponentlist_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="788,-272 660,-272 660,-231 788,-231 788,-272"/>
-<text text-anchor="start" x="668" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
-<text text-anchor="start" x="668" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
-<text text-anchor="middle" x="724" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentlist.cpp</text>
+<!-- Node25 -->
+<g id="node25" class="node">
+<title>Node25</title>
+<g id="a_node25"><a xlink:href="behavior_2transform_8h.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="142,-118 0,-118 0,-77 142,-77 142,-118"/>
+<text text-anchor="start" x="8" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="8" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/behavior</text>
+<text text-anchor="middle" x="71" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/transform.h</text>
 </a>
 </g>
 </g>
-<!-- Node30&#45;&gt;Node31 -->
+<!-- Node23&#45;&gt;Node25 -->
+<g id="edge40" class="edge">
+<title>Node23&#45;&gt;Node25</title>
+<path fill="none" stroke="#63b8ff" d="M903.23,-172.77C756.95,-170.41 425.84,-160.38 151,-118 148.17,-117.56 145.3,-117.08 142.41,-116.55"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="903.13,-176.27 913.18,-172.92 903.24,-169.27 903.13,-176.27"/>
+</g>
+<!-- Node27 -->
+<g id="node27" class="node">
+<title>Node27</title>
+<g id="a_node27"><a xlink:href="entity_2components_2transform_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="295.5,-118 160.5,-118 160.5,-77 295.5,-77 295.5,-118"/>
+<text text-anchor="start" x="168.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="168.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="228" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/components/transform.cpp</text>
+</a>
+</g>
+</g>
+<!-- Node23&#45;&gt;Node27 -->
+<g id="edge42" class="edge">
+<title>Node23&#45;&gt;Node27</title>
+<path fill="none" stroke="#63b8ff" d="M903.59,-171.37C778.45,-166.92 520.35,-153.88 305,-118 302.01,-117.5 298.96,-116.94 295.89,-116.34"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="903.28,-174.86 913.4,-171.71 903.53,-167.86 903.28,-174.86"/>
+</g>
+<!-- Node26 -->
+<g id="node26" class="node">
+<title>Node26</title>
+<g id="a_node26"><a xlink:href="behavior_2transform_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="142,-41 0,-41 0,0 142,0 142,-41"/>
+<text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/behavior</text>
+<text text-anchor="middle" x="71" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/transform.cpp</text>
+</a>
+</g>
+</g>
+<!-- Node25&#45;&gt;Node26 -->
+<g id="edge41" class="edge">
+<title>Node25&#45;&gt;Node26</title>
+<path fill="none" stroke="#63b8ff" d="M71,-65.36C71,-57.24 71,-48.7 71,-41.33"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="67.5,-65.28 71,-75.28 74.5,-65.28 67.5,-65.28"/>
+</g>
+<!-- Node32&#45;&gt;Node4 -->
+<g id="edge49" class="edge">
+<title>Node32&#45;&gt;Node4</title>
+<path fill="none" stroke="#63b8ff" d="M1122.55,-301.53C1137.77,-292.02 1154.75,-281.41 1169.01,-272.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1120.75,-298.53 1114.13,-306.8 1124.46,-304.46 1120.75,-298.53"/>
+</g>
+<!-- Node32&#45;&gt;Node17 -->
 <g id="edge48" class="edge">
-<title>Node30&#45;&gt;Node31</title>
-<path fill="none" stroke="#63b8ff" d="M868.38,-303.82C840.04,-293.75 807.35,-282.13 780.25,-272.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="866.99,-307.04 877.58,-307.09 869.33,-300.44 866.99,-307.04"/>
+<title>Node32&#45;&gt;Node17</title>
+<path fill="none" stroke="#63b8ff" d="M1028.2,-302.79C985.27,-282.89 923.03,-254.46 868,-231 770.07,-189.24 654.31,-143.78 588.89,-118.45"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1026.49,-305.85 1037.04,-306.89 1029.44,-299.5 1026.49,-305.85"/>
+</g>
+<!-- Node33 -->
+<g id="node33" class="node">
+<title>Node33</title>
+<g id="a_node33"><a xlink:href="entitycomponentlist_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="859,-272 731,-272 731,-231 859,-231 859,-272"/>
+<text text-anchor="start" x="739" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">plugins/misc/scene</text>
+<text text-anchor="start" x="739" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/src/Madgine/scene/entity</text>
+<text text-anchor="middle" x="795" y="-238" font-family="Helvetica,sans-Serif" font-size="10.00">/entitycomponentlist.cpp</text>
+</a>
+</g>
+</g>
+<!-- Node32&#45;&gt;Node33 -->
+<g id="edge50" class="edge">
+<title>Node32&#45;&gt;Node33</title>
+<path fill="none" stroke="#63b8ff" d="M1005.82,-307.78C960.31,-295.85 902.89,-280.79 859.46,-269.4"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1004.79,-311.13 1015.35,-310.28 1006.57,-304.36 1004.79,-311.13"/>
 </g>
 </g>
 </svg>

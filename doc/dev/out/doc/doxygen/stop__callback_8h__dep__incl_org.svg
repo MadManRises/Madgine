@@ -1587,9 +1587,9 @@
 <path fill="none" stroke="#63b8ff" d="M3247.7,-604.65C3473.02,-593.4 4199.17,-557.15 4406.66,-546.79"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="3247.73,-601.14 3237.92,-605.13 3248.08,-608.13 3247.73,-601.14"/>
 </g>
-<!-- Node293 -->
+<!-- Node295 -->
 <g id="node90" class="node">
-<title>Node293</title>
+<title>Node295</title>
 <g id="a_node90"><a xlink:href="workgroup_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2549,-558 2436,-558 2436,-528 2549,-528 2549,-558"/>
 <text text-anchor="start" x="2444" y="-546" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/threading</text>
@@ -1597,15 +1597,15 @@
 </a>
 </g>
 </g>
-<!-- Node91&#45;&gt;Node293 -->
+<!-- Node91&#45;&gt;Node295 -->
 <g id="edge151" class="edge">
-<title>Node91&#45;&gt;Node293</title>
+<title>Node91&#45;&gt;Node295</title>
 <path fill="none" stroke="#63b8ff" d="M3113.4,-601.76C2978.21,-589.18 2675.28,-561 2549.22,-549.28"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="3112.99,-605.24 3123.27,-602.68 3113.64,-598.27 3112.99,-605.24"/>
 </g>
-<!-- Node302 -->
+<!-- Node304 -->
 <g id="node100" class="node">
-<title>Node302</title>
+<title>Node304</title>
 <g id="a_node100"><a xlink:href="fetchapi__curl_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="3243,-558 3148,-558 3148,-528 3243,-528 3243,-558"/>
 <text text-anchor="start" x="3156" y="-546" font-family="Helvetica,sans-Serif" font-size="10.00">src/Platform/fetch</text>
@@ -1613,9 +1613,9 @@
 </a>
 </g>
 </g>
-<!-- Node91&#45;&gt;Node302 -->
+<!-- Node91&#45;&gt;Node304 -->
 <g id="edge161" class="edge">
-<title>Node91&#45;&gt;Node302</title>
+<title>Node91&#45;&gt;Node304</title>
 <path fill="none" stroke="#63b8ff" d="M3186.43,-582.68C3188.39,-574.34 3190.49,-565.37 3192.18,-558.16"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="3183.05,-581.79 3184.17,-592.32 3189.86,-583.39 3183.05,-581.79"/>
 </g>
@@ -1852,9 +1852,9 @@
 <path fill="none" stroke="#63b8ff" d="M4537.74,-455.37C4520.65,-444.27 4499.99,-430.85 4484.64,-420.88"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="4535.77,-458.26 4546.06,-460.78 4539.58,-452.39 4535.77,-458.26"/>
 </g>
-<!-- Node239 -->
+<!-- Node241 -->
 <g id="node89" class="node">
-<title>Node239</title>
+<title>Node241</title>
 <g id="a_node89"><a xlink:href="taskpromise_8h.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="4780,-420.5 4667,-420.5 4667,-390.5 4780,-390.5 4780,-420.5"/>
 <text text-anchor="start" x="4675" y="-408.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/threading</text>
@@ -1862,9 +1862,9 @@
 </a>
 </g>
 </g>
-<!-- Node104&#45;&gt;Node239 -->
+<!-- Node104&#45;&gt;Node241 -->
 <g id="edge148" class="edge">
-<title>Node104&#45;&gt;Node239</title>
+<title>Node104&#45;&gt;Node241</title>
 <path fill="none" stroke="#63b8ff" d="M4611.79,-456.91C4637.01,-445.53 4668.52,-431.31 4691.63,-420.88"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="4610.46,-453.67 4602.79,-460.98 4613.34,-460.05 4610.46,-453.67"/>
 </g>
@@ -1890,9 +1890,9 @@
 <path fill="none" stroke="#63b8ff" d="M4041.35,-92.97C3810.14,-80.81 3046.51,-40.64 2777.39,-26.49"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="4040.92,-96.45 4051.09,-93.48 4041.29,-89.46 4040.92,-96.45"/>
 </g>
-<!-- Node294 -->
+<!-- Node296 -->
 <g id="node91" class="node">
-<title>Node294</title>
+<title>Node296</title>
 <g id="a_node91"><a xlink:href="profiler_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2897,-492 2766,-492 2766,-462 2897,-462 2897,-492"/>
 <text text-anchor="start" x="2774" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/debug/profiler</text>
@@ -1900,15 +1900,15 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node294 -->
+<!-- Node295&#45;&gt;Node296 -->
 <g id="edge152" class="edge">
-<title>Node293&#45;&gt;Node294</title>
+<title>Node295&#45;&gt;Node296</title>
 <path fill="none" stroke="#63b8ff" d="M2560.43,-529.19C2613.96,-519.1 2690.5,-504.66 2757.5,-492 2760.2,-491.49 2762.95,-490.97 2765.73,-490.44"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2560.03,-525.71 2550.85,-531 2561.33,-532.58 2560.03,-525.71"/>
 </g>
-<!-- Node295 -->
+<!-- Node297 -->
 <g id="node92" class="node">
-<title>Node295</title>
+<title>Node297</title>
 <g id="a_node92"><a xlink:href="profilerthread_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="3046,-492 2915,-492 2915,-462 3046,-462 3046,-492"/>
 <text text-anchor="start" x="2923" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/debug/profiler</text>
@@ -1916,15 +1916,15 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node295 -->
+<!-- Node295&#45;&gt;Node297 -->
 <g id="edge153" class="edge">
-<title>Node293&#45;&gt;Node295</title>
+<title>Node295&#45;&gt;Node297</title>
 <path fill="none" stroke="#63b8ff" d="M2560.69,-535.18C2642.9,-526.62 2785.17,-510.78 2906.5,-492 2909.21,-491.58 2911.98,-491.13 2914.77,-490.67"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2560.34,-531.69 2550.75,-536.2 2561.06,-538.66 2560.34,-531.69"/>
 </g>
-<!-- Node296 -->
+<!-- Node298 -->
 <g id="node93" class="node">
-<title>Node296</title>
+<title>Node298</title>
 <g id="a_node93"><a xlink:href="pluginmanager_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1968.5,-492 1864.5,-492 1864.5,-462 1968.5,-462 1968.5,-492"/>
 <text text-anchor="start" x="1872.5" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/plugins</text>
@@ -1932,15 +1932,15 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node296 -->
+<!-- Node295&#45;&gt;Node298 -->
 <g id="edge154" class="edge">
-<title>Node293&#45;&gt;Node296</title>
+<title>Node295&#45;&gt;Node298</title>
 <path fill="none" stroke="#63b8ff" d="M2424.49,-538.2C2325.6,-532.03 2136.56,-517.86 1977.5,-492 1974.71,-491.55 1971.86,-491.04 1968.99,-490.5"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2424.09,-541.68 2434.29,-538.8 2424.52,-534.69 2424.09,-541.68"/>
 </g>
-<!-- Node297 -->
+<!-- Node299 -->
 <g id="node94" class="node">
-<title>Node297</title>
+<title>Node299</title>
 <g id="a_node94"><a xlink:href="pluginsection_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2090.5,-492 1986.5,-492 1986.5,-462 2090.5,-462 2090.5,-492"/>
 <text text-anchor="start" x="1994.5" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/plugins</text>
@@ -1948,15 +1948,15 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node297 -->
+<!-- Node295&#45;&gt;Node299 -->
 <g id="edge155" class="edge">
-<title>Node293&#45;&gt;Node297</title>
+<title>Node295&#45;&gt;Node299</title>
 <path fill="none" stroke="#63b8ff" d="M2424.6,-535.32C2346.21,-527.16 2213.52,-511.92 2100.5,-492 2097.35,-491.44 2094.12,-490.84 2090.86,-490.19"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2423.96,-538.78 2434.26,-536.32 2424.68,-531.81 2423.96,-538.78"/>
 </g>
-<!-- Node288 -->
+<!-- Node290 -->
 <g id="node95" class="node">
-<title>Node288</title>
+<title>Node290</title>
 <g id="a_node95"><a xlink:href="scheduler_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2222,-492 2109,-492 2109,-462 2222,-462 2222,-492"/>
 <text text-anchor="start" x="2117" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/threading</text>
@@ -1964,15 +1964,15 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node288 -->
+<!-- Node295&#45;&gt;Node290 -->
 <g id="edge156" class="edge">
-<title>Node293&#45;&gt;Node288</title>
+<title>Node295&#45;&gt;Node290</title>
 <path fill="none" stroke="#63b8ff" d="M2424.43,-529.34C2371.72,-519.45 2296.91,-505.2 2231.5,-492 2228.51,-491.4 2225.46,-490.77 2222.37,-490.14"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2423.71,-532.77 2434.18,-531.17 2425,-525.89 2423.71,-532.77"/>
 </g>
-<!-- Node291 -->
+<!-- Node293 -->
 <g id="node96" class="node">
-<title>Node291</title>
+<title>Node293</title>
 <g id="a_node96"><a xlink:href="taskqueue_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2353,-492 2240,-492 2240,-462 2353,-462 2353,-492"/>
 <text text-anchor="start" x="2248" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/threading</text>
@@ -1980,15 +1980,15 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node291 -->
+<!-- Node295&#45;&gt;Node293 -->
 <g id="edge157" class="edge">
-<title>Node293&#45;&gt;Node291</title>
+<title>Node295&#45;&gt;Node293</title>
 <path fill="none" stroke="#63b8ff" d="M2437.58,-524.07C2406.98,-514.07 2369.37,-501.79 2340.68,-492.43"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2436.48,-527.39 2447.07,-527.17 2438.66,-520.74 2436.48,-527.39"/>
 </g>
-<!-- Node292 -->
+<!-- Node294 -->
 <g id="node97" class="node">
-<title>Node292</title>
+<title>Node294</title>
 <g id="a_node97"><a xlink:href="workgroup_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2484,-492 2371,-492 2371,-462 2484,-462 2484,-492"/>
 <text text-anchor="start" x="2379" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/threading</text>
@@ -1996,15 +1996,15 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node292 -->
+<!-- Node295&#45;&gt;Node294 -->
 <g id="edge158" class="edge">
-<title>Node293&#45;&gt;Node292</title>
+<title>Node295&#45;&gt;Node294</title>
 <path fill="none" stroke="#63b8ff" d="M2469.96,-519.81C2460.65,-510.64 2450.12,-500.28 2441.89,-492.16"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2467.41,-522.21 2477,-526.73 2472.33,-517.22 2467.41,-522.21"/>
 </g>
-<!-- Node298 -->
+<!-- Node300 -->
 <g id="node98" class="node">
-<title>Node298</title>
+<title>Node300</title>
 <g id="a_node98"><a xlink:href="workgrouphandle_8h.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="2615,-492 2502,-492 2502,-462 2615,-462 2615,-492"/>
 <text text-anchor="start" x="2510" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/threading</text>
@@ -2012,15 +2012,15 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node298 -->
+<!-- Node295&#45;&gt;Node300 -->
 <g id="edge159" class="edge">
-<title>Node293&#45;&gt;Node298</title>
+<title>Node295&#45;&gt;Node300</title>
 <path fill="none" stroke="#63b8ff" d="M2515.39,-519.81C2524.84,-510.64 2535.53,-500.28 2543.89,-492.16"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2512.98,-517.27 2508.23,-526.74 2517.85,-522.29 2512.98,-517.27"/>
 </g>
-<!-- Node301 -->
+<!-- Node303 -->
 <g id="node99" class="node">
-<title>Node301</title>
+<title>Node303</title>
 <g id="a_node99"><a xlink:href="workgroupstorage_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="2748,-492 2633,-492 2633,-462 2748,-462 2748,-492"/>
 <text text-anchor="start" x="2641" y="-480" font-family="Helvetica,sans-Serif" font-size="10.00">src/Modules/threading</text>
@@ -2028,9 +2028,9 @@
 </a>
 </g>
 </g>
-<!-- Node293&#45;&gt;Node301 -->
+<!-- Node295&#45;&gt;Node303 -->
 <g id="edge160" class="edge">
-<title>Node293&#45;&gt;Node301</title>
+<title>Node295&#45;&gt;Node303</title>
 <path fill="none" stroke="#63b8ff" d="M2547.57,-524.2C2578.56,-514.18 2616.76,-501.83 2645.87,-492.43"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="2546.81,-520.77 2538.38,-527.17 2548.97,-527.43 2546.81,-520.77"/>
 </g>

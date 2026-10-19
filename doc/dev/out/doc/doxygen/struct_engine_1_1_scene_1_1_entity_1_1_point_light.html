@@ -170,7 +170,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#locking">Locking</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/resources/skeletonloader/docs/skeletonloader.html">SkeletonLoader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../samples/Tanks/docs/tanks.html">Tanks</a></li>
@@ -273,6 +276,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="struct_engine_1_1_scene_1_1_entity_1_1_point_light-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Engine::Scene::Entity::PointLight Struct Reference</div></div>
@@ -287,22 +291,57 @@ Inheritance diagram for Engine::Scene::Entity::PointLight:</div>
 </div>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a4d27d57ab6289ee4466e5d484af6a16c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_point_light.html#a4d27d57ab6289ee4466e5d484af6a16c">castsShadow</a> () const</td></tr>
+<tr class="separator:a4d27d57ab6289ee4466e5d484af6a16c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a8549cd5d1e0da279b532089807b59570"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_point_light.html#a8549cd5d1e0da279b532089807b59570">mCastShadows</a> = true</td></tr>
+<tr class="separator:a8549cd5d1e0da279b532089807b59570"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11509ffdc59462d8df7d662d58efec5d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_math_1_1_color3.html">Math::Color3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_point_light.html#a11509ffdc59462d8df7d662d58efec5d">mColor</a> = { 1.0f, 1.0f, 1.0f }</td></tr>
 <tr class="separator:a11509ffdc59462d8df7d662d58efec5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab692da8bb896a8f6a20e62120f60fe49"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_point_light.html#ab692da8bb896a8f6a20e62120f60fe49">mRange</a> = 10</td></tr>
-<tr class="separator:ab692da8bb896a8f6a20e62120f60fe49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae182f2f65e73822f4fcc2a8a46173d4e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_point_light.html#ae182f2f65e73822f4fcc2a8a46173d4e">mIntensity</a> = 1.0f</td></tr>
+<tr class="separator:ae182f2f65e73822f4fcc2a8a46173d4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6c5f4591cdc27d912be21e8c5e9819d"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_point_light.html#af6c5f4591cdc27d912be21e8c5e9819d">mRange</a> = 10.0f</td></tr>
+<tr class="separator:af6c5f4591cdc27d912be21e8c5e9819d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4d27d57ab6289ee4466e5d484af6a16c" name="a4d27d57ab6289ee4466e5d484af6a16c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d27d57ab6289ee4466e5d484af6a16c">&#9670;&#160;</a></span>castsShadow()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Engine::Scene::Entity::PointLight::castsShadow </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="ab692da8bb896a8f6a20e62120f60fe49" name="ab692da8bb896a8f6a20e62120f60fe49"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab692da8bb896a8f6a20e62120f60fe49">&#9670;&#160;</a></span>mRange</h2>
+<a id="af6c5f4591cdc27d912be21e8c5e9819d" name="af6c5f4591cdc27d912be21e8c5e9819d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6c5f4591cdc27d912be21e8c5e9819d">&#9670;&#160;</a></span>mRange</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t Engine::Scene::Entity::PointLight::mRange = 10</td>
+          <td class="memname">float Engine::Scene::Entity::PointLight::mRange = 10.0f</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -323,13 +362,41 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ae182f2f65e73822f4fcc2a8a46173d4e" name="ae182f2f65e73822f4fcc2a8a46173d4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae182f2f65e73822f4fcc2a8a46173d4e">&#9670;&#160;</a></span>mIntensity</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float Engine::Scene::Entity::PointLight::mIntensity = 1.0f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8549cd5d1e0da279b532089807b59570" name="a8549cd5d1e0da279b532089807b59570"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8549cd5d1e0da279b532089807b59570">&#9670;&#160;</a></span>mCastShadows</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Engine::Scene::Entity::PointLight::mCastShadows = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>plugins/misc/scene/src/Madgine/scene/entity/components/<a class="el" href="pointlight_8h.html">pointlight.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Oct 19 2026 18:35:07 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Mon Oct 19 2026 21:15:22 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

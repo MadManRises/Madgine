@@ -1,0 +1,14 @@
+.. meta::e65c89426ba679a7f5e3cf09fe52e0caba50251658181ffa0eccd8c14558b873b7cf782d72562d2ff524ed994d2fac5e24b8eabee41ad7346f0915dcf1bff564
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Engine::Scene::Entity::SpotLight Struct Reference
+
+SpotLight Struct Reference
+==========================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_scene_1_1_entity_1_1_spot_light.html

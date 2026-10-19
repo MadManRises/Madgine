@@ -172,7 +172,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#locking">Locking</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/resources/skeletonloader/docs/skeletonloader.html">SkeletonLoader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../samples/Tanks/docs/tanks.html">Tanks</a></li>
@@ -306,7 +309,7 @@ $(function() {
 <li>deallocatePersistent()&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_vulkan_constant_buffer_heap.html#ae191ff4c24bf2c746d976a5fe2953992">Engine::Render::VulkanConstantBufferHeap</a></li>
 <li>deallocateTemp()&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_vulkan_constant_buffer_heap.html#a039de1b5568f6ed2d5575bca2b97a85c">Engine::Render::VulkanConstantBufferHeap</a></li>
 <li>debug()&#160;:&#160;<a class="el" href="struct_engine_1_1_core_1_1_root.html#a686a2ea2e9f5caae14ab013e307bcce3">Engine::Core::Root</a></li>
-<li>debugCameras()&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_render_debuggable.html#a9ca57c4ea911fea7490c5881c5530fb9">Engine::Render::RenderDebuggable</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a0f81b8575829e636e8bf4b954c829f6c">Engine::Render::SceneRenderPass</a></li>
+<li>debugCameras()&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_g_buffer_render_pass.html#ae90549fa11a7cf440c4911b71047c1bb">Engine::Render::GBufferRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_render_debuggable.html#a9ca57c4ea911fea7490c5881c5530fb9">Engine::Render::RenderDebuggable</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a0f81b8575829e636e8bf4b954c829f6c">Engine::Render::SceneRenderPass</a></li>
 <li>debugContexts()&#160;:&#160;<a class="el" href="struct_engine_1_1_debug_1_1_debuggable_lifetime_base.html#aafa4108aca2fe7def97c3db60c0da5e7">Engine::Debug::DebuggableLifetimeBase</a></li>
 <li>debugFrustums()&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_render_debuggable.html#a7207ca75b583ec49cbf66e07298da824">Engine::Render::RenderDebuggable</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a591a27ded13e568c38a1f18bf581ca5f">Engine::Render::ShadowRenderPass</a></li>
 <li>DEBUGGABLE_LIFETIME()&#160;:&#160;<a class="el" href="struct_engine_1_1_behavior_1_1_handler_base.html#a8220a2d71c09495c084d2436327c503d">Engine::Behavior::HandlerBase</a></li>
@@ -315,7 +318,7 @@ $(function() {
 <li>decreaseReceivingCounter()&#160;:&#160;<a class="el" href="struct_engine_1_1_serialize_1_1_sync_manager.html#ac716554ecb77283678ba8086bf0a0ba5">Engine::Serialize::SyncManager</a></li>
 <li>decRef()&#160;:&#160;<a class="el" href="struct_engine_1_1_resources_1_1_resource_data_info_base.html#a04527742a210ef6813966c86df89a973">Engine::Resources::ResourceDataInfoBase&lt; Interface &gt;</a></li>
 <li>defaultMaterial()&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_scene_render_data.html#aea6543e1031325ca0abe7424025ca874">Engine::Render::SceneRenderData</a></li>
-<li>deferred_receiver()&#160;:&#160;<a class="el" href="struct_engine_1_1_execution_1_1deferred__receiver.html#ae527e2f5657983f86ab351a0fba8af41">Engine::Execution::deferred_receiver&lt; Rec &gt;</a></li>
+<li>deferred_receiver()&#160;:&#160;<a class="el" href="struct_engine_1_1_execution_1_1deferred__receiver.html#abd98dab6a51e4108204beed21d23c35f">Engine::Execution::deferred_receiver&lt; Rec &gt;</a></li>
 <li>deleteMasterId()&#160;:&#160;<a class="el" href="struct_engine_1_1_serialize_1_1_serialize_manager.html#a61234a9d504f7634b0cf88169acf2168">Engine::Serialize::SerializeManager</a></li>
 <li>dependencies()&#160;:&#160;<a class="el" href="struct_engine_1_1_plugins_1_1_plugin.html#ae17091f033d7268b40a67469d3f26d4f">Engine::Plugins::Plugin</a>, <a class="el" href="struct_engine_1_1_render_1_1_render_pass.html#a9bf8ab2e40afcee724591bfa21d5b8a6">Engine::Render::RenderPass</a></li>
 <li>dependents()&#160;:&#160;<a class="el" href="struct_engine_1_1_plugins_1_1_plugin.html#a7601851b3a23dd4c51266133a1d8a3a7">Engine::Plugins::Plugin</a></li>
@@ -372,7 +375,7 @@ $(function() {
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Oct 19 2026 18:35:08 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Mon Oct 19 2026 21:15:23 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

@@ -170,7 +170,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#locking">Locking</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/resources/skeletonloader/docs/skeletonloader.html">SkeletonLoader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../samples/Tanks/docs/tanks.html">Tanks</a></li>
@@ -285,7 +288,7 @@ $(function() {
 <div class="dynheader">
 Inheritance diagram for Engine::Render::RenderPass:</div>
 <div class="dyncontent">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="struct_engine_1_1_render_1_1_render_pass__inherit__graph.svg" width="100%" height="547"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="struct_engine_1_1_render_1_1_render_pass__inherit__graph.svg" width="100%" height="584"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -390,7 +393,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reimplemented in <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#af36f80874d5d0e792f955759c4e54f81">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a6056dd0547edc6384b1832b92567ef70">Engine::Render::SceneRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a20735996261f82af036b3f3dff000dc9">Engine::Render::ShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_bloom_pass.html#ad98a2abbf4c5767340a0c48dbb0ea519">Engine::Render::BloomPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_blur_pass.html#afe8162d5c3770ec8c480debccca914ea">Engine::Render::BlurPass</a>.</p>
+<p>Reimplemented in <a class="el" href="struct_engine_1_1_render_1_1_g_buffer_render_pass.html#a99953f8aa34a22da257bf0a5853f5eb8">Engine::Render::GBufferRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#af36f80874d5d0e792f955759c4e54f81">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a6056dd0547edc6384b1832b92567ef70">Engine::Render::SceneRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a20735996261f82af036b3f3dff000dc9">Engine::Render::ShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_bloom_pass.html#ad98a2abbf4c5767340a0c48dbb0ea519">Engine::Render::BloomPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_blur_pass.html#afe8162d5c3770ec8c480debccca914ea">Engine::Render::BlurPass</a>.</p>
 
 </div>
 </div>
@@ -418,7 +421,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reimplemented in <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#a8283b2377e945dc4a9094dd9f76c42c8">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a6f6f76ae2a9e96496af13138d4375579">Engine::Render::SceneRenderPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#ab8c0a9c56de0caf64ac78b8c30cb41bf">Engine::Render::ShadowRenderPass</a>.</p>
+<p>Reimplemented in <a class="el" href="struct_engine_1_1_render_1_1_g_buffer_render_pass.html#a481324a966907ba9f37c6a58d8e6a147">Engine::Render::GBufferRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#a8283b2377e945dc4a9094dd9f76c42c8">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a6f6f76ae2a9e96496af13138d4375579">Engine::Render::SceneRenderPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#ab8c0a9c56de0caf64ac78b8c30cb41bf">Engine::Render::ShadowRenderPass</a>.</p>
 
 </div>
 </div>
@@ -456,7 +459,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="struct_engine_1_1_core_1_1_main_window_component_base.html#a5e08b813a8001952335af4a652bc2abb">Engine::Core::MainWindowComponentBase</a>, <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#aef8f68a5be16a1e47eab2697ebcdd3fe">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a949ecb0a75c3aa0eb69f47c200821b71">Engine::Render::SceneRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a94246c0398d6df3dec02824abf4eb5cc">Engine::Render::ShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_bloom_pass.html#a761208956b0550d58cfd121a1e31b2ba">Engine::Render::BloomPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_blur_pass.html#a4bbe5a2f28fafeb4a2b27252f2099210">Engine::Render::BlurPass</a>.</p>
+<p>Implemented in <a class="el" href="struct_engine_1_1_core_1_1_main_window_component_base.html#a5e08b813a8001952335af4a652bc2abb">Engine::Core::MainWindowComponentBase</a>, <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#aef8f68a5be16a1e47eab2697ebcdd3fe">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a949ecb0a75c3aa0eb69f47c200821b71">Engine::Render::SceneRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_g_buffer_render_pass.html#ab7ccd392122887e09302906e241c4271">Engine::Render::GBufferRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a94246c0398d6df3dec02824abf4eb5cc">Engine::Render::ShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_bloom_pass.html#a761208956b0550d58cfd121a1e31b2ba">Engine::Render::BloomPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_blur_pass.html#a4bbe5a2f28fafeb4a2b27252f2099210">Engine::Render::BlurPass</a>.</p>
 
 </div>
 </div>
@@ -556,7 +559,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="struct_engine_1_1_core_1_1_main_window_component_base.html#a9029f96e394108e19274dc05a5a51280">Engine::Core::MainWindowComponentBase</a>, <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#ae9a8b40b07ea3d56b94fea4021197621">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#adcf5d9e1d5fd0260fbe61670fe18655b">Engine::Render::SceneRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a80b7ce14a31e9305be216b3edb5fe913">Engine::Render::ShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_bloom_pass.html#a0442a9468223749453e67e132c8a9ff8">Engine::Render::BloomPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_blur_pass.html#ae065848c424cca007ccc74faf726e7b2">Engine::Render::BlurPass</a>.</p>
+<p>Implemented in <a class="el" href="struct_engine_1_1_core_1_1_main_window_component_base.html#a9029f96e394108e19274dc05a5a51280">Engine::Core::MainWindowComponentBase</a>, <a class="el" href="struct_engine_1_1_render_1_1_g_buffer_render_pass.html#a7e1fa248fc209e3de5ca198e50b5d1c0">Engine::Render::GBufferRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#ae9a8b40b07ea3d56b94fea4021197621">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#adcf5d9e1d5fd0260fbe61670fe18655b">Engine::Render::SceneRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a80b7ce14a31e9305be216b3edb5fe913">Engine::Render::ShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_bloom_pass.html#a0442a9468223749453e67e132c8a9ff8">Engine::Render::BloomPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_blur_pass.html#ae065848c424cca007ccc74faf726e7b2">Engine::Render::BlurPass</a>.</p>
 
 </div>
 </div>
@@ -639,7 +642,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reimplemented in <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#a699b0c0044ddd527d5a4f07b974c738a">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a573a55edea0ad387ab68a24137b2af5b">Engine::Render::SceneRenderPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a2ad5b128fcae1f263360b7692b92adb2">Engine::Render::ShadowRenderPass</a>.</p>
+<p>Reimplemented in <a class="el" href="struct_engine_1_1_render_1_1_g_buffer_render_pass.html#a1b86aa4edd8fb4ace5dd203a7d4bf224">Engine::Render::GBufferRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#a699b0c0044ddd527d5a4f07b974c738a">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#a573a55edea0ad387ab68a24137b2af5b">Engine::Render::SceneRenderPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a2ad5b128fcae1f263360b7692b92adb2">Engine::Render::ShadowRenderPass</a>.</p>
 
 </div>
 </div>
@@ -722,7 +725,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#af39a710f885326dc26f8b66520d9f69e">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#ad252c9d29c3aa89d091f7a19948e494a">Engine::Render::SceneRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a4b341ce38145d049a0ecd5c974dd34f6">Engine::Render::ShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_bloom_pass.html#a8f104ccd2e925284bf1de434b0a8f290">Engine::Render::BloomPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_blur_pass.html#ab2f9ba952acbcd6661ba1cfd750bea88">Engine::Render::BlurPass</a>.</p>
+<p>Implemented in <a class="el" href="struct_engine_1_1_render_1_1_g_buffer_render_pass.html#a2699e0f60e5f63b8299c72988aac7ce8">Engine::Render::GBufferRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_point_shadow_render_pass.html#af39a710f885326dc26f8b66520d9f69e">Engine::Render::PointShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_scene_render_pass.html#ad252c9d29c3aa89d091f7a19948e494a">Engine::Render::SceneRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_shadow_render_pass.html#a4b341ce38145d049a0ecd5c974dd34f6">Engine::Render::ShadowRenderPass</a>, <a class="el" href="struct_engine_1_1_render_1_1_bloom_pass.html#a8f104ccd2e925284bf1de434b0a8f290">Engine::Render::BloomPass</a>, and <a class="el" href="struct_engine_1_1_render_1_1_blur_pass.html#ab2f9ba952acbcd6661ba1cfd750bea88">Engine::Render::BlurPass</a>.</p>
 
 </div>
 </div>
@@ -862,7 +865,7 @@ Protected Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Oct 19 2026 18:35:06 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Mon Oct 19 2026 21:15:22 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

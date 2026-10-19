@@ -170,7 +170,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#locking">Locking</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/resources/skeletonloader/docs/skeletonloader.html">SkeletonLoader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../samples/Tanks/docs/tanks.html">Tanks</a></li>
@@ -301,8 +304,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a74583c60c40d38bc7826076608c223e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e6fc0c9ed46bbada11baa12acefc1de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_render_1_1_g_p_u_ptr.html">GPUPtr</a>&lt; <a class="el" href="classvoid.html">void</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#a0e6fc0c9ed46bbada11baa12acefc1de">allocateBufferImpl</a> (size_t size, <a class="el" href="namespace_engine_1_1_render.html#ae3d90eb6351de01795d3953f4d9580a7">UsageHint</a> hint=<a class="el" href="namespace_engine_1_1_render.html#ae3d90eb6351de01795d3953f4d9580a7a8de1a267356c58d46e0e0657e77534ff">UsageHint::USAGE_DEFAULT</a>) override</td></tr>
 <tr class="separator:a0e6fc0c9ed46bbada11baa12acefc1de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a904929fef016887b6a8f89b9047113fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#a904929fef016887b6a8f89b9047113fe">bindFormat</a> (<a class="el" href="struct_engine_1_1_render_1_1_vertex_format.html">VertexFormat</a> format, size_t offset=0)</td></tr>
-<tr class="separator:a904929fef016887b6a8f89b9047113fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e80473d32dbf99ac6e1031742029017"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#a2e80473d32dbf99ac6e1031742029017">beginFrame</a> () override</td></tr>
+<tr class="separator:a2e80473d32dbf99ac6e1031742029017"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bdb4fb2601137c9d2a87c590dda89e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#a8bdb4fb2601137c9d2a87c590dda89e6">bindFormat</a> (<a class="el" href="struct_engine_1_1_render_1_1_vertex_format.html">VertexFormat</a> format, uintptr_t offset=0)</td></tr>
+<tr class="separator:a8bdb4fb2601137c9d2a87c590dda89e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56a6cdf752fd3ea255808309ad3b4857"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="struct_engine_1_1_render_1_1_render_target.html">RenderTarget</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#a56a6cdf752fd3ea255808309ad3b4857">createRenderTexture</a> (const <a class="el" href="struct_engine_1_1_math_1_1_vector2i.html">Math::Vector2i</a> &amp;size={ 1, 1 }, const <a class="el" href="struct_engine_1_1_render_1_1_render_texture_config.html">RenderTextureConfig</a> &amp;config={}) override</td></tr>
 <tr class="separator:a56a6cdf752fd3ea255808309ad3b4857"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa6bc8fb7375b772c91911c8be926aa43"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="struct_engine_1_1_render_1_1_render_target.html">RenderTarget</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#aa6bc8fb7375b772c91911c8be926aa43">createRenderWindow</a> (<a class="el" href="struct_engine_1_1_platform_1_1_window_1_1_o_s_window.html">Platform::Window::OSWindow</a> *w, size_t samples) override</td></tr>
@@ -313,6 +318,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a18caf18f6bb6c2a5dc5d8256298e3263"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab7af56dbaf5b0be8af2fe8a0cf303126"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#ab7af56dbaf5b0be8af2fe8a0cf303126">destroyResourceBlock</a> (<a class="el" href="struct_engine_1_1_render_1_1_unique_resource_block.html">UniqueResourceBlock</a> &amp;block) override</td></tr>
 <tr class="separator:ab7af56dbaf5b0be8af2fe8a0cf303126"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b4a089870180d11f00d49307ca9a5e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#a1b4a089870180d11f00d49307ca9a5e0">endFrame</a> () override</td></tr>
+<tr class="separator:a1b4a089870180d11f00d49307ca9a5e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e8c357e8c268a148f0b2be91ae55f46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespace_engine_1_1_memory.html#aa4fadc0dae2c692ec3843d66a7e28217">Memory::WritableByteBuffer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#a6e8c357e8c268a148f0b2be91ae55f46">mapBufferImpl</a> (const <a class="el" href="struct_engine_1_1_render_1_1_g_p_u_ptr.html">GPUPtr</a>&lt; <a class="el" href="classvoid.html">void</a> &gt; &amp;buffer) override</td></tr>
 <tr class="separator:a6e8c357e8c268a148f0b2be91ae55f46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a802fb32c97d5fd114ec78c288eabcd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespace_engine_1_1_memory.html#aa4fadc0dae2c692ec3843d66a7e28217">Memory::WritableByteBuffer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_context.html#a5a802fb32c97d5fd114ec78c288eabcd">mapBufferImpl</a> (const <a class="el" href="struct_engine_1_1_render_1_1_g_p_u_ptr.html">GPUPtr</a>&lt; <a class="el" href="struct_engine_1_1_void.html">Void</a>[]&gt; &amp;buffer) override</td></tr>
@@ -427,6 +434,56 @@ Public Attributes</h2></td></tr>
   </td>
   <td class="mlabels-right">
 <span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2e80473d32dbf99ac6e1031742029017" name="a2e80473d32dbf99ac6e1031742029017"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e80473d32dbf99ac6e1031742029017">&#9670;&#160;</a></span>beginFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Engine::Render::OpenGLRenderContext::beginFrame </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1b4a089870180d11f00d49307ca9a5e0" name="a1b4a089870180d11f00d49307ca9a5e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b4a089870180d11f00d49307ca9a5e0">&#9670;&#160;</a></span>endFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Render::OpenGLRenderContext::endFrame </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -858,8 +915,8 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a904929fef016887b6a8f89b9047113fe" name="a904929fef016887b6a8f89b9047113fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a904929fef016887b6a8f89b9047113fe">&#9670;&#160;</a></span>bindFormat()</h2>
+<a id="a8bdb4fb2601137c9d2a87c590dda89e6" name="a8bdb4fb2601137c9d2a87c590dda89e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bdb4fb2601137c9d2a87c590dda89e6">&#9670;&#160;</a></span>bindFormat()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -873,7 +930,7 @@ Public Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
+          <td class="paramtype">uintptr_t&#160;</td>
           <td class="paramname"><em>offset</em> = <code>0</code>&#160;</td>
         </tr>
         <tr>
@@ -967,7 +1024,7 @@ Public Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Oct 19 2026 18:35:06 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Mon Oct 19 2026 21:15:22 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

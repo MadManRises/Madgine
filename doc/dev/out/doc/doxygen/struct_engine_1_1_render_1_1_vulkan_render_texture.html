@@ -170,7 +170,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#locking">Locking</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/resources/skeletonloader/docs/skeletonloader.html">SkeletonLoader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../samples/Tanks/docs/tanks.html">Tanks</a></li>
@@ -382,6 +385,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6a9bd4d161d67444ade9050072d749e4 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0873448c0238810865cf1f8ccbc81697 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_target.html#a0873448c0238810865cf1f8ccbc81697">name</a> () const</td></tr>
 <tr class="separator:a0873448c0238810865cf1f8ccbc81697 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a584fe9588bfc932467b4a0654ac0d4ff inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_target.html#a584fe9588bfc932467b4a0654ac0d4ff">paused</a> () const</td></tr>
+<tr class="separator:a584fe9588bfc932467b4a0654ac0d4ff inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9bdbe66f93b4b51fd760550089093f7 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_target.html#ae9bdbe66f93b4b51fd760550089093f7">popAnnotation</a> ()=0</td></tr>
 <tr class="separator:ae9bdbe66f93b4b51fd760550089093f7 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f085594aa1733a009c437cf17012fae inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_target.html#a1f085594aa1733a009c437cf17012fae">pushAnnotation</a> (const char *tag)=0</td></tr>
@@ -398,6 +403,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6581500d2f59f757c6fd57f8fa9984f3 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac81f37928d763c69b9c415b0eaa50fc7 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_target.html#ac81f37928d763c69b9c415b0eaa50fc7">resizeImpl</a> (const <a class="el" href="struct_engine_1_1_math_1_1_vector2i.html">Math::Vector2i</a> &amp;<a class="el" href="struct_engine_1_1_render_1_1_render_target.html#a90a2018d33374208d352a6feb171ee0d">size</a>)=0</td></tr>
 <tr class="separator:ac81f37928d763c69b9c415b0eaa50fc7 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47ca3567a933ca891ae1458423fda308 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_target.html#a47ca3567a933ca891ae1458423fda308">setPaused</a> (bool <a class="el" href="struct_engine_1_1_render_1_1_render_target.html#a584fe9588bfc932467b4a0654ac0d4ff">paused</a>)</td></tr>
+<tr class="separator:a47ca3567a933ca891ae1458423fda308 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3530873bfcd0c63ed0e07458786e9099 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_target.html#a3530873bfcd0c63ed0e07458786e9099">setRenderSpace</a> (const <a class="el" href="struct_engine_1_1_math_1_1_rect2i.html">Math::Rect2i</a> &amp;space)</td></tr>
 <tr class="separator:a3530873bfcd0c63ed0e07458786e9099 inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93b961828642866394e1953b6ee869ac inherit pub_methods_struct_engine_1_1_render_1_1_render_target"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_target.html#a93b961828642866394e1953b6ee869ac">setScissorsRect</a> (const <a class="el" href="struct_engine_1_1_math_1_1_rect2i.html">Math::Rect2i</a> &amp;space)=0</td></tr>
@@ -827,7 +834,7 @@ Additional Inherited Members</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Oct 19 2026 18:35:07 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Mon Oct 19 2026 21:15:22 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

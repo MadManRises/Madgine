@@ -1,0 +1,14 @@
+.. meta::be07fcfd017f7bf500772ce6b88e0fb9cf730c88c4a2ecdeec42bb8f1b027f13584192cc7bae4f1ce48a151847d3ffe3942192cc9ee184ef2f99537e6ebea5d5
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: plugins/misc/scene/src/Madgine/scene/entity/components/spotlight.cpp File Reference
+
+plugins/misc/scene/src/Madgine/scene/entity/components/spotlight.cpp File Reference
+===================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: spotlight_8cpp.html
