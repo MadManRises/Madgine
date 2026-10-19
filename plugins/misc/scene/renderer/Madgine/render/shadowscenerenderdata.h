@@ -8,7 +8,7 @@
 namespace Engine {
 namespace Render {
 
-    struct ShadowSceneRenderData : RenderData {
+    struct MADGINE_SCENE_RENDERER_EXPORT ShadowSceneRenderData : RenderData {
 
         ShadowSceneRenderData(Scene::SceneManager &scene, SceneRenderData &renderData);
 
