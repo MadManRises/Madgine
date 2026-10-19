@@ -227,15 +227,25 @@ jobs:
       with:
         ref: 'gh-pages'
         path: 'gh-pages'
+                
+    - name: Install wasm-split
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: getsentry/symbolicator
+        latest: true
+        fileName: wasm-split-Linux-x86_64
 
     - name: Updating gh-pages branch
       env: 
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       run: |
+        chmod +x ${{ github.workspace }}/wasm-split-Linux-x86_64
+        mkdir ${{ github.workspace }}/debug
         cd gh-pages
         rm -rf ${{ github.ref_name }} 
         mkdir ${{ github.ref_name }} 
         unzip ${{ github.workspace }}/packages/*.zip -d ${{ github.ref_name }} 
+        ${{ github.workspace }}/wasm-split-Linux-x86_64 ${{ github.ref_name }}/bin/MadgineLauncher.wasm -o ${{ github.ref_name }}/bin/MadgineLauncher.wasm -d ${{ github.workspace }}/debug/MadgineLauncher.debug.wasm --strip
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add ${{ github.ref_name }} 
