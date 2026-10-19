@@ -1,3 +1,4 @@
+#include "Madgine/render/shadinglanguage/distancefield.hlsl"
 
 struct Im3DPerApplication
 {
@@ -55,11 +56,6 @@ export FragmentData im3d_VS(AppData IN)
     OUT.uv = IN.aUV;
 
     return OUT;
-}
-
-float median(float r, float g, float b)
-{
-    return max(min(r, g), min(max(r, g), b));
 }
 
 export float4 im3d_PS(FragmentData IN) : SV_TARGET
