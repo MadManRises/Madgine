@@ -49,14 +49,20 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mData.mScene.entityComponentList<Scene::Entity::PointLight>();
-        if (mIndex >= lights.size())
+        // The mIndex-th shadow casting light that is switched on (same selection as SceneRenderPass)
+        Scene::Entity::Entity *lightEntity = nullptr;
+        size_t index = 0;
+        for (auto &[light, entity] : mData.mScene.entityComponentList<Scene::Entity::PointLight>()) {
+            if (light.castsShadow() && index++ == mIndex) {
+                lightEntity = &entity;
+                break;
+            }
+        }
+        if (!lightEntity)
             return;
 
         // TODO Culling
-        auto it = lights.begin();
-        std::advance(it, mIndex);
-        Scene::Entity::Entity &entity = it->entity();
+        Scene::Entity::Entity &entity = *lightEntity;
         Scene::Entity::Transform *transform = entity.getComponent<Scene::Entity::Transform>();
         if (!transform)
             return;

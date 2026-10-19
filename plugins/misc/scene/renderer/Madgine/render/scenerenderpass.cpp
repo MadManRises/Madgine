@@ -103,20 +103,21 @@ namespace Render {
             perFrame->light.light.dir = (v * Math::Vector4 { mData.mScene.mAmbientLightDirection, 0.0f }).xyz();
             perFrame->light.light.orthographic = mData.mScene.mAmbientLightOrthographic;
 
-            Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mData.mScene.entityComponentList<Scene::Entity::PointLight>();
-            perFrame->pointLightCount = lights.size();
-            if (perFrame->pointLightCount > 2) {
-                LOG_WARNING("Too many point lights in scene!");
-                perFrame->pointLightCount = 2;
-            }
-
+            // The forward renderer supports two point lights, both with shadow maps: the first two shadow casting lights
+            // that are switched on (see PointShadowRenderPass)
             size_t i = 0;
-            for (auto &[light, entity] : lights | std::ranges::views::take(2)) {
+            for (auto &[light, entity] : mData.mScene.entityComponentList<Scene::Entity::PointLight>()) {
+                if (!light.castsShadow())
+                    continue;
+                if (i == 2) {
+                    LOG_WARNING_ONCE("Too many shadow casting point lights in scene for the forward renderer!");
+                    break;
+                }
                 Scene::Entity::Transform *t = entity.getComponent<Scene::Entity::Transform>();
                 if (t) {
                     float range = light.mRange;
                     perFrame->pointLights[i].light.position = (v * Math::Vector4 { t->mPosition, 1.0f }).xyz();
-                    perFrame->pointLights[i].light.color = Math::Vector3 { light.mColor };
+                    perFrame->pointLights[i].light.color = Math::Vector3 { light.mColor } * light.mIntensity;
                     perFrame->pointLights[i].light.constantFactor = mLightConstantFactor;
                     perFrame->pointLights[i].light.linearFactor = mLightLinearFactor / range;
                     perFrame->pointLights[i].light.squaredFactor = mLightSquaredFactor / (range * range);
@@ -124,6 +125,7 @@ namespace Render {
                 }
                 ++i;
             }
+            perFrame->pointLightCount = static_cast<int>(i);
         }
 
         mPipeline->bindResources(target, 3, mShadowResourceBlock);
