@@ -48,7 +48,7 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        updateFrustum(1.0f);
+        updateFrustum(mAspectRatio);
 
         {
             auto perApplication = mPipeline->mapParameters<HLSL::ScenePerApplication>(0);
@@ -130,31 +130,106 @@ namespace Render {
         return mLightFrustum.getViewProjectionMatrix();
     }
 
+    // Points spanning the part of the frustum inside the bounds: the frustum faces clipped against the box, plus the box
+    // corners inside the frustum. Every vertex of the intersection is among them.
+    static std::vector<Math::Vector3> clipFrustum(const std::array<Math::Vector3, 8> &corners, const Math::AABB &bounds)
+    {
+        static constexpr int faces[6][4] = { { 0, 1, 2, 3 }, { 4, 5, 6, 7 }, { 0, 1, 5, 4 }, { 1, 2, 6, 5 }, { 2, 3, 7, 6 }, { 3, 0, 4, 7 } };
+
+        std::vector<Math::Vector3> points;
+        std::vector<Math::Vector3> poly, clipped;
+        for (const auto &face : faces) {
+            poly.assign({ corners[face[0]], corners[face[1]], corners[face[2]], corners[face[3]] });
+            for (size_t axis = 0; axis < 3 && !poly.empty(); ++axis) {
+                for (int side = 0; side < 2 && !poly.empty(); ++side) {
+                    float limit = side == 0 ? bounds.mMin[axis] : bounds.mMax[axis];
+                    float sign = side == 0 ? 1.0f : -1.0f;
+                    clipped.clear();
+                    for (size_t i = 0; i < poly.size(); ++i) {
+                        const Math::Vector3 &p0 = poly[i];
+                        const Math::Vector3 &p1 = poly[(i + 1) % poly.size()];
+                        float d0 = sign * (p0[axis] - limit);
+                        float d1 = sign * (p1[axis] - limit);
+                        if (d0 >= 0.0f)
+                            clipped.push_back(p0);
+                        if ((d0 >= 0.0f) != (d1 >= 0.0f))
+                            clipped.push_back(p0 + (p1 - p0) * (d0 / (d0 - d1)));
+                    }
+                    std::swap(poly, clipped);
+                }
+            }
+            points.insert(points.end(), poly.begin(), poly.end());
+        }
+
+        Math::Vector3 centre = std::accumulate(corners.begin(), corners.end(), Math::Vector3 { Math::Vector3::ZERO }) / 8.0f;
+        for (const Math::Vector3 &p : bounds.corners()) {
+            bool inside = true;
+            for (const auto &face : faces) {
+                Math::Vector3 o = corners[face[0]];
+                Math::Vector3 n = (corners[face[1]] - o).crossProduct(corners[face[3]] - o);
+                if (n.dotProduct(centre - o) * n.dotProduct(p - o) < 0.0f) {
+                    inside = false;
+                    break;
+                }
+            }
+            if (inside)
+                points.push_back(p);
+        }
+
+        return points;
+    }
+
     void ShadowRenderPass::updateFrustum(float aspectRatio)
     {
         Math::Vector3 minBounds = std::numeric_limits<float>::max() * Math::Vector3 { Math::Vector3::UNIT_SCALE };
         Math::Vector3 maxBounds = std::numeric_limits<float>::lowest() * Math::Vector3 { Math::Vector3::UNIT_SCALE };
 
-        Math::Quaternion q = Math::Quaternion::FromDirection(mData.mScene.mAmbientLightDirection, (mCamera.mOrientation * Math::Vector3 { Math::Vector3::UNIT_Z }).crossProduct(mData.mScene.mAmbientLightDirection));
+        // The light space turns with the camera for the best fit of the view in the shadow map
+        const Math::NormalizedVector3 &lightDir = mData.mScene.mAmbientLightDirection;
+        Math::Quaternion q = Math::Quaternion::FromDirection(lightDir, (mCamera.mOrientation * Math::Vector3 { Math::Vector3::UNIT_Z }).crossProduct(lightDir));
         Math::Quaternion qInv = q.inverse();
 
-        Math::Frustum cameraFrustum = mCamera.getFrustum(aspectRatio);
-        Math::Frustum localFrustum = qInv * cameraFrustum;
-        auto corners = localFrustum.getCorners();
+        std::array<Math::Vector3, 8> corners = mCamera.getFrustum(aspectRatio).getCorners();
+        std::vector<Math::Vector3> points;
+        float margin = 1.0f;
+        if (mBounds) {
+            points = clipFrustum(corners, *mBounds);
+            // Casters outside the view still throw shadows into it: extend the light frustum towards the light until it
+            // leaves the bounds
+            float height = mBounds->mMax.y - mBounds->mMin.y;
+            margin = std::min(height / std::max(std::abs(lightDir.y), 0.1f), 2.0f * mBounds->diameter()) + 1.0f;
+        }
+        if (points.empty())
+            points.assign(corners.begin(), corners.end());
 
-        minBounds = std::accumulate(corners.begin(), corners.end(), minBounds, [](const Math::Vector3 &v1, const Math::Vector3 &v2) { return min(v1, v2); });
-        maxBounds = std::accumulate(corners.begin(), corners.end(), maxBounds, [](const Math::Vector3 &v1, const Math::Vector3 &v2) { return max(v1, v2); });
+        for (const Math::Vector3 &p : points) {
+            Math::Vector3 local = qInv * p;
+            minBounds = min(minBounds, local);
+            maxBounds = max(maxBounds, local);
+        }
 
-        Math::Vector3 relPos = (maxBounds + minBounds) / 2.0f;
-        relPos.z = minBounds.z - 1.0f;
+        // Quantize the extent (steps of 1/8 of a power of two) and snap the origin to whole texels, so that moving the
+        // camera without turning it only shifts the shadow map by whole texels and the shadows stay still
+        auto quantize = [](float size) {
+            float step = std::exp2(std::floor(std::log2(std::max(size, 1.0f)))) / 8.0f;
+            return std::ceil(size / step) * step;
+        };
+        Math::Vector2 size;
+        Math::Vector2 origin;
+        for (size_t axis = 0; axis < 2; ++axis) {
+            float extent = maxBounds[axis] - minBounds[axis];
+            float texel = quantize(extent * (1.0f + 2.0f / sShadowMapSize)) / (sShadowMapSize - 2.0f);
+            size[axis] = texel * sShadowMapSize;
+            origin[axis] = (std::floor(minBounds[axis] / texel) - 1.0f) * texel;
+        }
 
-        Math::Vector2 size = maxBounds.xy() - minBounds.xy();
+        Math::Vector3 relPos { origin.x + size.x / 2.0f, origin.y + size.y / 2.0f, minBounds.z - margin };
 
         mLightFrustum = {
             q * relPos,
             q,
             size.y / 2.0f, size.x / 2.0f,
-            1.0f, maxBounds.z - minBounds.z + 1.0f,
+            0.0f, maxBounds.z - minBounds.z + margin,
             true
         };
     }
