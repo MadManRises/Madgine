@@ -9,9 +9,15 @@ namespace Engine {
 namespace Render {
 
     struct GPUMeshData {
+
+        // Temporary solution to handle ResourceBlocks
+        struct ResourceBlockHolder {
+            UniqueResourceBlock mResourceBlock;
+        };
+
         struct Material {
             std::string mName;
-            UniqueResourceBlock mResourceBlock;
+            std::shared_ptr<ResourceBlockHolder> mResourceBlock;          
             Math::Vector4 mDiffuseColor = Math::Vector4::UNIT_SCALE;
         };
         std::vector<Material> mMaterials;

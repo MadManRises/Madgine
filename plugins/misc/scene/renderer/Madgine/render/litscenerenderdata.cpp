@@ -55,7 +55,7 @@ namespace Render {
                 ResourceBlock resource;
                 Math::Vector4 diffuseColor { 1.0f, 1.0f, 1.0f, 1.0f };
                 if (material) {
-                    resource = material->mResourceBlock;
+                    resource = material->mResourceBlock->mResourceBlock;
                     diffuseColor = material->mDiffuseColor;
                 }
 

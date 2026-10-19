@@ -17,6 +17,13 @@ VIRTUALRESOURCELOADERIMPL(Engine::Render::RenderMeshLoader, Engine::Render::GPUM
 namespace Engine {
 namespace Render {
 
+    struct Wrapper : GPUMeshData::ResourceBlockHolder {
+        ~Wrapper() {
+            if (mResourceBlock)
+                RenderContext::getSingleton().destroyResourceBlock(mResourceBlock);
+        }
+    };
+
     RenderMeshLoader::RenderMeshLoader()
     {
         getOrCreateManual("quad", {}, {}, this);
@@ -85,7 +92,10 @@ namespace Render {
                 mapped->shininess = 32.0f;
             }
 
-            gpuMat.mResourceBlock = RenderContext::getSingleton().createResourceBlock({ std::move(diffuseTexture), std::move(emissiveTexture), buffer });
+            std::shared_ptr<Wrapper> wrapper = std::make_shared<Wrapper>();
+            wrapper->mResourceBlock = RenderContext::getSingleton().createResourceBlock({ std::move(diffuseTexture), std::move(emissiveTexture), buffer });
+
+            gpuMat.mResourceBlock = wrapper;
         }
 
         co_return true;
@@ -96,8 +106,7 @@ namespace Render {
         data.mVertices = {};
         data.mIndices = {};
         for (GPUMeshData::Material &gpuMat : data.mMaterials) {
-            if (gpuMat.mResourceBlock)
-                RenderContext::getSingleton().destroyResourceBlock(gpuMat.mResourceBlock);
+            gpuMat.mResourceBlock.reset();
         }
         GPUMeshLoader::reset(data);
     }
