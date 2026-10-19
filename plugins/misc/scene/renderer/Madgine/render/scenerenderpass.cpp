@@ -45,7 +45,7 @@ namespace Render {
 
     void SceneRenderPass::setup(RenderTarget *target)
     {
-        mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "ShadowMap", .mType = TextureType_2DMultiSample, .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0 });
+        mShadowMap = target->context()->createRenderTexture({ static_cast<int>(ShadowRenderPass::sShadowMapSize), static_cast<int>(ShadowRenderPass::sShadowMapSize) }, { .mName = "ShadowMap", .mType = TextureType_2DMultiSample, .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0 });
 
         mShadowMap->addRenderPass(&mShadowPass);
 
@@ -83,6 +83,7 @@ namespace Render {
         Math::Vector2i size = target->renderSpace().mSize;
 
         float aspectRatio = float(size.x) / size.y;
+        mShadowPass.mAspectRatio = aspectRatio;
 
         {
             auto perApplication = mPipeline->mapParameters<HLSL::ScenePerApplication>(0);

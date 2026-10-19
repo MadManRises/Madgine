@@ -26,6 +26,8 @@ namespace Render {
 
         virtual void debugCameras(CallableView<void(const Camera &, std::string_view)> handler) const override;
 
+        ShadowRenderPass &shadowPass() { return mShadowPass; }
+
         float mLightConstantFactor = 1.0f;
         float mLightLinearFactor = 4.5f;
         float mLightSquaredFactor = 75.0f;

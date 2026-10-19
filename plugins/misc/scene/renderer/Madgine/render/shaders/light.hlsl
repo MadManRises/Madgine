@@ -62,6 +62,9 @@ struct LightPerFrame
     PointShadowLight pointLights[2];
 };
 
+// Shaders that only need the light structures and functions (e.g. a deferred lighting pass) define
+// LIGHT_NO_RESOURCES before including this file
+#ifndef LIGHT_NO_RESOURCES
 ConstantBuffer<LightPerFrame> frame : register(b1);
 
 SamplerState texSampler : register(s0);
@@ -70,6 +73,7 @@ SamplerState clampSampler : register(s1);
 Texture2DMS<float> shadowDepthMap : register(t0, space3);
 TextureCube<float> pointShadowDepthMaps0 : register(t1, space3);
 TextureCube<float> pointShadowDepthMaps1 : register(t2, space3);
+#endif
 
 static const float ambientFactor = 0.5;
 
@@ -102,6 +106,19 @@ void castDirectionalLight(
     specularIntensity += specular;
 }
 
+static const float shadowMapSize = 2048.0;
+
+// Fraction of the depth samples of one shadow map texel that do not occlude the given depth
+float shadowTexel(Texture2DMS<float> shadowMap, int2 coord, float depth, int samples)
+{
+    if (any(coord < 0) || any(coord >= int(shadowMapSize)))
+        return 1.0;
+    float lit = 0.0;
+    for (int i = 0; i < samples; ++i)
+        lit += float(depth <= shadowMap.Load(coord, i).r);
+    return lit / samples;
+}
+
 void castDirectionalShadowLight(
     inout float3 diffuseIntensity,
     inout float3 specularIntensity,
@@ -111,23 +128,49 @@ void castDirectionalShadowLight(
     Texture2DMS<float> shadowMap,
     float shininess)
 {
-    float bias = /* max(0.05 * (1.0 - dot(normal, light.light.dir)), */0.0005 /*)*/;
-    
-    
-    float4 lightViewPosition = projectShadow(light.caster, viewPos); 
-    
-    float3 normalizedLightViewPosition = lightViewPosition.xyz / lightViewPosition.w;
-    normalizedLightViewPosition.y *= -1;
-    int2 lightTexCoord = int2(2048 * (normalizedLightViewPosition.xy * 0.5 + 0.5));
-    
-    float lightDepth = normalizedLightViewPosition.z - bias;
+    float lightStrength = 0.0;
 
-    float lightStrength = 1.0;
-
-    for (int i = 0; i < light.caster.shadowSamples; ++i)
+    float NdotL = dot(normal, -light.light.dir);
+    if (NdotL > 0.0)
     {
-        float shadowDepth = shadowMap.Load(lightTexCoord, i).r;
-        lightStrength -= float(lightDepth > shadowDepth) / light.caster.shadowSamples;
+        // Size of a shadow map texel and the light space depth per unit, both taken from the reprojection
+        float3 side = normalize(cross(light.light.dir, abs(light.light.dir.y) < 0.9 ? float3(0.0, 1.0, 0.0) : float3(1.0, 0.0, 0.0)));
+        float texelSize = 2.0 / (length(projectShadow(light.caster, float4(side, 0.0)).xy) * shadowMapSize);
+        float depthPerUnit = abs(projectShadow(light.caster, float4(light.light.dir, 0.0)).z);
+
+        // Normal offset and slope scaled bias against shadow acne
+        float tanTheta = min(sqrt(max(1.0 - NdotL * NdotL, 0.0)) / NdotL, 4.0);
+        float4 offsetPos = float4(viewPos.xyz / viewPos.w + normal * texelSize * (0.6 + 0.8 * (1.0 - NdotL)), 1.0);
+        float bias = depthPerUnit * texelSize * (0.5 + 1.2 * tanTheta);
+
+        float4 lightViewPosition = projectShadow(light.caster, offsetPos);
+        float3 normalizedLightViewPosition = lightViewPosition.xyz / lightViewPosition.w;
+        normalizedLightViewPosition.y *= -1;
+
+        float lightDepth = normalizedLightViewPosition.z - bias;
+
+        if (any(abs(normalizedLightViewPosition.xy) > 1.0) || lightDepth > 1.0)
+        {
+            lightStrength = 1.0;
+        }
+        else
+        {
+            // 2x2 texel box filter evaluated bilinearly (3x3 texels): soft edges that move smoothly instead of
+            // jumping from texel to texel
+            float2 texelPos = shadowMapSize * (normalizedLightViewPosition.xy * 0.5 + 0.5);
+            int2 base = int2(floor(texelPos));
+            float2 f = texelPos - floor(texelPos);
+            float weightX[3] = { 1.0 - f.x, 1.0, f.x };
+            float weightY[3] = { 1.0 - f.y, 1.0, f.y };
+            for (int y = 0; y < 3; ++y)
+            {
+                for (int x = 0; x < 3; ++x)
+                {
+                    lightStrength += weightX[x] * weightY[y] * shadowTexel(shadowMap, base + int2(x - 1, y - 1), lightDepth, light.caster.shadowSamples);
+                }
+            }
+            lightStrength /= 4.0;
+        }
     }
 
     castDirectionalLight(
@@ -139,9 +182,6 @@ void castDirectionalShadowLight(
         lightStrength,
         shininess
     );
-
-    //diffuseIntensity = float3(lightDepth, shadowMap.Load(lightTexCoord, 0).r, lightTexCoord.y);
-    //diffuseIntensity = normalizedLightViewPosition;
 }
 
 void castPointLight(
@@ -195,6 +235,7 @@ void castPointShadowLight(
     );
 }
 
+#ifndef LIGHT_NO_RESOURCES
 export HDRShaderOutput lighting(LightingInput IN)
 {
     
@@ -258,3 +299,4 @@ export HDRShaderOutput lighting(LightingInput IN)
 	
     return OUT;
 }
+#endif

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Meta/math/boundingbox.h"
 #include "Meta/math/frustum.h"
 
 #include "Madgine/render/pipelineloader.h"
@@ -27,6 +28,16 @@ namespace Render {
         Math::Matrix4 viewProjectionMatrix() const;
 
         void updateFrustum(float aspectRatio);
+
+        // Aspect ratio of the view the shadows are rendered for (set by the scene pass)
+        float mAspectRatio = 1.0f;
+
+        // Optional world-space bounds of all shadow receivers and casters. When set, the shadow map only covers the part
+        // of the camera frustum inside these bounds (e.g. the ground layer of a city instead of the whole far plane).
+        std::optional<Math::AABB> mBounds;
+
+        // Resolution of the shadow map, used to snap the light frustum to whole texels
+        static constexpr float sShadowMapSize = 2048.0f;
 
         virtual void debugFrustums(CallableView<void(const Math::Frustum &, std::string_view)> handler) const override;
 
