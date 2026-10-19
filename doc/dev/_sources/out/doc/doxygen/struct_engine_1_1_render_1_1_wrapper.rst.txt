@@ -1,0 +1,14 @@
+.. meta::f59ab82bdbafbc80885c6119145ac2334513ff767a78c4c70ec40e475dd09bd02812ed26977e33ed3324676c36ecfc796ad152045c7a5d1f2faf72038ce81a0d
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Engine::Render::Wrapper Struct Reference
+
+Wrapper Struct Reference
+========================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_render_1_1_wrapper.html
