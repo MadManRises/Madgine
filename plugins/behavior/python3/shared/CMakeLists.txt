@@ -1,7 +1,7 @@
 
 if (NOT CMAKE_CROSSCOMPILING)
 
-	find_package (Python3 REQUIRED COMPONENTS Interpreter Development.Embed)
+	find_package (Python3 3.12 COMPONENTS Interpreter Development.Embed)
 
 	if (NOT Python3_Development.Embed_FOUND)
 		MESSAGE(STATUS "Python3 not found.")
