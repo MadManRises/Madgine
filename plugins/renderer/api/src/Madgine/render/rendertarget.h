@@ -41,6 +41,8 @@ namespace Render {
         virtual void endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const;
 
         virtual bool skipFrame();
+        void setPaused(bool paused);
+        bool paused() const;
 
         virtual void beginFrame();
         virtual RenderFuture endFrame();
@@ -83,6 +85,8 @@ namespace Render {
         std::vector<std::string> mPostProcessing;
 
         Math::Rect2i mRenderSpace;
+
+        bool mPaused = false;
     };
 
 }

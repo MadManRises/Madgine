@@ -109,7 +109,17 @@ namespace Render {
 
     bool RenderTarget::skipFrame()
     {
-        return false;
+        return mPaused;
+    }
+
+    void RenderTarget::setPaused(bool paused)
+    {
+        mPaused = paused;
+    }
+
+    bool RenderTarget::paused() const
+    {
+        return mPaused;
     }
 
     void RenderTarget::beginFrame()
