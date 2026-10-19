@@ -17,7 +17,7 @@ namespace Widgets {
         Math::Color4 mBottomRight = { 1.0f, 1.0f, 1.0f, 1.0f };
     };
 
-    struct ColorRenderData : RenderData {
+    struct MADGINE_WIDGETS_EXPORT ColorRenderData : RenderData {
 
         ColorRenderData() = default;
         ColorRenderData(Math::Color4 color)
@@ -32,7 +32,7 @@ namespace Widgets {
         Math::Vector2 mGradient = { 0.0f, 0.0f };
     };
 
-    struct ColorFrame {
+    struct MADGINE_WIDGETS_EXPORT ColorFrame {
         ColorQuad toQuad(Math::Vector2 pos, Math::Vector2 size) const;
 
         ColorRenderData mRenderData;
