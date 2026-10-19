@@ -52,6 +52,7 @@ namespace Render {
             GPUMeshData::Material &gpuMat = data.mMaterials.emplace_back();
             gpuMat.mName = mat.mName;
             gpuMat.mDiffuseColor = mat.mDiffuseColor;
+            gpuMat.mEmissiveColor = mat.mEmissiveColor;
 
             std::vector<Threading::TaskFuture<bool>> futures;
 

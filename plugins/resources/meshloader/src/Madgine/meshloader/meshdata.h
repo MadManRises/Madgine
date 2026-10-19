@@ -17,6 +17,8 @@ namespace Render {
             std::string mDiffuseName;
             std::string mEmissiveName;
             Math::Vector4 mDiffuseColor = Math::Vector4::UNIT_SCALE;
+            // Light emitted by the surface itself (added after lighting, e.g. lamps, displays)
+            Math::Vector3 mEmissiveColor = Math::Vector3::ZERO;
         };
 
         template <typename VertexType>

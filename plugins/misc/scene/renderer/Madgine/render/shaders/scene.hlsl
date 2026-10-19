@@ -24,6 +24,7 @@ struct SceneInstanceData
     row_major float4x4 anti_mv;
     float4 diffuseColor;
     float4 specularColor;
+    float4 emissiveColor;
 	//ArrayPtr<float4x4> bones;
 };
 
@@ -53,6 +54,7 @@ struct FragmentData
     float4 viewPos : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD0;
+    float3 emissive : COLOR1;
     float4 position : SV_Position;
 };
 
@@ -86,6 +88,8 @@ export FragmentData scene_VS(AppData IN)
 
     OUT.uv = IN.aUV;
 
+    OUT.emissive = aInstance.emissiveColor.rgb;
+
     return OUT;
 }
 
@@ -106,7 +110,7 @@ export LightingInput scene(FragmentData IN)
     
     lightInput.albedo = IN.color;
     lightInput.viewPos = IN.viewPos;
-    lightInput.emissiveColor = float3(0.0, 0.0, 0.0);
+    lightInput.emissiveColor = IN.emissive;
     lightInput.shininess = material.shininess;
 
     lightInput.normal = normalize(IN.normal);
@@ -122,7 +126,7 @@ export LightingInput scene(FragmentData IN)
         }
         else
         {
-            lightInput.emissiveColor = emissiveTex.Sample(texSampler, IN.uv).rgb;
+            lightInput.emissiveColor += emissiveTex.Sample(texSampler, IN.uv).rgb;
             lightInput.albedo = diffuseTex.Sample(texSampler, IN.uv) * lightInput.albedo;
         }
     }

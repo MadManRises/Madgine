@@ -19,6 +19,8 @@ namespace Render {
             std::string mName;
             std::shared_ptr<ResourceBlockHolder> mResourceBlock;          
             Math::Vector4 mDiffuseColor = Math::Vector4::UNIT_SCALE;
+            // Light emitted by the surface itself (added after lighting, e.g. lamps, displays)
+            Math::Vector3 mEmissiveColor = Math::Vector3::ZERO;
         };
         std::vector<Material> mMaterials;
         Math::AABB mAABB;

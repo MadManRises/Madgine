@@ -21,11 +21,13 @@ METATABLE_BEGIN(Engine::Render::GPUMeshData::Material)
     /* MEMBER(mDiffuseTexture)
     MEMBER(mEmissiveTexture)*/
     MEMBER(mDiffuseColor)
+    MEMBER(mEmissiveColor)
 METATABLE_END(Engine::Render::GPUMeshData::Material)
 
 SERIALIZETABLE_BEGIN(Engine::Render::GPUMeshData::Material)
     FIELD(mName)
     FIELD(mDiffuseColor)
+    FIELD(mEmissiveColor)
 SERIALIZETABLE_END(Engine::Render::GPUMeshData::Material)
 
 namespace Engine {

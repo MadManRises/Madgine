@@ -28,6 +28,7 @@ namespace Render {
         struct ObjectData {
             Math::Matrix4 mTransform;
             Math::Vector4 mDiffuseColor;
+            Math::Vector3 mEmissiveColor;
             GPUPtr<Math::Matrix4[]> mBones;
         };
         std::map<NonInstancedData, std::vector<ObjectData>> mInstances;
