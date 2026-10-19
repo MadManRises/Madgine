@@ -215,6 +215,24 @@ namespace Render {
         glBindFramebuffer(GL_FRAMEBUFFER, it->second[targetSubresourceIndex]);
         GL_CHECK();
 
+        // Output i of the pass goes to texture targetIndex + i (like DirectX 12). Not for subresources without an own
+        // framebuffer (faces of a layered cube map): 0 is the default framebuffer.
+        if (it->second[targetSubresourceIndex] != 0) {
+            GLenum drawBuffers[] = { GL_NONE, GL_NONE, GL_NONE };
+            size_t count = targetIndex < textureCount() ? std::min(targetCount, textureCount() - targetIndex) : 0;
+            assert(count <= array_size(drawBuffers));
+            for (size_t i = 0; i < count; ++i)
+                drawBuffers[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + targetIndex + i);
+            glDrawBuffers(static_cast<GLsizei>(count), drawBuffers);
+            GL_CHECK();
+
+            // Like DirectX 12: every iteration of a flip flop target starts with cleared targets and depth
+            if (canFlipFlop()) {
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                GL_CHECK();
+            }
+        }
+
         OpenGLRenderTarget::beginIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
@@ -231,6 +249,10 @@ namespace Render {
         auto it = mFramebuffers.find(mFlipFlopIndices);
         if (it != mFramebuffers.end()) {
             glBindFramebuffer(GL_FRAMEBUFFER, it->second[0]);
+            GL_CHECK();
+            // The clear covers all textures (an iteration may have selected only some of them)
+            GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(static_cast<GLsizei>(textureCount()), drawBuffers);
             GL_CHECK();
         }
 
@@ -250,7 +272,8 @@ namespace Render {
 
     ConstTexturePtr OpenGLRenderTexture::texture(size_t index) const
     {
-        int offset = canFlipFlop() ? mFlipFlopIndices[index] : 0;
+        // With flip flop: the texture written last (the other one is the next to be rendered into)
+        int offset = canFlipFlop() ? (1 ^ mFlipFlopIndices[index]) : 0;
         return mTextures[textureCount() * offset + index];
     }
 
