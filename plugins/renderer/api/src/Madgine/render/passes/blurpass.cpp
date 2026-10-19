@@ -2,6 +2,8 @@
 
 #include "blurpass.h"
 
+#include "Meta/math/matrix4.h"
+
 #include "Madgine/render/texture.h"
 #include "Madgine/render/texturedescriptor.h"
 
@@ -32,6 +34,7 @@ namespace Render {
 
         {
             auto data = mPipeline->mapParameters<HLSL::BlurData>(0);
+            data->clipSpace = target->getClipSpaceMatrix();
             data->horizontal = iteration % 2;
             data->textureSize = mInput->size();
         }
@@ -77,8 +80,10 @@ namespace Render {
 
     void BlurPass::setInput(RenderTarget *input, size_t inputIndex)
     {
+        if (mInput)
+            removeDependency(mInput);
         mInput = input;
-        // addDependency(input);
+        addDependency(input);
         mInputIndex = inputIndex;
     }
 

@@ -1,6 +1,7 @@
 
 struct BlurData
 {
+    float4x4 clipSpace;
     int2 textureSize;
     bool horizontal;
 };
@@ -29,7 +30,8 @@ export FragmentData blur_VS(AppData IN)
     FragmentData OUT;
 
     OUT.texCoord = (IN.aPos.xy * float2(1.0, -1.0) + float2(1.0, 1.0)) * 0.5;
-    OUT.position = float4(IN.aPos, 1.0);
+    // Same orientation as the input on every backend
+    OUT.position = mul(data.clipSpace, float4(IN.aPos, 1.0));
 
     return OUT;
 }

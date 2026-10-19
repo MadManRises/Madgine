@@ -23,14 +23,16 @@ namespace Render {
         void setInput(RenderTarget *input, size_t inputIndex = 0, RenderTarget *blurInput = nullptr, size_t blurIndex = 1);
 
         float mExposure = 1.0f;
+        // Factor for the blurred bright parts added to the image
+        float mBloomIntensity = 1.0f;
 
     private:
         int mPriority;
 
         BlurPass mBlur;
 
-        size_t mInputIndex;
-        RenderTarget *mInput;
+        size_t mInputIndex = 0;
+        RenderTarget *mInput = nullptr;
     };
 
 }
