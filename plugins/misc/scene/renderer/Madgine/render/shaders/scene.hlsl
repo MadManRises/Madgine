@@ -1,6 +1,7 @@
 
 #include "light.hlsl"
 #include "Madgine/render/shadinglanguage/memory.hlsl"
+#include "Madgine/render/shadinglanguage/distancefield.hlsl"
 
 
 struct ScenePerApplication
@@ -98,11 +99,6 @@ Texture2D diffuseTex : register(t0, space2);
 Texture2D emissiveTex : register(t1, space2);
 
 ConstantBuffer<MaterialData> material : register(b2, space2);
-
-float median(float r, float g, float b)
-{
-    return max(min(r, g), min(max(r, g), b));
-}
 
 export LightingInput scene(FragmentData IN)
 {

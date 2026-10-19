@@ -1,4 +1,4 @@
-
+#include "Madgine/render/shadinglanguage/distancefield.hlsl"
 
 struct WidgetsPerApplication
 {
@@ -57,11 +57,6 @@ export FragmentData widgets_VS(AppData IN)
 Texture2D tex : register(t0, space2);
 SamplerState texSampler : register(s0);
 
-
-float median(float r, float g, float b)
-{
-    return max(min(r, g), min(max(r, g), b));
-}
 
 export float4 widgets_PS(FragmentData IN) : SV_TARGET
 {
