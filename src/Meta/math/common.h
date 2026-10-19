@@ -29,9 +29,12 @@ namespace Math {
 
     constexpr float sqrtf(float x)
     {
-        return x >= 0 && x < std::numeric_limits<float>::infinity()
-            ? sqrtNewtonRaphson(x, x, 0)
-            : std::numeric_limits<float>::quiet_NaN();
+        if (std::is_constant_evaluated())
+            return x >= 0 && x < std::numeric_limits<float>::infinity()
+                ? sqrtNewtonRaphson(x, x, 0)
+                : std::numeric_limits<float>::quiet_NaN();
+        else
+            return std::sqrt(x);
     }
 
     template <typename T>
