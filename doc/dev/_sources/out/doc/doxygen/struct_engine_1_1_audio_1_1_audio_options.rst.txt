@@ -1,0 +1,14 @@
+.. meta::36b3291d9ddce9f912179c2c324c612b7ba7ef736dc70cc47f72a2f584fbca3eff947e6ed9a2d4aef296aced7bd0613c039dff025032a0196594b6a865fb8368
+
+:orphan:
+
+.. title:: Madgine - Doxygen Documentation: Engine::Audio::AudioOptions Struct Reference
+
+AudioOptions Struct Reference
+=============================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: struct_engine_1_1_audio_1_1_audio_options.html

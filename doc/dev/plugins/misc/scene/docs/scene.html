@@ -169,6 +169,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../resources/api/docs/resources.html">Resources</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../root/api/docs/root.html">Root</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Scene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#behaviors">Behaviors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#locking">Locking</a></li>
 </ul>
 </li>
@@ -242,13 +243,20 @@
 </dd></dl>
 
 <p>The Scene plugin contains a comprehensive implementation of a Scene system, including a full Entity-Component-System (ECS). It is built upon the Base plugin and the SceneManager is implemented as a GlobalAPIComponent.</p>
+<section id="behaviors">
+<h2>Behaviors<a class="headerlink" href="#behaviors" title="Permalink to this heading"></a></h2>
+<p>The Scene plugin integrates seamlessly with the Behavior system. Every Entity holds a lifetime, that is itself embedded in an asynchronous lifetime. Behaviors are the preferred way to assign
+logic to entities for gameplay purposes. In special cases, where heavy calculations over a large number of Entity components is needed, Systems can be used instead. The plugin also makes
+use and extends the Context feature within Behaviors. EntityContext and SceneContext parameters can be added to any Behavior argument list, defaulting to <cite>= {}</cite>. This way the function signature
+effectively remains unchanged, but inside the function body, those parameters will have been filled in, providing access to the enclosing Entity and the SceneManager.</p>
+</section>
 <section id="locking">
 <h2>Locking<a class="headerlink" href="#locking" title="Permalink to this heading"></a></h2>
 <p>Since the current state of a Scene Manager can be accessed by multiple systems, it is important to make sure that no critical data races can occur. The implementation makes use of an orthogonal model.
 There exists a single DataMutex, that is used to guard adding or removing entity components from their respective EntityComponentLists. Note that components may only be added during creation
 and may only be removed during destruction of the Entity. Furthermore, EntityComponentLists are required to keep pointers to their elements stable on insert/remove of the container.
 Transitively, this means that as long as the Entity is guaranteed to be still alive, accessing any of it’s components is also safe.
-Entities have their own mechanism to ensure safe access. Entities themselves live inside the asynchronous Behavior space. createEntity() itself is embedding itself into the lifetime of
+Entities have their own mechanism to ensure safe access. createEntity() itself is embedding itself into the lifetime of
 its enclosing SceneContainer. This is already taking care of ensuring the DataLock is held during creation/destruction. createEntity() does <em>not</em> require a held DataMutex.
 Behaviors of an Entity are guaranteed to finish before the lifetime of that Entity is allowed to finish. When accessing Entities from Behaviors, they always need to be passed as EntityPtr.
 EntityPtr is a Binding and acts as weak pointer into the lifetime of said Entity. If accessed successfully, the lifetime of the Entity is extended at least until the access finished. If the access fails,

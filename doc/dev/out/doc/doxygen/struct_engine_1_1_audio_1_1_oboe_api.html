@@ -167,6 +167,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/resources/api/docs/resources.html">Resources</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/root/api/docs/root.html">Root</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html">Scene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#behaviors">Behaviors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#locking">Locking</a></li>
 </ul>
 </li>
@@ -298,10 +299,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a34ac2b8cd341d0ed1095333cad377f97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5416be423e0b4ee378441dcd5fe1abff"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a5416be423e0b4ee378441dcd5fe1abff">~OboeApi</a> ()</td></tr>
 <tr class="separator:a5416be423e0b4ee378441dcd5fe1abff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a273d09c1c4688032848cd9a8d6bf15fb"><td class="memItemLeft" align="right" valign="top">virtual std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a273d09c1c4688032848cd9a8d6bf15fb">key</a> () const override</td></tr>
+<tr class="memitem:a273d09c1c4688032848cd9a8d6bf15fb"><td class="memItemLeft" align="right" valign="top">std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a273d09c1c4688032848cd9a8d6bf15fb">key</a> () const override</td></tr>
 <tr class="separator:a273d09c1c4688032848cd9a8d6bf15fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a756b6b9ebb52084bdace5dd755de86d9"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a756b6b9ebb52084bdace5dd755de86d9">playSound</a> (AudioLoader::Handle buffer) override</td></tr>
-<tr class="separator:a756b6b9ebb52084bdace5dd755de86d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cfb06eb9f2fa3edfc3ee76061e8c241"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a2cfb06eb9f2fa3edfc3ee76061e8c241">playDynamicSound</a> (AudioLoader::Handle buffer, <a class="el" href="struct_engine_1_1_execution_1_1_binding_ptr.html">Execution::BindingPtr</a>&lt; <a class="el" href="struct_engine_1_1_math_1_1_vector2.html">Math::Vector2</a> &gt; distance, const <a class="el" href="struct_engine_1_1_audio_1_1_audio_options.html">AudioOptions</a> &amp;options) override</td></tr>
+<tr class="separator:a2cfb06eb9f2fa3edfc3ee76061e8c241"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6544bb31806b71e7e204dde7e111277f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a6544bb31806b71e7e204dde7e111277f">playDynamicSound</a> (const <a class="el" href="struct_engine_1_1_audio_1_1_audio_buffer.html">AudioBuffer</a> &amp;buffer, <a class="el" href="struct_engine_1_1_execution_1_1_binding_ptr.html">Execution::BindingPtr</a>&lt; <a class="el" href="struct_engine_1_1_math_1_1_vector2.html">Math::Vector2</a> &gt; distance, const <a class="el" href="struct_engine_1_1_audio_1_1_audio_options.html">AudioOptions</a> &amp;options) override</td></tr>
+<tr class="separator:a6544bb31806b71e7e204dde7e111277f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_struct_engine_1_1_reflect_1_1_virtual_scope"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_struct_engine_1_1_reflect_1_1_virtual_scope')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="struct_engine_1_1_reflect_1_1_virtual_scope.html">Engine::Reflect::VirtualScope&lt; T, Base &gt;</a></td></tr>
 <tr class="memitem:ab01a0fcceedfb0f0d62c7a250d7a3a94 inherit pub_methods_struct_engine_1_1_reflect_1_1_virtual_scope"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="struct_engine_1_1_reflect_1_1_scope_ptr.html">ScopePtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_reflect_1_1_virtual_scope.html#ab01a0fcceedfb0f0d62c7a250d7a3a94">customScopePtr</a> () override</td></tr>
 <tr class="separator:ab01a0fcceedfb0f0d62c7a250d7a3a94 inherit pub_methods_struct_engine_1_1_reflect_1_1_virtual_scope"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -377,15 +380,15 @@ Friends</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="a756b6b9ebb52084bdace5dd755de86d9" name="a756b6b9ebb52084bdace5dd755de86d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a756b6b9ebb52084bdace5dd755de86d9">&#9670;&#160;</a></span>playSound()</h2>
+<a id="a2cfb06eb9f2fa3edfc3ee76061e8c241" name="a2cfb06eb9f2fa3edfc3ee76061e8c241"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cfb06eb9f2fa3edfc3ee76061e8c241">&#9670;&#160;</a></span>playDynamicSound() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -394,16 +397,74 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a> Engine::Audio::OboeApi::playSound </td>
+          <td class="memname"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a> Engine::Audio::OboeApi::playDynamicSound </td>
           <td>(</td>
           <td class="paramtype">AudioLoader::Handle&#160;</td>
-          <td class="paramname"><em>buffer</em></td><td>)</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_execution_1_1_binding_ptr.html">Execution::BindingPtr</a>&lt; <a class="el" href="struct_engine_1_1_math_1_1_vector2.html">Math::Vector2</a> &gt;&#160;</td>
+          <td class="paramname"><em>distance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_engine_1_1_audio_1_1_audio_options.html">AudioOptions</a> &amp;&#160;</td>
+          <td class="paramname"><em>options</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6544bb31806b71e7e204dde7e111277f" name="a6544bb31806b71e7e204dde7e111277f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6544bb31806b71e7e204dde7e111277f">&#9670;&#160;</a></span>playDynamicSound() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_engine_1_1_behavior_1_1_behavior.html">Behavior::Behavior</a> Engine::Audio::OboeApi::playDynamicSound </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_engine_1_1_audio_1_1_audio_buffer.html">AudioBuffer</a> &amp;&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_execution_1_1_binding_ptr.html">Execution::BindingPtr</a>&lt; <a class="el" href="struct_engine_1_1_math_1_1_vector2.html">Math::Vector2</a> &gt;&#160;</td>
+          <td class="paramname"><em>distance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_engine_1_1_audio_1_1_audio_options.html">AudioOptions</a> &amp;&#160;</td>
+          <td class="paramname"><em>options</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -514,7 +575,7 @@ Friends</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Oct 19 2026 21:15:20 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Tue Oct 20 2026 17:42:18 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

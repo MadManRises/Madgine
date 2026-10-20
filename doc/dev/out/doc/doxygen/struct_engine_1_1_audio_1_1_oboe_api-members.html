@@ -167,6 +167,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/resources/api/docs/resources.html">Resources</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/root/api/docs/root.html">Root</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html">Scene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#behaviors">Behaviors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scene.html#locking">Locking</a></li>
 </ul>
 </li>
@@ -283,17 +284,18 @@ $(function() {
 <table class="directory">
   <tr class="even"><td class="entry"><a class="el" href="struct_engine_1_1_reflect_1_1_virtual_scope.html#ab01a0fcceedfb0f0d62c7a250d7a3a94">customScopePtr</a>() override</td><td class="entry"><a class="el" href="struct_engine_1_1_reflect_1_1_virtual_scope.html">Engine::Reflect::VirtualScope&lt; T, Base &gt;</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a2720305bd74e9c6aa9910c6689bb5da6">fetchStream</a>(const AudioInfo &amp;info)</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a273d09c1c4688032848cd9a8d6bf15fb">key</a>() const override</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a273d09c1c4688032848cd9a8d6bf15fb">key</a>() const override</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a34ac2b8cd341d0ed1095333cad377f97">OboeApi</a>(Core::Root &amp;root)</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a5be902f3cd7c9807342bd07abeae5177">OboeStream</a></td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"><span class="mlabel">friend</span></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a125fdcfa8f65b83c5a77f0b5874ffa3d">PlaybackState</a></td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"><span class="mlabel">friend</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a756b6b9ebb52084bdace5dd755de86d9">playSound</a>(AudioLoader::Handle buffer) override</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a52c7351f42c8f83788c4a2fde60b7970">reuseStream</a>(std::shared_ptr&lt; OboeStream &gt; stream)</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a5416be423e0b4ee378441dcd5fe1abff">~OboeApi</a>()</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a2cfb06eb9f2fa3edfc3ee76061e8c241">playDynamicSound</a>(AudioLoader::Handle buffer, Execution::BindingPtr&lt; Math::Vector2 &gt; distance, const AudioOptions &amp;options) override</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a6544bb31806b71e7e204dde7e111277f">playDynamicSound</a>(const AudioBuffer &amp;buffer, Execution::BindingPtr&lt; Math::Vector2 &gt; distance, const AudioOptions &amp;options) override</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a52c7351f42c8f83788c4a2fde60b7970">reuseStream</a>(std::shared_ptr&lt; OboeStream &gt; stream)</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html#a5416be423e0b4ee378441dcd5fe1abff">~OboeApi</a>()</td><td class="entry"><a class="el" href="struct_engine_1_1_audio_1_1_oboe_api.html">Engine::Audio::OboeApi</a></td><td class="entry"></td></tr>
 </table></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Oct 19 2026 21:15:20 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Tue Oct 20 2026 17:42:18 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>
