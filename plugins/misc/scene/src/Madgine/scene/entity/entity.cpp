@@ -219,6 +219,22 @@ namespace Scene {
             return mHandle;
         }
 
+        Execution::Future<Serialize::MessageResult, EntityPtr> Entity::createNestedEntity(const std::string &name, EntityDescriptor init, Closure<void(EntityPtr)> cb, Closure<void(Serialize::MessageResult)> onError)
+        {
+            Execution::Promise<Serialize::MessageResult, EntityPtr> promise;
+            Execution::Future<Serialize::MessageResult, EntityPtr> future = promise.getFuture();
+
+            SceneContainer &container = mContainer;
+
+            mLifetime.attach(
+                mutex().locked(AccessMode::WRITE, [this, name, init { std::move(init) }, &container, parent { pointer() }]() mutable {
+                    return TupleUnpacker::invokeFlatten(LIFT(container.mEntities.emplace_async, &container), container.mEntities.end(), container.createEntityData(name, std::move(init), std::move(parent)));
+                })
+                | Execution::let_value(std::identity {}) | Execution::then([cb { std::move(cb) }](auto it) { if (cb) cb(it->ptr()); return it->ptr(); }) | Execution::onError(onError ? std::move(onError) : [](Serialize::MessageResult) {}) | Execution::with_receiver(std::move(promise)));
+
+            return future;
+        }
+
         Debug::DebuggableLifetime<Reflect::get_reflect_contextual> &Entity::lifetime()
         {
             return mLifetime;
@@ -308,7 +324,6 @@ namespace Scene {
             clearComponents();
         }
 
-        
         void Entity::setParent(EntityPtr parent)
         {
             if (parent == mSelf)
@@ -332,7 +347,7 @@ namespace Scene {
         {
             return mParent;
         }
-        
+
     }
 }
 }

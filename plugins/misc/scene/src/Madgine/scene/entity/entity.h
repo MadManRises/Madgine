@@ -16,6 +16,7 @@
 #include "Madgine/debug/debuggablelifetime.h"
 
 #include "entitycomponenthandle.h"
+#include "entitydescriptor.h"
 #include "entityptr.h"
 
 namespace Engine {
@@ -109,6 +110,8 @@ namespace Scene {
             {
                 mLifetime.attach(std::forward<Sender>(sender) | Platform::Log::log_result());
             }
+
+            Execution::Future<Serialize::MessageResult, EntityPtr> createNestedEntity(const std::string &name = "", EntityDescriptor init = {}, Closure<void(EntityPtr)> cb = {}, Closure<void(Serialize::MessageResult)> onError = {});
 
             auto lifetimeSender()
             {
