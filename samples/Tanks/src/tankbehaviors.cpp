@@ -1,8 +1,11 @@
+#include "Madgine/audiolib.h"
 #include "Madgine/bulletlib.h"
 #include "Madgine/scenelib.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "Madgine/audio/audioapi.h"
+#include "Madgine/audio/audioloader.h"
 #include "Madgine/behavior/awaitables/awaitablebinding.h"
 #include "Madgine/behavior/behavior.h"
 #include "Madgine/behavior/nativebehaviorcollector.h"
@@ -51,6 +54,14 @@ Behavior::Behavior TankMovement(Scene::EntityContext tank = {})
     co_return;
 }
 
+Behavior::Behavior AudioTest(Scene::EntityContext self = {})
+{
+    auto selfPtr = co_await *self;
+
+    co_await Audio::play_dynamic_sound(Audio::AudioLoader::load("sample"), Execution::BindingPtr<Math::Vector2> { Execution::FunctionBinding { [](Scene::Entity::Entity &e) { return Math::Vector2 { e.getComponent<Scene::Entity::Transform>()->mPosition.x, e.getComponent<Scene::Entity::Transform>()->mPosition.z }; } }(*self) }, { .mLooping = true, .mVolume = 0.1f });
+}
+
 }
 
 NATIVE_BEHAVIOR(TankMovement, Engine::TankMovement)
+NATIVE_BEHAVIOR(AudioTest, Engine::AudioTest)

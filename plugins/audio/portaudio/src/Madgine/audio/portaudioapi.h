@@ -18,9 +18,10 @@ namespace Audio {
         bool init();
         void finalize();
 
-        virtual std::string_view key() const override;
+        std::string_view key() const override;
 
-        virtual Behavior::Behavior playSound(AudioLoader::Handle buffer) override;
+        Behavior::Behavior playDynamicSound(AudioLoader::Handle buffer, Execution::BindingPtr<Math::Vector2> distance, const AudioOptions &options) override;        
+        Behavior::Behavior playDynamicSound(const AudioBuffer &buffer, Execution::BindingPtr<Math::Vector2> distance, const AudioOptions &options) override;
 
     protected:
         friend struct PlaybackState;

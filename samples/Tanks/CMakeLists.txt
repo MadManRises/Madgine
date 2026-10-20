@@ -14,4 +14,4 @@ target_link_libraries(Tanks PUBLIC Modules)
 target_link_libraries(Tanks PRIVATE BulletDynamics BulletCollision BulletSoftBody LinearMath)
 
 
-target_link_plugins(Tanks Scene Bullet)
+target_link_plugins(Tanks Scene Bullet Audio)

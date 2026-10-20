@@ -22,17 +22,21 @@ namespace Engine {
 namespace Audio {
 
     struct PlaybackState : Behavior::BehaviorReceiver {
-        PlaybackState(AudioLoader::Handle buffer, OboeApi *api)
-            : mBuffer(std::move(buffer))
+        PlaybackState(const AudioBuffer &buffer, OboeApi &api, AudioOptions options, Execution::BindingPtr<Math::Vector2> distance)
+            : mBuffer(buffer)
             , mApi(api)
+            , mOptions(std::move(options))
+            , mDistance(std::move(distance))
         {
         }
 
         void start();
         void stop();
 
-        AudioLoader::Handle mBuffer;
-        OboeApi *mApi;
+        const AudioBuffer &mBuffer;
+        OboeApi &mApi;
+        AudioOptions mOptions;
+        Execution::BindingPtr<Math::Vector2> mDistance;
         const void *mNext;
         const void *mEnd;
     };
@@ -45,17 +49,19 @@ namespace Audio {
         template <typename Rec>
         friend auto tag_invoke(Execution::connect_t, PlaybackSender &&sender, Rec &&rec)
         {
-            return Behavior::VirtualBehaviorState<Rec, PlaybackState> { std::forward<Rec>(rec), std::move(sender.mBuffer), sender.mApi };
+            return Behavior::VirtualBehaviorState<Rec, PlaybackState> { std::forward<Rec>(rec), sender.mBuffer, sender.mApi, std::move(sender.mOptions), std::move(sender.mDistance) };
         }
 
         template <typename Rec>
         friend auto tag_invoke(Execution::connect_t, PlaybackSender &sender, Rec &&rec)
         {
-            return Behavior::VirtualBehaviorState<Rec, PlaybackState> { std::forward<Rec>(rec), sender.mBuffer, sender.mApi };
+            return Behavior::VirtualBehaviorState<Rec, PlaybackState> { std::forward<Rec>(rec), sender.mBuffer, sender.mApi, sender.mOptions, sender.mDistance };
         }
 
-        AudioLoader::Handle mBuffer;
-        OboeApi *mApi;
+        const AudioBuffer &mBuffer;
+        OboeApi &mApi;
+        AudioOptions mOptions;
+        Execution::BindingPtr<Math::Vector2> mDistance;
     };
 
     struct OboeErrorCallback : oboe::AudioStreamErrorCallback {
@@ -66,8 +72,8 @@ namespace Audio {
         void play(PlaybackState &state)
         {
             assert(!mState);
-            state.mNext = state.mBuffer->mBuffer.begin();
-            state.mEnd = state.mBuffer->mBuffer.end();
+            state.mNext = state.mBuffer.mBuffer.begin();
+            state.mEnd = state.mBuffer.mBuffer.end();
             mState = &state;
             mStream->requestStart();
         }
@@ -83,47 +89,22 @@ namespace Audio {
             int32_t numFrames) override
         {
             if (!Engine::Core::Root::getSingleton().taskQueue()->running()) {
-                OboeApi *api = mState->mApi;
+                OboeApi &api = mState->mApi;
                 mState->set_done();
                 mState = nullptr;
-                api->reuseStream(shared_from_this());
+                api.reuseStream(shared_from_this());
                 return oboe::DataCallbackResult::Stop;
             }
 
-            const int16_t *source = static_cast<const int16_t *>(mState->mNext);
-            unsigned long count = std::min<unsigned int>(numFrames, (static_cast<const int16_t *>(mState->mEnd) - source) / audioStream->getChannelCount());
-
-            switch (audioStream->getFormat()) {
-            case oboe::AudioFormat::I16: {
-                int16_t *target = static_cast<int16_t *>(audioData);
-
-                for (size_t i = 0; i < count; ++i) {
-                    for (int i = 0; i < audioStream->getChannelCount(); ++i)
-                        *target++ = *source++;
-                }
-                break;
-            }
-            case oboe::AudioFormat::Float: {
-                float *target = static_cast<float *>(audioData);
-
-                for (size_t i = 0; i < count; ++i) {
-                    for (int i = 0; i < audioStream->getChannelCount(); ++i)
-                        *target++ = *source++ / 32768.0f;
-                }
-                break;
-            }
-            default:
-                throw 0;
-            }
-
-            mState->mNext = source;
+            int count = AudioApi::process(audioData, audioStream->getFormat() == oboe::AudioFormat::I16 ? AudioApi::I16 : AudioApi::F, reinterpret_cast<const int16_t *&>(mState->mNext), mState->mEnd, numFrames, audioStream->getChannelCount(), mState->mDistance, mState->mOptions);
+            
             if (count > 0) {
                 return oboe::DataCallbackResult::Continue;
             } else {
-                OboeApi *api = mState->mApi;
+                OboeApi &api = mState->mApi;
                 mState->set_value();
                 mState = nullptr;
-                api->reuseStream(shared_from_this());
+                api.reuseStream(shared_from_this());
 
                 return oboe::DataCallbackResult::Stop;
             }
@@ -137,7 +118,7 @@ namespace Audio {
 
     void PlaybackState::start()
     {
-        std::shared_ptr<OboeStream> stream = mApi->fetchStream(mBuffer->mInfo);
+        std::shared_ptr<OboeStream> stream = mApi.fetchStream(mBuffer.mInfo);
         stream->play(*this);
     }
 
@@ -161,9 +142,15 @@ namespace Audio {
         return "Oboe";
     }
 
-    Behavior::Behavior OboeApi::playSound(AudioLoader::Handle buffer)
+    
+    Behavior::Behavior OboeApi::playDynamicSound(AudioLoader::Handle buffer, Execution::BindingPtr<Math::Vector2> distance, const AudioOptions &options)
     {
-        return PlaybackSender { {}, buffer, this } | Resources::with_handle(AudioLoader::Handle { buffer });
+        return PlaybackSender { {}, *buffer.getUnsafe(), *this, options, distance } | Resources::with_handle(AudioLoader::Handle { buffer });
+    }
+
+    Behavior::Behavior OboeApi::playDynamicSound(const AudioBuffer &buffer, Execution::BindingPtr<Math::Vector2> distance, const AudioOptions &options)
+    {
+        return PlaybackSender { {}, buffer, *this, options, distance };
     }
 
     std::shared_ptr<OboeStream> OboeApi::fetchStream(const AudioInfo &info)

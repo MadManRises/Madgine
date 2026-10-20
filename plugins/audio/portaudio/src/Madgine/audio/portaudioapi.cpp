@@ -5,6 +5,9 @@
 #include "Generic/execution/execution.h"
 #include "Generic/execution/stop_callback.h"
 
+#include "Meta/math/pi.h"
+#include "Meta/math/vector2.h"
+
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
@@ -24,9 +27,11 @@ namespace Engine {
 namespace Audio {
 
     struct PlaybackState : Behavior::BehaviorReceiver {
-        PlaybackState(AudioLoader::Handle buffer, PortAudioApi &api)
+        PlaybackState(const AudioBuffer &buffer, PortAudioApi &api, AudioOptions options, Execution::BindingPtr<Math::Vector2> direction)
             : mBuffer(std::move(buffer))
             , mApi(api)
+            , mOptions(std::move(options))
+            , mDirection(std::move(direction))
         {
         }
 
@@ -36,13 +41,13 @@ namespace Audio {
 
         friend auto tag_invoke(Execution::visit_state_t, PlaybackState *state, auto &&visitor)
         {
-            visitor(Execution::State::BeginBlock { "Play '"s + std::string { state->mBuffer.name() } + "'" });
+            visitor(Execution::State::BeginBlock { "Play '"s + std::string { "Audio" } + "'" });
 
             float progress = 0.0f;
 
             if (state) {
                 const std::byte *start, *end, *current;
-                start = static_cast<const std::byte *>(state->mBuffer->mBuffer.begin());
+                start = static_cast<const std::byte *>(state->mBuffer.mBuffer.begin());
                 end = static_cast<const std::byte *>(state->mEnd);
                 current = static_cast<const std::byte *>(state->mPtr);
                 progress = static_cast<float>(current - start) / (end - start);
@@ -53,14 +58,14 @@ namespace Audio {
             visitor(Execution::State::EndBlock {});
         }
 
-        AudioLoader::Handle mBuffer;
+        const AudioBuffer &mBuffer;
         PortAudioApi &mApi;
         PortAudioStream *mStream = nullptr;
+        AudioOptions mOptions;
+        Execution::BindingPtr<Math::Vector2> mDirection;
 
         const void *mPtr;
         const void *mEnd;
-
-        bool mLooping = false;
     };
 
     struct PlaybackSender : Execution::base_sender {
@@ -71,17 +76,19 @@ namespace Audio {
         template <typename Rec>
         friend auto tag_invoke(Execution::connect_t, PlaybackSender &&sender, Rec &&rec)
         {
-            return Behavior::VirtualBehaviorState<Rec, PlaybackState> { std::forward<Rec>(rec), std::move(sender.mBuffer), sender.mApi };
+            return Behavior::VirtualBehaviorState<Rec, PlaybackState> { std::forward<Rec>(rec), sender.mBuffer, sender.mApi, std::move(sender.mOptions), std::move(sender.mDirection) };
         }
 
         template <typename Rec>
         friend auto tag_invoke(Execution::connect_t, PlaybackSender &sender, Rec &&rec)
         {
-            return Behavior::VirtualBehaviorState<Rec, PlaybackState> { std::forward<Rec>(rec), sender.mBuffer, sender.mApi };
+            return Behavior::VirtualBehaviorState<Rec, PlaybackState> { std::forward<Rec>(rec), sender.mBuffer, sender.mApi, sender.mOptions, sender.mDirection };
         }
 
-        AudioLoader::Handle mBuffer;
+        const AudioBuffer &mBuffer;
         PortAudioApi &mApi;
+        AudioOptions mOptions;
+        Execution::BindingPtr<Math::Vector2> mDirection;
     };
 
     struct PortAudioStream {
@@ -124,8 +131,8 @@ namespace Audio {
         void play(PlaybackState &state)
         {
             assert(!mState);
-            state.mPtr = state.mBuffer->mBuffer.begin();
-            state.mEnd = state.mBuffer->mBuffer.end();
+            state.mPtr = state.mBuffer.mBuffer.begin();
+            state.mEnd = state.mBuffer.mBuffer.end();
             mState = &state;
             assert(Pa_IsStreamStopped(mStream));
             PaError err = Pa_StartStream(mStream);
@@ -157,21 +164,14 @@ namespace Audio {
             if (Execution::get_stop_token(*mState)->stop_requested())
                 return paAbort;
 
-            int16_t *target = static_cast<int16_t *>(output);
-            const int16_t *source = static_cast<const int16_t *>(mState->mPtr);
-
-            unsigned long count = std::min<unsigned int>(frameCount, (static_cast<const int16_t *>(mState->mEnd) - source) / mChannels);
-
-            for (size_t i = 0; i < count; ++i) {
-                for (int i = 0; i < mChannels; ++i)
-                    *target++ = *source++;
-            }
-
-            mState->mPtr = source;
+            int processed = AudioApi::process(output, AudioApi::I16, reinterpret_cast<const int16_t *&>(mState->mPtr), mState->mEnd, frameCount, mChannels, mState->mDirection, mState->mOptions);
+            if (processed < 0)
+                return paAbort;
+            
             if (mState->mPtr == mState->mEnd) {
-                if (mState->mLooping) {
-                    mState->mPtr = mState->mBuffer->mBuffer.begin();
-                    return callback(target, frameCount - count, timeInfo, statusFlags);
+                if (mState->mOptions.mLooping) {
+                    mState->mPtr = mState->mBuffer.mBuffer.begin();
+                    return callback(output, frameCount - processed, timeInfo, statusFlags);
                 } else {
                     return paComplete;
                 }
@@ -222,7 +222,7 @@ namespace Audio {
             set_done();
             return;
         }
-        mStream = &mApi.fetchStream(mBuffer->mInfo);
+        mStream = &mApi.fetchStream(mBuffer.mInfo);
         mStream->play(*this);
     }
 
@@ -373,9 +373,14 @@ namespace Audio {
         return "PortAudio";
     }
 
-    Behavior::Behavior PortAudioApi::playSound(AudioLoader::Handle buffer)
+    Behavior::Behavior PortAudioApi::playDynamicSound(AudioLoader::Handle buffer, Execution::BindingPtr<Math::Vector2> distance, const AudioOptions &options)
     {
-        return PlaybackSender { {}, buffer, *this } | Resources::with_handle(AudioLoader::Handle { buffer });
+        return PlaybackSender { {}, *buffer.getUnsafe(), *this, options, distance } | Resources::with_handle(AudioLoader::Handle { buffer });
+    }
+
+    Behavior::Behavior PortAudioApi::playDynamicSound(const AudioBuffer &buffer, Execution::BindingPtr<Math::Vector2> distance, const AudioOptions &options)
+    {
+        return PlaybackSender { {}, buffer, *this, options, distance };
     }
 
     PortAudioStream &PortAudioApi::fetchStream(const AudioInfo &info)
