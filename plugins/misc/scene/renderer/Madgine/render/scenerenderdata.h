@@ -17,6 +17,9 @@ namespace Render {
 
         ResourceBlock defaultMaterial();
 
+    protected:
+        Threading::TaskQueue *queue(RenderContext *) override;
+
     private:
         Scene::SceneManager &mScene;
 

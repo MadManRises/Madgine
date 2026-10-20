@@ -51,5 +51,10 @@ namespace Render {
         return mDefaultMaterial;
     }
 
+    Threading::TaskQueue *SceneRenderData::queue(RenderContext *)
+    {
+        return mScene.taskQueue();
+    }
+
 }
 }
