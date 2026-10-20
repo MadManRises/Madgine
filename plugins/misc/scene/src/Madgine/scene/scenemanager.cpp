@@ -91,9 +91,11 @@ namespace Scene {
         }
 
         taskQueue()->queue([this]() -> Threading::Task<void> {
+            std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
             while (taskQueue()->running()) {
                 mSimulationClock.tick(mApp.clock().now());
-                co_await std::chrono::microseconds { 1000000 / 60 };
+                now += std::chrono::microseconds { 1000000 / 60 };
+                co_await now;
             }
         });
 
