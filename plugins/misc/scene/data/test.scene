@@ -4,9 +4,7 @@
             <mParent>0</mParent>
             <mComponents>
                 <Mesh serId=1>
-                    <mMesh serId=2>
-                        <Name>Cube</Name>
-                    </mMesh>
+                    <mMesh>Cube</mMesh>
                     <mMaterial>0</mMaterial>
                 </Mesh>
                 <Transform serId=3>
@@ -32,9 +30,7 @@
             <mParent>260</mParent>
             <mComponents>
                 <Mesh serId=6>
-                    <mMesh serId=7>
-                        <Name>Cube</Name>
-                    </mMesh>
+                    <mMesh>Cube</mMesh>
                     <mMaterial>0</mMaterial>
                 </Mesh>
                 <Transform serId=8>                    
@@ -92,9 +88,7 @@
             <mParent>0</mParent>
             <mComponents>
                 <Mesh serId=15>
-                    <mMesh serId=16>
-                        <Name>Cube</Name>
-                    </mMesh>
+                    <mMesh>Cube</mMesh>
                     <mMaterial>0</mMaterial>
                 </Mesh>
                 <Transform serId=17>

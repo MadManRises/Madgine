@@ -35,7 +35,7 @@ namespace Render {
 
             for (auto &[mesh, entity] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {               
 
-                if (!mesh.mIsVisible)
+                if (!mesh.visible(entity))
                     continue;
 
                 if (!mesh.mMesh.available())

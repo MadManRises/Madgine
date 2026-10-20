@@ -14,10 +14,21 @@ namespace Scene {
 
             Math::AABB aabb() const;
 
+            void setVisible(bool visible);
+            void setInheritVisibility(bool inherit);
+
+            bool visible(Contextual<Entity &> entity) const;
+            bool inheritsVisibility() const;
+
             typename Render::GPUMeshLoader::Handle mMesh;
-        
+
             uint32_t mMaterial = 0;
-            bool mIsVisible = true;
+
+            enum {
+                Visible,
+                Invisible,
+                Inherit
+            } mVisibility = Visible;
         };
 
     }
