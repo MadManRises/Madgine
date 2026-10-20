@@ -174,7 +174,11 @@
 </ul>
 </li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">SceneRenderer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#custom-lighting">Custom lighting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scene-data-interpolation">Scene Data &amp; Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#passes">Passes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../server/api/docs/server.html">Server</a></li>
@@ -243,6 +247,16 @@
 </dd></dl>
 
 <p>The SceneRenderer plugin draws the scene of a SceneManager into a RenderTarget.</p>
+<section id="scene-data-interpolation">
+<h2>Scene Data &amp; Interpolation<a class="headerlink" href="#scene-data-interpolation" title="Permalink to this heading"></a></h2>
+<p>Note: This is not implemented yet.</p>
+<p>The Simulation does only step at a limited frequency. In order to allow smooth rendering at any frame rate, it is the renderers job to interpolate between Simulation frames.
+The idea is, that the SceneRenderData is gathering all Entities and their state for the current frame. It should be the only place the actual
+transforms for Entities have to be calculated by walking the parent chain. It is also the RenderDatas job to cache previous frames, to allow smooth interpolation for movement
+and animation.</p>
+</section>
+<section id="passes">
+<h2>Passes<a class="headerlink" href="#passes" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">SceneRenderPass</span></code> is a forward renderer with the directional light (<code class="docutils literal notranslate"><span class="pre">SceneManager::mAmbientLightDirection</span></code>) and up to
 two shadow casting <code class="docutils literal notranslate"><span class="pre">PointLight</span></code> components. It writes the HDR image into target 0 and its bright parts (emissive colour
 and pixels brighter than 1) into target 1 of the RenderTarget it is added to. Bloom and tone mapping are up to the user,
@@ -256,7 +270,7 @@ e.g. with a <code class="docutils literal notranslate"><span class="pre">BloomPa
 </pre></div>
 </div>
 <section id="custom-lighting">
-<h2>Custom lighting<a class="headerlink" href="#custom-lighting" title="Permalink to this heading"></a></h2>
+<h3>Custom lighting<a class="headerlink" href="#custom-lighting" title="Permalink to this heading"></a></h3>
 <p>For a lighting model of its own (e.g. deferred shading with many lights), a project can combine these building blocks
 with a render pass of its own:</p>
 <ul class="simple">
@@ -276,6 +290,7 @@ the view inside a world box. <code class="docutils literal notranslate"><span cl
 degrees).</p></li>
 </ul>
 <p>Materials can emit light with <code class="docutils literal notranslate"><span class="pre">GPUMeshData::Material::mEmissiveColor</span></code>.</p>
+</section>
 </section>
 </section>
 

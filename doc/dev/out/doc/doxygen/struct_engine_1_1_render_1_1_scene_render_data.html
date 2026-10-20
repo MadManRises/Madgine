@@ -172,7 +172,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#scene-data-interpolation">Scene Data &amp; Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#passes">Passes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
@@ -278,6 +282,7 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="struct_engine_1_1_render_1_1_scene_render_data-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Engine::Render::SceneRenderData Struct Reference</div></div>
 </div><!--header-->
@@ -309,8 +314,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a153f8656c9c5bba3fa459690ba877035 inherit pub_methods_struct_engine_1_1_render_1_1_render_data"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_threading_1_1_task_future.html">Threading::TaskFuture</a>&lt; <a class="el" href="struct_engine_1_1_render_1_1_render_future.html">RenderFuture</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_data.html#a153f8656c9c5bba3fa459690ba877035">update</a> (<a class="el" href="struct_engine_1_1_render_1_1_render_context.html">RenderContext</a> *context)</td></tr>
 <tr class="separator:a153f8656c9c5bba3fa459690ba877035 inherit pub_methods_struct_engine_1_1_render_1_1_render_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a20b8ce10140429408bb4f506d2bba8fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_threading_1_1_task_queue.html">Threading::TaskQueue</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_scene_render_data.html#a20b8ce10140429408bb4f506d2bba8fe">queue</a> (<a class="el" href="struct_engine_1_1_render_1_1_render_context.html">RenderContext</a> *) override</td></tr>
+<tr class="separator:a20b8ce10140429408bb4f506d2bba8fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a797be89ffdf9a89a3a4eb09cec8aa9d1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="struct_engine_1_1_threading_1_1_task_queue.html">Threading::TaskQueue</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_data.html#a797be89ffdf9a89a3a4eb09cec8aa9d1">queue</a> (<a class="el" href="struct_engine_1_1_render_1_1_render_context.html">RenderContext</a> *context)</td></tr>
+<tr class="separator:a797be89ffdf9a89a3a4eb09cec8aa9d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a955982d57bac58ed4a1c44e2402c23f0"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespace_engine_1_1_threading.html#a19fdd8ee5e722502a18f3a0bfc61873a">Threading::ImmediateTask</a>&lt; <a class="el" href="struct_engine_1_1_render_1_1_render_future.html">RenderFuture</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_render_1_1_render_data.html#a955982d57bac58ed4a1c44e2402c23f0">render</a> (<a class="el" href="struct_engine_1_1_render_1_1_render_context.html">RenderContext</a> *context)=0</td></tr>
 <tr class="separator:a955982d57bac58ed4a1c44e2402c23f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -415,6 +424,34 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a id="a20b8ce10140429408bb4f506d2bba8fe" name="a20b8ce10140429408bb4f506d2bba8fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20b8ce10140429408bb4f506d2bba8fe">&#9670;&#160;</a></span>queue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_engine_1_1_threading_1_1_task_queue.html">Threading::TaskQueue</a> * Engine::Render::SceneRenderData::queue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_render_1_1_render_context.html">RenderContext</a> *&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="struct_engine_1_1_render_1_1_render_data.html#a797be89ffdf9a89a3a4eb09cec8aa9d1">Engine::Render::RenderData</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following files:<ul>
 <li>plugins/misc/scene/renderer/Madgine/render/<a class="el" href="scenerenderdata_8h.html">scenerenderdata.h</a></li>
 <li>plugins/misc/scene/renderer/Madgine/render/<a class="el" href="scenerenderdata_8cpp.html">scenerenderdata.cpp</a></li>
@@ -422,7 +459,7 @@ Additional Inherited Members</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Oct 20 2026 17:42:20 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Tue Oct 20 2026 20:13:24 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

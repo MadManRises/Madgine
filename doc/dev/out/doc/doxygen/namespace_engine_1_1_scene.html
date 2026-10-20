@@ -172,7 +172,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#scene-data-interpolation">Scene Data &amp; Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#passes">Passes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
@@ -499,7 +503,7 @@ template&lt;typename T , typename Base &gt; </div>
 <div class="line">    }</div>
 <div class="ttc" id="anamespace_engine_1_1_scene_html_ae103086c0a5c678072109811788eceef"><div class="ttname"><a href="namespace_engine_1_1_scene.html#ae103086c0a5c678072109811788eceef">Engine::Scene::SceneContext</a></div><div class="ttdeci">Behavior::ContextParameter&lt; SceneManager &amp; &gt; SceneContext</div><div class="ttdef"><b>Definition:</b> scenesenders.h:15</div></div>
 <div class="ttc" id="astruct_engine_1_1_scene_1_1_scene_manager_html"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_scene_manager.html">Engine::Scene::SceneManager</a></div><div class="ttdef"><b>Definition:</b> scenemanager.h:24</div></div>
-<div class="ttc" id="astruct_engine_1_1_scene_1_1_scene_manager_html_a442eaf63a0a9a37551c8c959d03dbdba"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_scene_manager.html#a442eaf63a0a9a37551c8c959d03dbdba">Engine::Scene::SceneManager::simulationClock</a></div><div class="ttdeci">Execution::IntervalClock&lt; Threading::CustomTimepoint &gt; &amp; simulationClock()</div><div class="ttdef"><b>Definition:</b> scenemanager.cpp:190</div></div>
+<div class="ttc" id="astruct_engine_1_1_scene_1_1_scene_manager_html_a442eaf63a0a9a37551c8c959d03dbdba"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_scene_manager.html#a442eaf63a0a9a37551c8c959d03dbdba">Engine::Scene::SceneManager::simulationClock</a></div><div class="ttdeci">Execution::IntervalClock&lt; Threading::CustomTimepoint &gt; &amp; simulationClock()</div><div class="ttdef"><b>Definition:</b> scenemanager.cpp:192</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -551,7 +555,7 @@ template&lt;typename T , typename Base &gt; </div>
 <b>Initial value:</b><div class="fragment"><div class="line">= [](std::chrono::steady_clock::duration duration, <a class="code hl_typedef" href="namespace_engine_1_1_scene.html#ae103086c0a5c678072109811788eceef">SceneContext</a> scene = {}) {</div>
 <div class="line">        <span class="keywordflow">return</span> std::move(scene) | Execution::let_value([=](<a class="code hl_struct" href="struct_engine_1_1_scene_1_1_scene_manager.html">SceneManager</a> &amp;mgr) { <span class="keywordflow">return</span> mgr.<a class="code hl_function" href="struct_engine_1_1_scene_1_1_scene_manager.html#a4c7dab76a586568999284657335eb2a7">animationClock</a>().wait(duration); });</div>
 <div class="line">    }</div>
-<div class="ttc" id="astruct_engine_1_1_scene_1_1_scene_manager_html_a4c7dab76a586568999284657335eb2a7"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_scene_manager.html#a4c7dab76a586568999284657335eb2a7">Engine::Scene::SceneManager::animationClock</a></div><div class="ttdeci">Execution::IntervalClock&lt; Threading::CustomTimepoint &gt; &amp; animationClock()</div><div class="ttdef"><b>Definition:</b> scenemanager.cpp:195</div></div>
+<div class="ttc" id="astruct_engine_1_1_scene_1_1_scene_manager_html_a4c7dab76a586568999284657335eb2a7"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_scene_manager.html#a4c7dab76a586568999284657335eb2a7">Engine::Scene::SceneManager::animationClock</a></div><div class="ttdeci">Execution::IntervalClock&lt; Threading::CustomTimepoint &gt; &amp; animationClock()</div><div class="ttdef"><b>Definition:</b> scenemanager.cpp:197</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -640,8 +644,8 @@ template&lt;typename T , typename Base &gt; </div>
 <div class="line">    }</div>
 <div class="ttc" id="anamespace_engine_1_1_scene_html_a64d96d147ec00535ea2c781685ac1f64"><div class="ttname"><a href="namespace_engine_1_1_scene.html#a64d96d147ec00535ea2c781685ac1f64">Engine::Scene::yield_simulation</a></div><div class="ttdeci">constexpr auto yield_simulation</div><div class="ttdef"><b>Definition:</b> scenesenders.h:21</div></div>
 <div class="ttc" id="astruct_engine_1_1_math_1_1_quaternion_html"><div class="ttname"><a href="struct_engine_1_1_math_1_1_quaternion.html">Engine::Math::Quaternion</a></div><div class="ttdef"><b>Definition:</b> quaternion.h:10</div></div>
-<div class="ttc" id="astruct_engine_1_1_scene_1_1_entity_1_1_entity_html"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_entity_1_1_entity.html">Engine::Scene::Entity::Entity</a></div><div class="ttdef"><b>Definition:</b> entity.h:25</div></div>
-<div class="ttc" id="astruct_engine_1_1_scene_1_1_entity_1_1_entity_html_a5124e4dc641916a5469b4f6f06660670"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_entity_1_1_entity.html#a5124e4dc641916a5469b4f6f06660670">Engine::Scene::Entity::Entity::getComponent</a></div><div class="ttdeci">T * getComponent()</div><div class="ttdef"><b>Definition:</b> entity.h:70</div></div>
+<div class="ttc" id="astruct_engine_1_1_scene_1_1_entity_1_1_entity_html"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_entity_1_1_entity.html">Engine::Scene::Entity::Entity</a></div><div class="ttdef"><b>Definition:</b> entity.h:26</div></div>
+<div class="ttc" id="astruct_engine_1_1_scene_1_1_entity_1_1_entity_html_a5124e4dc641916a5469b4f6f06660670"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_entity_1_1_entity.html#a5124e4dc641916a5469b4f6f06660670">Engine::Scene::Entity::Entity::getComponent</a></div><div class="ttdeci">T * getComponent()</div><div class="ttdef"><b>Definition:</b> entity.h:71</div></div>
 <div class="ttc" id="astruct_engine_1_1_scene_1_1_entity_1_1_transform_html"><div class="ttname"><a href="struct_engine_1_1_scene_1_1_entity_1_1_transform.html">Engine::Scene::Entity::Transform</a></div><div class="ttdef"><b>Definition:</b> transform.h:16</div></div>
 </div><!-- fragment -->
 </div>
@@ -680,7 +684,7 @@ template&lt;typename T , typename Base &gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Oct 20 2026 17:42:20 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Tue Oct 20 2026 20:13:24 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>

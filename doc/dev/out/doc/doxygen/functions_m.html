@@ -174,7 +174,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html">SceneRenderer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#scene-data-interpolation">Scene Data &amp; Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#passes">Passes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../plugins/misc/scene/docs/scenerenderer.html#custom-lighting">Custom lighting</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/server/api/docs/server.html">Server</a></li>
@@ -354,7 +358,7 @@ $(function() {
 <li>mAtlas&#160;:&#160;<a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager_1_1_widget_manager_data.html#a0347c608c8d5774d7874de2f02807a2a">Engine::Widgets::WidgetManager::WidgetManagerData</a></li>
 <li>matrix()&#160;:&#160;<a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_transform.html#adc38250a9e560b0ba4e354da625012f6">Engine::Scene::Entity::Transform</a></li>
 <li>Matrix3()&#160;:&#160;<a class="el" href="struct_engine_1_1_math_1_1_matrix3.html#ab77e1f8268e2f506ff12c7487527c2a5">Engine::Math::Matrix3</a></li>
-<li>Matrix4&#160;:&#160;<a class="el" href="struct_engine_1_1_math_1_1_matrix3.html#ace502ef0a04779612fa74b63295cd7d4">Engine::Math::Matrix3</a>, <a class="el" href="struct_engine_1_1_math_1_1_matrix4.html#a8c12e8b84e60e0422323b1c398e12dc7">Engine::Math::Matrix4</a></li>
+<li>Matrix4&#160;:&#160;<a class="el" href="struct_engine_1_1_math_1_1_matrix3.html#ace502ef0a04779612fa74b63295cd7d4">Engine::Math::Matrix3</a>, <a class="el" href="struct_engine_1_1_math_1_1_matrix4.html#a592f03b8bf4c28b9f2a4762dc4415cb0">Engine::Math::Matrix4</a></li>
 <li>mAttached&#160;:&#160;<a class="el" href="struct_engine_1_1_threading_1_1_task_promise_shared_state_base.html#adb450509d0c6cd69e549ecd7e38656c6">Engine::Threading::TaskPromiseSharedStateBase</a></li>
 <li>mAutoLoad&#160;:&#160;<a class="el" href="struct_engine_1_1_resources_1_1_resource_loader_settings.html#a99e01ba6b21325bc9dde4d9c632ecb37">Engine::Resources::ResourceLoaderSettings</a></li>
 <li>mAutoReload&#160;:&#160;<a class="el" href="struct_engine_1_1_resources_1_1_resource_loader_settings.html#ac9fc706c412bcd6311e1d504c81a426d">Engine::Resources::ResourceLoaderSettings</a></li>
@@ -640,7 +644,6 @@ $(function() {
 <li>mIsSRGBTarget&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_target.html#afd3c199b6f6de32aad2c70038afadca8">Engine::Render::OpenGLRenderTarget</a></li>
 <li>mIsStub&#160;:&#160;<a class="el" href="struct_engine_1_1_plugins_1_1_binary_info.html#a5a3d7c18333e713e6c2faa130c97937f">Engine::Plugins::BinaryInfo</a></li>
 <li>mIsTopLevelUnit&#160;:&#160;<a class="el" href="struct_engine_1_1_serialize_1_1_serialize_table.html#a7dcb8ce164e88f757ac6eccb224ac10f">Engine::Serialize::SerializeTable</a></li>
-<li>mIsVisible&#160;:&#160;<a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_mesh.html#a7d31b7d057d1d73b88d3bc150bc8d041">Engine::Scene::Entity::Mesh</a></li>
 <li>mIsWindow&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_open_g_l_render_target.html#ae8784f388f21b7df654883afea91c4a4">Engine::Render::OpenGLRenderTarget</a></li>
 <li>mIt&#160;:&#160;<a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_scope_iterator.html#a52b2d3f6708377bff36e8f13f1f50915">Engine::Behavior::Python3::PyScopeIterator</a>, <a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_virtual_associative_iterator.html#a531b2ced8217ad8e91f7679c3f6e5799">Engine::Behavior::Python3::PyVirtualAssociativeIterator</a>, <a class="el" href="struct_engine_1_1_behavior_1_1_python3_1_1_py_virtual_sequence_iterator.html#a990ab2b7c3cdd952b1c36999b21c4dba">Engine::Behavior::Python3::PyVirtualSequenceIterator</a>, <a class="el" href="struct_engine_1_1_containers_1_1_safe_iterator_1_1_iterator_impl.html#a38839574eb22beb599330c92d2682d72">Engine::Containers::SafeIterator&lt; T &gt;::IteratorImpl&lt; It &gt;</a>, <a class="el" href="struct_engine_1_1_execution_1_1for__each__t_1_1state.html#a1e8c357453cc499c12dab06db5248aaa">Engine::Execution::for_each_t::state&lt; Rec, C, F &gt;</a>, <a class="el" href="struct_engine_1_1_serialize_1_1_serializable_container_impl_1_1___insert_operation.html#a557720bdc39020050bd4b4a28b38a71a">Engine::Serialize::SerializableContainerImpl&lt; C, Observer, OffsetPtr &gt;::_InsertOperation</a>, <a class="el" href="struct_engine_1_1_serialize_1_1_syncable_container_impl_1_1emplace__action__t.html#a1001a904bae45bd372409bfa9d3a50a3">Engine::Serialize::SyncableContainerImpl&lt; C, Observer, OffsetPtr &gt;::emplace_action_t</a>, <a class="el" href="struct_engine_1_1_widgets_1_1_property_iterator.html#aacbf5cb184ceeafe00a0a17118dc0c6f">Engine::Widgets::PropertyIterator</a></li>
 <li>mItems&#160;:&#160;<a class="el" href="struct_engine_1_1_widgets_1_1_combobox.html#a6f8d3ea73fa48e52acfe3c993cd29981">Engine::Widgets::Combobox</a></li>
@@ -724,8 +727,8 @@ $(function() {
 <li>mousePointToRay()&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_camera.html#a59a68c1477e1e3a222d24564791cb5e5">Engine::Render::Camera</a></li>
 <li>mOut&#160;:&#160;<a class="el" href="struct_engine_1_1_string_util_1_1_stream_joiner.html#a62bcc7aa3bc50854f246fd38709f9048">Engine::StringUtil::StreamJoiner&lt; Stream &gt;</a></li>
 <li>mOuterAngle&#160;:&#160;<a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_spot_light.html#ac6bc96f3d44d9e25ecb07d3d5fa1aac1">Engine::Scene::Entity::SpotLight</a></li>
-<li>MoveAssign&#160;:&#160;<a class="el" href="struct_engine_1_1_type_1_1_storage_ops.html#a10db1dd05f35de4237719ed1c0959d17">Engine::Type::StorageOps</a></li>
 <li>moveAssign()&#160;:&#160;<a class="el" href="struct_engine_1_1_type_1_1_storage_ops.html#a24ccae11626bd476c1388f0cc264c86c">Engine::Type::StorageOps</a></li>
+<li>MoveAssign&#160;:&#160;<a class="el" href="struct_engine_1_1_type_1_1_storage_ops.html#a10db1dd05f35de4237719ed1c0959d17">Engine::Type::StorageOps</a></li>
 <li>moveMasterId()&#160;:&#160;<a class="el" href="struct_engine_1_1_serialize_1_1_syncable_unit_base.html#ad5487e745880117d83f817c718ddb7b6">Engine::Serialize::SyncableUnitBase</a></li>
 <li>moveMasterStream()&#160;:&#160;<a class="el" href="struct_engine_1_1_serialize_1_1_sync_manager.html#a0aeb73db808855431eaa5467dfe4caed">Engine::Serialize::SyncManager</a></li>
 <li>moveTopLevelItem()&#160;:&#160;<a class="el" href="struct_engine_1_1_serialize_1_1_sync_manager.html#a9431047418b56f4f82769c9fd333dbb6">Engine::Serialize::SyncManager</a></li>
@@ -963,6 +966,7 @@ $(function() {
 <li>mVerticalLayoutRenderData&#160;:&#160;<a class="el" href="struct_engine_1_1_widgets_1_1_table_widget.html#a7703a4476c3ce0562fe7dcf2e3594054">Engine::Widgets::TableWidget</a></li>
 <li>mVerticalScroll&#160;:&#160;<a class="el" href="struct_engine_1_1_widgets_1_1_text_edit.html#aae577df2cc886ccc7b568872c938b255">Engine::Widgets::TextEdit</a></li>
 <li>mVertices&#160;:&#160;<a class="el" href="struct_engine_1_1_render_1_1_g_p_u_mesh_data.html#a85a16cd9f91e8cd132c76469c1594385">Engine::Render::GPUMeshData</a>, <a class="el" href="struct_engine_1_1_render_1_1_mesh_data.html#a19d970a15c2186c0ae8cdfb6e7b0bd44">Engine::Render::MeshData</a></li>
+<li>mVisibility&#160;:&#160;<a class="el" href="struct_engine_1_1_scene_1_1_entity_1_1_mesh.html#a1b37226c3436dd0fc61408b0810afaf0">Engine::Scene::Entity::Mesh</a></li>
 <li>mVisible&#160;:&#160;<a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html#a45b61185a410fe565e188359c780a22d">Engine::Widgets::WidgetBase</a></li>
 <li>mVisitStream&#160;:&#160;<a class="el" href="struct_engine_1_1_serialize_1_1_serializer.html#af11ddac3f8222d45fd78624d9f2c1d64">Engine::Serialize::Serializer</a></li>
 <li>mVolume&#160;:&#160;<a class="el" href="struct_engine_1_1_audio_1_1_audio_options.html#aa5cdd7440cdab8bda1b7fef0712308a7">Engine::Audio::AudioOptions</a></li>
@@ -987,7 +991,7 @@ $(function() {
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Oct 20 2026 17:42:21 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Tue Oct 20 2026 20:13:26 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>
