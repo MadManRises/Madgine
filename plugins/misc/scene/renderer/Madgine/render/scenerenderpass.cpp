@@ -56,10 +56,9 @@ namespace Render {
         addDependency(&mPointShadowRenderData);
 
         std::vector<std::variant<ConstTexturePtr, GPUPtr<void>, GPUPtr<Void[]>>> textures;
-        std::ranges::move(mPointShadowRenderData.depthTextures(), std::back_inserter(textures));        
+        std::ranges::move(mPointShadowRenderData.depthTextures(), std::back_inserter(textures));
         textures.insert(textures.begin(), mShadowMap->depthTexture());
         mShadowResourceBlock = target->context()->createResourceBlock(std::move(textures));
-
     }
 
     void SceneRenderPass::shutdown(RenderTarget *target)
@@ -117,7 +116,7 @@ namespace Render {
                 Scene::Entity::Transform *t = entity.getComponent<Scene::Entity::Transform>();
                 if (t) {
                     float range = light.mRange;
-                    perFrame->pointLights[i].light.position = (v * Math::Vector4 { t->mPosition, 1.0f }).xyz();
+                    perFrame->pointLights[i].light.position = (v * Math::Vector4 { t->worldPosition(entity), 1.0f }).xyz();
                     perFrame->pointLights[i].light.color = Math::Vector3 { light.mColor } * light.mIntensity;
                     perFrame->pointLights[i].light.constantFactor = mLightConstantFactor;
                     perFrame->pointLights[i].light.linearFactor = mLightLinearFactor / range;
