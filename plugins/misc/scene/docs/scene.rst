@@ -6,6 +6,15 @@ Scene
 The Scene plugin contains a comprehensive implementation of a Scene system, including a full Entity-Component-System (ECS). It is built upon the Base plugin and the SceneManager is implemented as a GlobalAPIComponent.
 
 
+Behaviors
+~~~~~~~~~
+
+The Scene plugin integrates seamlessly with the Behavior system. Every Entity holds a lifetime, that is itself embedded in an asynchronous lifetime. Behaviors are the preferred way to assign
+logic to entities for gameplay purposes. In special cases, where heavy calculations over a large number of Entity components is needed, Systems can be used instead. The plugin also makes
+use and extends the Context feature within Behaviors. EntityContext and SceneContext parameters can be added to any Behavior argument list, defaulting to `= {}`. This way the function signature
+effectively remains unchanged, but inside the function body, those parameters will have been filled in, providing access to the enclosing Entity and the SceneManager.
+
+
 Locking
 ~~~~~~~
 
@@ -13,7 +22,7 @@ Since the current state of a Scene Manager can be accessed by multiple systems, 
 There exists a single DataMutex, that is used to guard adding or removing entity components from their respective EntityComponentLists. Note that components may only be added during creation
 and may only be removed during destruction of the Entity. Furthermore, EntityComponentLists are required to keep pointers to their elements stable on insert/remove of the container.
 Transitively, this means that as long as the Entity is guaranteed to be still alive, accessing any of it's components is also safe.
-Entities have their own mechanism to ensure safe access. Entities themselves live inside the asynchronous Behavior space. createEntity() itself is embedding itself into the lifetime of
+Entities have their own mechanism to ensure safe access. createEntity() itself is embedding itself into the lifetime of
 its enclosing SceneContainer. This is already taking care of ensuring the DataLock is held during creation/destruction. createEntity() does *not* require a held DataMutex. 
 Behaviors of an Entity are guaranteed to finish before the lifetime of that Entity is allowed to finish. When accessing Entities from Behaviors, they always need to be passed as EntityPtr.
 EntityPtr is a Binding and acts as weak pointer into the lifetime of said Entity. If accessed successfully, the lifetime of the Entity is extended at least until the access finished. If the access fails, 
