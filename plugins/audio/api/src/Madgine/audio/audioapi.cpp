@@ -70,6 +70,7 @@ namespace Audio {
         float volume = options.mVolume;
 
         float channelVolumes[8];
+        assert(channels <= 8);
         if (channels == 2) {
             float pan = Math::clamp(options.mPan, -1.0f, 1.0f);
             channelVolumes[0] = Math::sqrtf((1.0f - pan) / 2.0f);
@@ -93,7 +94,7 @@ namespace Audio {
         switch (format) {
         case I16: {
 
-            int16_t *target = static_cast<int16_t *>(output);
+            int16_t *target = reinterpret_cast<int16_t *&>(output);
 
             for (size_t i = 0; i < count; ++i) {
 
@@ -113,7 +114,7 @@ namespace Audio {
             break;
         }
         case F: {
-            float *target = static_cast<float *>(output);
+            float *target = reinterpret_cast<float *&>(output);
 
             for (size_t i = 0; i < count; ++i) {
 
@@ -127,7 +128,7 @@ namespace Audio {
                 } else {
 
                     for (int j = 0; j < channels; ++j)
-                        *target++ = std::round(channelVolumes[j] * volume * (*source++ / 32768.0f));
+                        *target++ = channelVolumes[j] * volume * (*source++ / 32768.0f);
                 }
             }
             break;

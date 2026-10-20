@@ -58,7 +58,7 @@ Behavior::Behavior AudioTest(Scene::EntityContext self = {})
 {
     auto selfPtr = co_await *self;
 
-    co_await Audio::play_dynamic_sound(Audio::AudioLoader::load("sample"), Execution::BindingPtr<Math::Vector2> { Execution::FunctionBinding { [](Scene::Entity::Entity &e) { return Math::Vector2 { e.getComponent<Scene::Entity::Transform>()->mPosition.x, e.getComponent<Scene::Entity::Transform>()->mPosition.z }; } }(*self) }, { .mLooping = true, .mVolume = 0.1f });
+    co_await Audio::play_dynamic_sound(Audio::AudioLoader::load("sample"), Execution::BindingPtr<Math::Vector2> { Execution::FunctionBinding { [](Scene::Entity::Entity &e) { return Math::Vector2 { e.getComponent<Scene::Entity::Transform>()->mPosition.x, e.getComponent<Scene::Entity::Transform>()->mPosition.z }; } }(*self) }, { .mVolume = 0.1f, .mLooping = true });
 }
 
 }
