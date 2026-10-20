@@ -14,6 +14,59 @@ namespace Memory {
 
         static constexpr size_t goodSize = blockSize;
 
+        struct Chunk {
+
+            Chunk(Parent &parent)
+                : mParentMemory(parent.allocate(blockSize * blockCount))
+            {
+                assert(mParentMemory.mAddress);
+            }
+
+            ~Chunk()
+            {
+                assert(!mParentMemory.mAddress);
+            }
+
+            Memory::Block allocate(size_t size, size_t alignment)
+            {
+                auto result = std::ranges::search_n(mBlockState, (size - 1) / blockSize + 1, false);
+                if (result.begin() == mBlockState.end())
+                    return {};
+
+                for (auto block : result) {
+                    block = true;
+                }
+
+                return {
+                    static_cast<std::byte *>(mParentMemory.mAddress) + std::distance(mBlockState.begin(), result.begin()) * blockSize,
+                    ((size - 1) / blockSize + 1) * blockSize
+                };
+            }
+
+            void deallocate(Memory::Block block)
+            {
+                size_t blockCount = (block.mSize - 1) / blockSize + 1;
+                size_t distance = static_cast<std::byte *>(block.mAddress) - static_cast<std::byte *>(mParentMemory.mAddress);
+                assert(distance % blockSize == 0);
+                size_t blockIndex = distance / blockSize;
+                std::fill(mBlockState.begin() + blockIndex, mBlockState.begin() + blockIndex + blockCount, false);
+            }
+
+            void deallocateAll(Parent &parent)
+            {
+                parent.deallocate(mParentMemory);
+                mParentMemory = {};
+                mBlockState = {};
+            }
+
+            bool contains(void* p) const {
+                return mParentMemory.mAddress <= p && p < static_cast<std::byte *>(mParentMemory.mAddress) + mParentMemory.mSize;
+            }
+
+            Block mParentMemory;
+            Containers::BitArray<blockCount> mBlockState;
+        };
+
         HeapAllocator(Parent parent)
             : mParent(std::forward<Parent>(parent))
         {
@@ -21,8 +74,7 @@ namespace Memory {
 
         ~HeapAllocator()
         {
-            if (mParentMemory.mAddress)
-                mParent.deallocate(mParentMemory);
+            deallocateAll();
         }
 
         Memory::Block allocate(size_t size, size_t alignment)
@@ -30,45 +82,33 @@ namespace Memory {
             assert(alignment <= blockSize);
             assert(blockSize % alignment == 0);
 
-            if (!mParentMemory.mAddress)
-                mParentMemory = mParent.allocate(blockSize * blockCount);
-
-            auto result = std::ranges::search_n(mBlockState, (size - 1) / blockSize + 1, false);
-            if (result.begin() == mBlockState.end())
-                return {};
-
-            for (auto block : result) {
-                block = true;
+            for (Chunk &chunk : mChunks) {
+                Memory::Block block = chunk.allocate(size, alignment);
+                if (block.mAddress)
+                    return block;
             }
 
-            return {
-                static_cast<std::byte *>(mParentMemory.mAddress) + std::distance(mBlockState.begin(), result.begin()) * blockSize,
-                ((size - 1) / blockSize + 1) * blockSize
-            };
+            return mChunks.emplace_back(mParent).allocate(size, alignment);
         }
 
         void deallocate(Memory::Block block)
         {
-            size_t blockCount = (block.mSize - 1) / blockSize + 1;
-            size_t distance = static_cast<std::byte *>(block.mAddress) - static_cast<std::byte *>(mParentMemory.mAddress);
-            assert(distance % blockSize == 0);
-            size_t blockIndex = distance / blockSize;
-            std::fill(mBlockState.begin() + blockIndex, mBlockState.begin() + blockIndex + blockCount, false);
+            auto it = std::ranges::find_if(mChunks, [&](Chunk &chunk) { return chunk.contains(block.mAddress); });
+            assert(it != mChunks.end());
+            it->deallocate(block);
         }
 
         void deallocateAll()
         {
-            if (mParentMemory.mAddress) {
-                mParent.deallocate(mParentMemory);
-                mParentMemory = {};
+            for (Chunk &chunk : mChunks) {
+                chunk.deallocateAll(mParent);
             }
-            mBlockState = {};
+            mChunks.clear();
         }
 
     private:
         Parent mParent;
-        Block mParentMemory;
-        Containers::BitArray<blockCount> mBlockState;
+        std::list<Chunk> mChunks;
     };
 
     template <Allocator Parent, typename BlockSize>
