@@ -5,6 +5,20 @@ SceneRenderer
 
 The SceneRenderer plugin draws the scene of a SceneManager into a RenderTarget.
 
+
+Scene Data & Interpolation
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note: This is not implemented yet. 
+
+The Simulation does only step at a limited frequency. In order to allow smooth rendering at any frame rate, it is the renderers job to interpolate between Simulation frames.
+The idea is, that the SceneRenderData is gathering all Entities and their state for the current frame. It should be the only place the actual
+transforms for Entities have to be calculated by walking the parent chain. It is also the RenderDatas job to cache previous frames, to allow smooth interpolation for movement
+and animation.
+
+Passes
+~~~~~~
+
 ``SceneRenderPass`` is a forward renderer with the directional light (``SceneManager::mAmbientLightDirection``) and up to
 two shadow casting ``PointLight`` components. It writes the HDR image into target 0 and its bright parts (emissive colour
 and pixels brighter than 1) into target 1 of the RenderTarget it is added to. Bloom and tone mapping are up to the user,
