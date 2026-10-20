@@ -109,6 +109,10 @@ namespace Platform {
 
             EM_BOOL handleMouseEvent(int eventType, const EmscriptenMouseEvent *mouseEvent)
             {
+                mKeyDown[Input::Key::Shift] = mouseEvent->shiftKey;
+                mKeyDown[Input::Key::Control] = mouseEvent->ctrlKey;
+                mKeyDown[Input::Key::Alt] = mouseEvent->altKey;
+
                 PlatformVector position = { mouseEvent->targetX, mouseEvent->targetY };
                 PlatformVector screenPosition = { mouseEvent->screenX, mouseEvent->screenY };
 
@@ -117,16 +121,16 @@ namespace Platform {
                 switch (eventType) {
                 case EMSCRIPTEN_EVENT_MOUSEMOVE:
                     onEvent(Input::PointerMoveEvent { position, screenPosition,
-                        { mouseEvent->movementX, mouseEvent->movementY } });
+                        { mouseEvent->movementX, mouseEvent->movementY }, controlKeyState() });
                     break;
                 case EMSCRIPTEN_EVENT_MOUSEDOWN:
                     focus();
                     onEvent(Input::PointerPressEvent { position, screenPosition,
-                        convertMouseButton(mouseEvent->button) });
+                        convertMouseButton(mouseEvent->button), controlKeyState() });
                     break;
                 case EMSCRIPTEN_EVENT_MOUSEUP:
                     onEvent(Input::PointerReleaseEvent { position, screenPosition,
-                        convertMouseButton(mouseEvent->button) });
+                        convertMouseButton(mouseEvent->button), controlKeyState() });
                     break;
                 default:
                     handled = false;
@@ -293,7 +297,6 @@ namespace Platform {
 
             EM_BOOL handleWheelEvent(int eventType, const EmscriptenWheelEvent *wheelEvent)
             {
-
                 bool handled = true;
 
                 switch (eventType) {
@@ -308,7 +311,7 @@ namespace Platform {
                     case DOM_DELTA_PAGE:
                         delta *= 1068.0f;
                     }
-                    onEvent(Input::AxisEvent { Input::AxisEvent::WHEEL, -delta / 120.0f });
+                    onEvent(Input::AxisEvent { Input::AxisEvent::WHEEL, -delta / 120.0f, 0.0f, controlKeyState() });
                 } break;
                 default:
                     handled = false;
@@ -319,6 +322,10 @@ namespace Platform {
 
             EM_BOOL handleTouchEvent(int eventType, const EmscriptenTouchEvent *touchEvent)
             {
+                mKeyDown[Input::Key::Shift] = touchEvent->shiftKey;
+                mKeyDown[Input::Key::Control] = touchEvent->ctrlKey;
+                mKeyDown[Input::Key::Alt] = touchEvent->altKey;
+
                 PlatformVector position = { touchEvent->touches[0].targetX, touchEvent->touches[0].targetY };
                 PlatformVector screenPosition = { touchEvent->touches[0].screenX, touchEvent->touches[0].screenY };
 
@@ -327,10 +334,10 @@ namespace Platform {
                 switch (eventType) {
                 case EMSCRIPTEN_EVENT_TOUCHMOVE:
                     if (mPendingTouch && std::abs(mTouchStartPosition.x - position.x) + std::abs(mTouchStartPosition.y - position.y) > sTouchMoveThreshold) {
-                        onEvent(Input::PointerPressEvent { mTouchStartPosition, mTouchStartScreenPosition, Input::MouseButton::LEFT_BUTTON });
+                        onEvent(Input::PointerPressEvent { mTouchStartPosition, mTouchStartScreenPosition, Input::MouseButton::LEFT_BUTTON, controlKeyState() });
                         mPendingTouch = false;
                     }
-                    onEvent(Input::PointerMoveEvent { position, screenPosition, position - mLastMousePosition });
+                    onEvent(Input::PointerMoveEvent { position, screenPosition, position - mLastMousePosition, controlKeyState() });
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHSTART:
                     focus();
@@ -338,16 +345,16 @@ namespace Platform {
                     mTouchStartPosition = position;
                     mTouchStartTimestamp = touchEvent->timestamp;
                     mPendingTouch = true;
-                    onEvent(Input::PointerMoveEvent { position, screenPosition, position - mLastMousePosition });
+                    onEvent(Input::PointerMoveEvent { position, screenPosition, position - mLastMousePosition, controlKeyState() });
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHEND: {
                     double milliseconds = touchEvent->timestamp - mTouchStartTimestamp;
                     Input::MouseButton::MouseButton button = milliseconds > sTouchRightclickThreshold && mPendingTouch ? Input::MouseButton::RIGHT_BUTTON : Input::MouseButton::LEFT_BUTTON;
                     if (mPendingTouch) {
-                        onEvent(Input::PointerPressEvent { mTouchStartPosition, mTouchStartScreenPosition, button });
+                        onEvent(Input::PointerPressEvent { mTouchStartPosition, mTouchStartScreenPosition, button, controlKeyState() });
                         mPendingTouch = false;
                     }
-                    onEvent(Input::PointerReleaseEvent { position, screenPosition, button });
+                    onEvent(Input::PointerReleaseEvent { position, screenPosition, button, controlKeyState() });
                 } break;
                 default:
                     handled = false;

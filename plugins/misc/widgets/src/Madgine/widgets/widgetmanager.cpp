@@ -208,7 +208,7 @@ namespace Widgets {
                 mFocusedWidget = mPointerEventTargetWidget;
             }
 
-            mDragStartEvent = DragBeginEvent { arg.mWindowPosition, arg.mScreenPosition, arg.mButton };
+            mDragStartEvent = DragBeginEvent { arg.mWindowPosition, arg.mScreenPosition, arg.mButton, arg.mControlKeys };
 
             Math::Vector2i pos = mFocusedWidget->getAbsolutePosition().floor();
             mDragStartEvent.mWindowPosition = mDragStartEvent.mWindowPosition - Platform::PlatformVector { pos.x, pos.y };
@@ -277,10 +277,10 @@ namespace Widgets {
             arg.mWindowPosition = arg.mWindowPosition - Platform::PlatformVector { pos.x, pos.y };
             if (mDragging) {
                 if (!mDraggingAborted)
-                    mFocusedWidget->injectDragEnd(DragEndEvent { arg.mWindowPosition, arg.mScreenPosition, arg.mButton });
+                    mFocusedWidget->injectDragEnd(DragEndEvent { arg.mWindowPosition, arg.mScreenPosition, arg.mButton, arg.mControlKeys });
                 mDragging = false;
             } else {
-                mFocusedWidget->injectPointerClick(PointerClickEvent { arg.mWindowPosition, arg.mScreenPosition, arg.mButton });
+                mFocusedWidget->injectPointerClick(PointerClickEvent { arg.mWindowPosition, arg.mScreenPosition, arg.mButton, arg.mControlKeys });
             }
 
             mDragStartEvent.mButton = Platform::Input::MouseButton::NO_BUTTON;
@@ -338,7 +338,7 @@ namespace Widgets {
             if (mDragging && !mDraggingAborted) {
                 Math::Vector2i pos = mFocusedWidget->getAbsolutePosition().floor();
                 arg.mWindowPosition = arg.mWindowPosition - Platform::PlatformVector { pos.x, pos.y };
-                mFocusedWidget->injectDragMove(DragMoveEvent { arg.mWindowPosition, arg.mScreenPosition, mDragStartEvent.mButton, arg.mMoveDelta });
+                mFocusedWidget->injectDragMove(DragMoveEvent { arg.mWindowPosition, arg.mScreenPosition, mDragStartEvent.mButton, arg.mMoveDelta, arg.mControlKeys });
             }
 
             return false;

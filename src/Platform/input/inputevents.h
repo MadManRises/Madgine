@@ -189,18 +189,21 @@ namespace Platform {
         struct PointerMoveEvent {
             mutable PlatformVector mWindowPosition;
             PlatformVector mScreenPosition, mMoveDelta;
+            ControlKeyState mControlKeys;
         };
 
         struct PointerPressEvent {
             mutable PlatformVector mWindowPosition;
             PlatformVector mScreenPosition;
             MouseButton::MouseButton mButton;
+            ControlKeyState mControlKeys;
         };
 
         struct PointerReleaseEvent {
             mutable PlatformVector mWindowPosition;
             PlatformVector mScreenPosition;
             MouseButton::MouseButton mButton;
+            ControlKeyState mControlKeys;
         };
 
         struct AxisEvent {
@@ -216,6 +219,7 @@ namespace Platform {
             AxisType mAxisType;
             float mAxis1;
             float mAxis2 = 0.0f;
+            ControlKeyState mControlKeys;
         };
 
         struct NoEvent { };

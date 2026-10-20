@@ -43,34 +43,34 @@ namespace Platform {
                     switch (msg) {
                     case WM_LBUTTONDOWN:
                         captureInput();
-                        onEvent(Input::PointerPressEvent { windowPos, screenPos, Input::MouseButton::LEFT_BUTTON });
+                        onEvent(Input::PointerPressEvent { windowPos, screenPos, Input::MouseButton::LEFT_BUTTON, controlKeyState() });
                         break;
                     case WM_LBUTTONUP:
                         releaseInput();
-                        onEvent(Input::PointerReleaseEvent { windowPos, screenPos, Input::MouseButton::LEFT_BUTTON });
+                        onEvent(Input::PointerReleaseEvent { windowPos, screenPos, Input::MouseButton::LEFT_BUTTON, controlKeyState() });
                         break;
                     case WM_RBUTTONDOWN:
                         captureInput();
-                        onEvent(Input::PointerPressEvent { windowPos, screenPos, Input::MouseButton::RIGHT_BUTTON });
+                        onEvent(Input::PointerPressEvent { windowPos, screenPos, Input::MouseButton::RIGHT_BUTTON, controlKeyState() });
                         break;
                     case WM_RBUTTONUP:
                         releaseInput();
-                        onEvent(Input::PointerReleaseEvent { windowPos, screenPos, Input::MouseButton::RIGHT_BUTTON });
+                        onEvent(Input::PointerReleaseEvent { windowPos, screenPos, Input::MouseButton::RIGHT_BUTTON, controlKeyState() });
                         break;
                     case WM_MBUTTONDOWN:
                         captureInput();
-                        onEvent(Input::PointerPressEvent { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON });
+                        onEvent(Input::PointerPressEvent { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON, controlKeyState() });
                         break;
                     case WM_MBUTTONUP:
                         releaseInput();
-                        onEvent(Input::PointerReleaseEvent { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON });
+                        onEvent(Input::PointerReleaseEvent { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON, controlKeyState() });
                         break;
                     case WM_MOUSEMOVE:
-                        onEvent(Input::PointerMoveEvent { windowPos, screenPos, windowPos - mLastKnownMousePos });
+                        onEvent(Input::PointerMoveEvent { windowPos, screenPos, windowPos - mLastKnownMousePos, controlKeyState() });
                         mLastKnownMousePos = windowPos;
                         break;
                     case WM_MOUSEWHEEL:
-                        onEvent(Input::AxisEvent { Input::AxisEvent::WHEEL, GET_WHEEL_DELTA_WPARAM(wParam) / float(WHEEL_DELTA) });
+                        onEvent(Input::AxisEvent { Input::AxisEvent::WHEEL, GET_WHEEL_DELTA_WPARAM(wParam) / float(WHEEL_DELTA), 0.0f, controlKeyState() });
                         break;
                     default:
                         handled = false;
