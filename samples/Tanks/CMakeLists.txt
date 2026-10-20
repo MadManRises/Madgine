@@ -1,4 +1,4 @@
-if (NOT TARGET Bullet)
+if (NOT TARGET Bullet OR NOT TARGET Audio)
 	return()
 endif()
 
