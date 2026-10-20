@@ -28,7 +28,11 @@ namespace Render {
 
     struct OpenGLMappedHeapAllocator {
 
+#if OPENGL_ES
         static constexpr size_t goodSize = 8 * 1024 * 1024; // 8MB
+#else
+        static constexpr size_t goodSize = 32 * 1024 * 1024; // 32MB
+#endif
 
         OpenGLMappedHeapAllocator(
 #if OPENGL_ES

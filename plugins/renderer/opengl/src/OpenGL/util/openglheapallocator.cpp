@@ -21,6 +21,7 @@ namespace Render {
     }
 
     static constexpr size_t sOffsetBitCount = sizeof(uintptr_t) * 8 - 8;
+    static constexpr uintptr_t sOffsetMask = (uintptr_t { 1 } << sOffsetBitCount) - 1;
 
     Memory::Block OpenGLHeapAllocator::allocate(size_t size, size_t alignment)
     {
@@ -41,6 +42,7 @@ namespace Render {
         glBufferData(target, size, nullptr, GL_DYNAMIC_COPY);
         GL_CHECK();
 
+        assert((static_cast<uintptr_t>(buffer) << sOffsetBitCount) >> sOffsetBitCount == buffer);
         return { reinterpret_cast<void *>(static_cast<uintptr_t>(buffer) << sOffsetBitCount), size };
     }
 
@@ -48,7 +50,7 @@ namespace Render {
     {
         uintptr_t ptr = reinterpret_cast<uintptr_t>(block.mAddress);
         uint32_t buffer = ptr >> sOffsetBitCount;
-        uintptr_t offset = ptr & ((1 << sOffsetBitCount) - 1);
+        uintptr_t offset = ptr & sOffsetMask;
         assert(offset == 0 && buffer != 0);
 
         glDeleteBuffers(1, &buffer);
@@ -59,7 +61,7 @@ namespace Render {
     {
         uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
         uint32_t buffer = address >> sOffsetBitCount;
-        uintptr_t offset = address & ((1 << sOffsetBitCount) - 1);
+        uintptr_t offset = address & sOffsetMask;
         return { buffer, offset };
     }
 
