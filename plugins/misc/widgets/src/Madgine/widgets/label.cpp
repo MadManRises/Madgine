@@ -27,7 +27,8 @@ namespace Widgets {
             Math::Vector2 pos = getAbsolutePosition();
             Math::Vector3 size = getAbsoluteSize();
 
-            mTextRenderData.render(renderData, mText.get(), pos, size);
+            auto keep = renderData.pushClipRect(pos, size.xy());
+            mTextRenderData.render(renderData, mText.get(), pos, size);           
         }
 
         WidgetBase::render(renderData);

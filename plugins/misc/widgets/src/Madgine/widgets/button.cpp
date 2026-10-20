@@ -68,6 +68,7 @@ namespace Widgets {
         }
 
         if (mTextRenderData.available()) {
+            auto keep = renderData.pushClipRect(pos, size.xy());
             mTextRenderData.render(renderData, mText.get(), pos, size);
         }
 
