@@ -338,7 +338,7 @@ namespace Widgets {
             if (mDragging && !mDraggingAborted) {
                 Math::Vector2i pos = mFocusedWidget->getAbsolutePosition().floor();
                 arg.mWindowPosition = arg.mWindowPosition - Platform::PlatformVector { pos.x, pos.y };
-                mFocusedWidget->injectDragMove(DragMoveEvent { arg.mWindowPosition, arg.mScreenPosition, arg.mMoveDelta });
+                mFocusedWidget->injectDragMove(DragMoveEvent { arg.mWindowPosition, arg.mScreenPosition, mDragStartEvent.mButton, arg.mMoveDelta });
             }
 
             return false;

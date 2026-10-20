@@ -18,6 +18,7 @@ namespace Widgets {
     struct DragMoveEvent {
         mutable Platform::PlatformVector mWindowPosition;
         Platform::PlatformVector mScreenPosition;
+        Platform::Input::MouseButton::MouseButton mButton;
         Platform::PlatformVector mMoveDelta;
     };
 
