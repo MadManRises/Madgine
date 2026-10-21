@@ -18,12 +18,15 @@ METATABLE_BEGIN_BASE(Engine::Scene::Entity::Mesh, Engine::Scene::Entity::EntityC
     MEMBER(mMesh)
     PROPERTY(Visible, visible, setVisible)
     PROPERTY(InheritVisibility, inheritsVisibility, setInheritVisibility)
+    READONLY_PROPERTY(WorldVisible, worldVisible)
     MEMBER(mMaterial)
 METATABLE_END(Engine::Scene::Entity::Mesh)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Mesh)
     FIELD(mMesh)
     FIELD(mMaterial)
+    FIELD(mIsVisible)
+    FIELD(mInheritsVisibility)
 SERIALIZETABLE_END(Engine::Scene::Entity::Mesh)
 
 namespace Engine {
@@ -42,40 +45,44 @@ namespace Scene {
 
         void Mesh::setVisible(bool visible)
         {
-            mVisibility = visible ? Visible : Invisible;
+            mIsVisible = visible;
         }
 
         void Mesh::setInheritVisibility(bool inherit)
         {
-            mVisibility = inherit ? Inherit : Visible;
+            mInheritsVisibility = inherit;
         }
 
-        bool Mesh::visible(Contextual<Entity &> entity) const
+        bool Mesh::visible() const
         {
-            if (mVisibility == Inherit) {
-                EntityPtr parent = entity->parent();
+            return mIsVisible;
+        }
 
-                bool visible = true;
+        bool Mesh::worldVisible(Contextual<Entity &> entity) const
+        {
+            if (!mIsVisible)
+                return false;
+            bool visible = true;
+            if (mInheritsVisibility) {
+                EntityPtr parent = entity->parent();
 
                 while (Execution::access_binding(parent, [&](Entity &e) {
                     Mesh *mesh = e.getComponent<Mesh>();
                     if (mesh) {
-                        visible = mesh->visible(e);
+                        visible = mesh->worldVisible(e);
                         return false;
                     }
                     parent = e.parent();
                     return true;
                 }))
                     ;
-                return visible;
-            } else {
-                return mVisibility == Visible;
             }
+            return visible;
         }
 
         bool Mesh::inheritsVisibility() const
         {
-            return mVisibility == Inherit;
+            return mInheritsVisibility;
         }
 
     }

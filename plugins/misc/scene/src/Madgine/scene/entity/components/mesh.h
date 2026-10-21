@@ -17,18 +17,16 @@ namespace Scene {
             void setVisible(bool visible);
             void setInheritVisibility(bool inherit);
 
-            bool visible(Contextual<Entity &> entity) const;
+            bool visible() const;
+            bool worldVisible(Contextual<Entity &> entity) const;
             bool inheritsVisibility() const;
 
             typename Render::GPUMeshLoader::Handle mMesh;
 
             uint32_t mMaterial = 0;
 
-            enum {
-                Visible,
-                Invisible,
-                Inherit
-            } mVisibility = Visible;
+            bool mIsVisible = true;
+            bool mInheritsVisibility = false;
         };
 
     }
