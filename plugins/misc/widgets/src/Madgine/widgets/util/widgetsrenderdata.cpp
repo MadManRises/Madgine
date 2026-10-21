@@ -109,12 +109,14 @@ namespace Widgets {
     void WidgetsRenderData::renderQuad(Math::Vector2 pos, Math::Vector2 size, ColorFrame color, TextureSettings tex, Math::Vector2 topLeftUV, Math::Vector2 bottomRightUV, bool flippedUV)
     {
         color.mRenderData.mColor.a *= mAlpha;
+        color.mRenderData.mSecondaryColor.a *= mAlpha;
         vertexData(tex).renderQuad(Math::Vector3 { pos, 10.0f * mLayer + mSubLayer }, size, mClipRect, color, topLeftUV, bottomRightUV, flippedUV);
     }
 
     void WidgetsRenderData::renderQuadUV(Math::Vector2 pos, Math::Vector2 size, ColorFrame color, TextureSettings tex, Math::Rect2i rect, Math::Vector2i textureSize, bool flippedUV)
     {
         color.mRenderData.mColor.a *= mAlpha;
+        color.mRenderData.mSecondaryColor.a *= mAlpha;
         vertexData(tex).renderQuadUV(Math::Vector3 { pos, 10.0f * mLayer + mSubLayer }, size, mClipRect, color, rect, textureSize, flippedUV);
     }
 
