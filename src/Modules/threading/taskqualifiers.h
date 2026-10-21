@@ -12,7 +12,8 @@ namespace Threading {
         {
         }
 
-        TaskQualifiers(std::chrono::steady_clock::duration duration)
+        template <typename Rep, typename Period>
+        TaskQualifiers(std::chrono::duration<Rep, Period> duration)
             : mScheduledFor(std::chrono::steady_clock::now() + duration)
         {
         }
