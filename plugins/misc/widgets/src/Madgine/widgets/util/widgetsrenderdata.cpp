@@ -106,16 +106,16 @@ namespace Widgets {
         mLineVertices.push_back({ line.mPointB, color, { 0, 0 } });
     }
 
-    void WidgetsRenderData::renderQuad(Math::Vector2 pos, Math::Vector2 size, ColorFrame color, TextureSettings tex, Math::Vector2 topLeftUV, Math::Vector2 bottomRightUV, bool flippedUV, bool transparentContent)
+    void WidgetsRenderData::renderQuad(Math::Vector2 pos, Math::Vector2 size, ColorFrame color, TextureSettings tex, Math::Vector2 topLeftUV, Math::Vector2 bottomRightUV, bool flippedUV)
     {
         color.mRenderData.mColor.a *= mAlpha;
-        vertexData(tex, transparentContent || color.mRenderData.mColor.a < 1.0f).renderQuad(Math::Vector3 { pos, 10.0f * mLayer + mSubLayer }, size, mClipRect, color, topLeftUV, bottomRightUV, flippedUV);
+        vertexData(tex).renderQuad(Math::Vector3 { pos, 10.0f * mLayer + mSubLayer }, size, mClipRect, color, topLeftUV, bottomRightUV, flippedUV);
     }
 
-    void WidgetsRenderData::renderQuadUV(Math::Vector2 pos, Math::Vector2 size, ColorFrame color, TextureSettings tex, Math::Rect2i rect, Math::Vector2i textureSize, bool flippedUV, bool transparentContent)
+    void WidgetsRenderData::renderQuadUV(Math::Vector2 pos, Math::Vector2 size, ColorFrame color, TextureSettings tex, Math::Rect2i rect, Math::Vector2i textureSize, bool flippedUV)
     {
         color.mRenderData.mColor.a *= mAlpha;
-        vertexData(tex, transparentContent || color.mRenderData.mColor.a < 1.0f).renderQuadUV(Math::Vector3 { pos, 10.0f * mLayer + mSubLayer }, size, mClipRect, color, rect, textureSize, flippedUV);
+        vertexData(tex).renderQuadUV(Math::Vector3 { pos, 10.0f * mLayer + mSubLayer }, size, mClipRect, color, rect, textureSize, flippedUV);
     }
 
     void WidgetsRenderData::renderLine(const Math::Line2 &line, Math::Color4 color)
@@ -149,9 +149,9 @@ namespace Widgets {
         return keep;
     }
 
-    WidgetsVertexData &WidgetsRenderData::vertexData(const TextureSettings &tex, bool transparentContent)
+    WidgetsVertexData &WidgetsRenderData::vertexData(const TextureSettings &tex)
     {
-        return mVertexData[transparentContent ? 10 * mLayer + mSubLayer : 0][tex];
+        return mVertexData[10 * mLayer + mSubLayer][tex];
     }
 
     void WidgetsRenderData::setAlpha(float alpha)

@@ -770,7 +770,7 @@ namespace Widgets {
 
     void WidgetManager::setup(Render::RenderTarget *target)
     {
-        setupImpl(target, HLSL::widgets_VS, HLSL::widgets_PS, { sizeof(HLSL::WidgetsPerApplication), 0, sizeof(HLSL::WidgetsPerObject) });
+        setupImpl(target, HLSL::widgets_VS, HLSL::widgets_PS, { sizeof(HLSL::WidgetsPerApplication), 0, sizeof(HLSL::WidgetsPerObject) }, false);
     }
 }
 }

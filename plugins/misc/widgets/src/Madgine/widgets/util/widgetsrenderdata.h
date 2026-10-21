@@ -26,8 +26,8 @@ namespace Widgets {
 
     struct MADGINE_WIDGETS_EXPORT WidgetsRenderData {
 
-        void renderQuad(Math::Vector2 pos, Math::Vector2 size, ColorFrame color = {}, TextureSettings tex = {}, Math::Vector2 topLeftUV = { 0.0f, 0.0f }, Math::Vector2 bottomRightUV = { 1.0f, 1.0f }, bool flippedUV = false, bool transparentContent = false);
-        void renderQuadUV(Math::Vector2 pos, Math::Vector2 size, ColorFrame color, TextureSettings tex, Math::Rect2i rect, Math::Vector2i textureSize, bool flippedUV = false, bool transparentContent = false);
+        void renderQuad(Math::Vector2 pos, Math::Vector2 size, ColorFrame color = {}, TextureSettings tex = {}, Math::Vector2 topLeftUV = { 0.0f, 0.0f }, Math::Vector2 bottomRightUV = { 1.0f, 1.0f }, bool flippedUV = false);
+        void renderQuadUV(Math::Vector2 pos, Math::Vector2 size, ColorFrame color, TextureSettings tex, Math::Rect2i rect, Math::Vector2i textureSize, bool flippedUV = false);
 
         void renderLine(const Math::Line2 &line, Math::Color4 color = { 1.0f, 1.0f, 1.0f, 1.0f });
 
@@ -51,7 +51,7 @@ namespace Widgets {
         size_t subLayer() const;
 
     protected:
-        WidgetsVertexData &vertexData(const TextureSettings &tex, bool transparentContent);
+        WidgetsVertexData &vertexData(const TextureSettings &tex);
 
     private:
         std::map<size_t, std::map<TextureSettings, WidgetsVertexData>> mVertexData;
