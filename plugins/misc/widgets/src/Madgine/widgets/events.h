@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Platform/input/inputevents.h"
+
 namespace Engine {
 namespace Widgets {
 
