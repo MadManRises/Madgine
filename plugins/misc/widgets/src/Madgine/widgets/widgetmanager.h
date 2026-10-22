@@ -111,6 +111,7 @@ namespace Widgets {
         WidgetBase *getHoveredWidgetDown(const Math::Vector2 &pos, WidgetBase *current);
 
         void resetPointerState();
+        void updateHovered();
 
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget, WidgetBase *parent);
         Serialize::StreamResult readWidgetStub(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
@@ -119,6 +120,8 @@ namespace Widgets {
         friend struct WidgetBase;
 
         void onActivate(Serialize::CallbackTiming timing, bool active);
+
+        void onWidgetHidden(WidgetBase *w);
 
     private:
         std::vector<WidgetBase *> mWidgets;
@@ -151,6 +154,8 @@ namespace Widgets {
         std::chrono::steady_clock::time_point mDragStartTime;
 
         Math::Vector2 mShadowOffset = { 0, 0 };
+
+        Platform::Input::PointerMoveEvent mCachedPointerMoveEvent;
     };
 
 }

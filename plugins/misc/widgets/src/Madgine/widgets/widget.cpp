@@ -268,11 +268,14 @@ namespace Widgets {
     void WidgetBase::hide()
     {
         mVisible = false;
+        mManager.onWidgetHidden(this);
     }
 
     void WidgetBase::setVisible(bool v)
     {
         mVisible = v;
+        if (!v)
+            mManager.onWidgetHidden(this);
     }
 
     bool WidgetBase::isFocused() const

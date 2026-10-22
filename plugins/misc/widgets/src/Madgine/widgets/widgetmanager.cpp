@@ -48,7 +48,7 @@ namespace Widgets {
 
     WidgetManager::WidgetManager(Core::MainWindow &window)
         : MainWindowComponent(window, 20)
-        , mLifetime(&window.lifetime())        
+        , mLifetime(&window.lifetime())
         , mData(std::make_shared<WidgetManagerData>())
     {
     }
@@ -321,7 +321,7 @@ namespace Widgets {
 
     bool WidgetManager::injectPointerMove(const Platform::Input::PointerMoveEvent &arg)
     {
-        if (std::ranges::find(mWidgets, mHoveredWidget) == mWidgets.end())
+        if (mHoveredWidget && std::ranges::find(mWidgets, mHoveredWidget) == mWidgets.end())
             mHoveredWidget = nullptr;
 
         if (mDragStartEvent.mButton != Platform::Input::MouseButton::NO_BUTTON) {
@@ -344,34 +344,13 @@ namespace Widgets {
             return false;
         }
 
-        WidgetBase *hoveredWidget = getHoveredWidget(Math::Vector2 { Math::Vector2i { &arg.mWindowPosition.x } }, mHoveredWidget);
+        mCachedPointerMoveEvent = arg;
 
-        bool enter = false;
-        if (mHoveredWidget != hoveredWidget) {
-
-            if (mHoveredWidget) {
-                Platform::PlatformVector storedWindowPosition = arg.mWindowPosition;
-                Math::Vector2i pos = mHoveredWidget->getAbsolutePosition().floor();
-                arg.mWindowPosition = arg.mWindowPosition - Platform::PlatformVector { pos.x, pos.y };
-                mHoveredWidget->injectPointerLeave(arg);
-                arg.mWindowPosition = storedWindowPosition;
-            }
-
-            mHoveredWidget = hoveredWidget;
-            enter = true;
-
-            mPointerEventTargetWidget = hoveredWidget;
-            while (mPointerEventTargetWidget && !mPointerEventTargetWidget->acceptsPointerEvents()) {
-                mPointerEventTargetWidget = mPointerEventTargetWidget->getParent();
-            }
-        }
+        updateHovered();
 
         if (mPointerEventTargetWidget) {
             Math::Vector2i pos = mPointerEventTargetWidget->getAbsolutePosition().floor();
             arg.mWindowPosition = arg.mWindowPosition - Platform::PlatformVector { pos.x, pos.y };
-
-            if (enter)
-                mPointerEventTargetWidget->injectPointerEnter(arg);
 
             mPointerEventTargetWidget->injectPointerMove(arg);
             return true;
@@ -382,7 +361,7 @@ namespace Widgets {
 
     bool WidgetManager::injectAxisEvent(const Platform::Input::AxisEvent &arg)
     {
-        if (std::ranges::find(mWidgets, mHoveredWidget) == mWidgets.end())
+        if (mHoveredWidget && std::ranges::find(mWidgets, mHoveredWidget) == mWidgets.end())
             mHoveredWidget = nullptr;
 
         if (mHoveredWidget)
@@ -468,6 +447,44 @@ namespace Widgets {
             };
             mPointerEventTargetWidget->injectPointerLeave(arg);
             mPointerEventTargetWidget = nullptr;
+        }
+        updateHovered();
+    }
+
+    void WidgetManager::updateHovered()
+    {
+        WidgetBase *hoveredWidget = getHoveredWidget(Math::Vector2 { Math::Vector2i { &mCachedPointerMoveEvent.mWindowPosition.x } }, mHoveredWidget);
+
+        bool enter = false;
+        if (mHoveredWidget != hoveredWidget) {
+
+            WidgetBase *newPointerEventTarget = hoveredWidget;
+            while (newPointerEventTarget && !newPointerEventTarget->acceptsPointerEvents()) {
+                newPointerEventTarget = newPointerEventTarget->getParent();
+            }
+
+            if (mPointerEventTargetWidget != newPointerEventTarget) {
+
+                Platform::PlatformVector storedWindowPosition = mCachedPointerMoveEvent.mWindowPosition;
+
+                if (mPointerEventTargetWidget) {
+                    Math::Vector2i pos = mPointerEventTargetWidget->getAbsolutePosition().floor();
+                    mCachedPointerMoveEvent.mWindowPosition = mCachedPointerMoveEvent.mWindowPosition - Platform::PlatformVector { pos.x, pos.y };
+                    mPointerEventTargetWidget->injectPointerLeave(mCachedPointerMoveEvent);
+                }
+
+                mPointerEventTargetWidget = newPointerEventTarget;
+
+                if (mPointerEventTargetWidget) {
+                    Math::Vector2i pos = mPointerEventTargetWidget->getAbsolutePosition().floor();
+                    mCachedPointerMoveEvent.mWindowPosition = mCachedPointerMoveEvent.mWindowPosition - Platform::PlatformVector { pos.x, pos.y };
+                    mPointerEventTargetWidget->injectPointerEnter(mCachedPointerMoveEvent);
+                }
+
+                mCachedPointerMoveEvent.mWindowPosition = storedWindowPosition;
+            }
+
+            mHoveredWidget = hoveredWidget;
         }
     }
 
@@ -742,6 +759,19 @@ namespace Widgets {
                     layoutWidget.mWidget.reset();
                 }
             }
+        }
+    }
+
+    void WidgetManager::onWidgetHidden(WidgetBase *w)
+    {
+        WidgetBase *check = mHoveredWidget;
+        while (check) {
+            if (check == w) {
+                mHoveredWidget = check->getParent();
+                updateHovered();
+                return;
+            }
+            check = check->getParent();
         }
     }
 
