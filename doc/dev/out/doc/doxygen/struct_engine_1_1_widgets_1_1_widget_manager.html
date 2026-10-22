@@ -422,12 +422,16 @@ Protected Member Functions</h2></td></tr>
 <tr class="separator:aacb0b7cf59a3b942b78bb794c6fb5f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64112d29202dfdf0f5dcfaf9e47a14f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager.html#a64112d29202dfdf0f5dcfaf9e47a14f8">onActivate</a> (Serialize::CallbackTiming timing, bool active)</td></tr>
 <tr class="separator:a64112d29202dfdf0f5dcfaf9e47a14f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fd7e2ef30e36a5576b5511d80cfb04c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager.html#a9fd7e2ef30e36a5576b5511d80cfb04c">onWidgetHidden</a> (<a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html">WidgetBase</a> *w)</td></tr>
+<tr class="separator:a9fd7e2ef30e36a5576b5511d80cfb04c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59174156e2e6ae420e2866d164a70782"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_serialize_1_1_stream_result.html">Serialize::StreamResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager.html#a59174156e2e6ae420e2866d164a70782">readWidget</a> (<a class="el" href="struct_engine_1_1_serialize_1_1_formatted_serialize_stream.html">Serialize::FormattedSerializeStream</a> &amp;in, std::unique_ptr&lt; <a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html">WidgetBase</a> &gt; &amp;widget, <a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html">WidgetBase</a> *parent)</td></tr>
 <tr class="separator:a59174156e2e6ae420e2866d164a70782"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4bca08f47d2853c315d195dcad42165"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_engine_1_1_serialize_1_1_stream_result.html">Serialize::StreamResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager.html#af4bca08f47d2853c315d195dcad42165">readWidgetStub</a> (<a class="el" href="struct_engine_1_1_serialize_1_1_formatted_serialize_stream.html">Serialize::FormattedSerializeStream</a> &amp;in, std::unique_ptr&lt; <a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html">WidgetBase</a> &gt; &amp;widget)</td></tr>
 <tr class="separator:af4bca08f47d2853c315d195dcad42165"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8649602fce6eee3f6e7b35e4bbe2f02e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager.html#a8649602fce6eee3f6e7b35e4bbe2f02e">resetPointerState</a> ()</td></tr>
 <tr class="separator:a8649602fce6eee3f6e7b35e4bbe2f02e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8668c0f9932211edfa97429862886cda"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvoid.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager.html#a8668c0f9932211edfa97429862886cda">updateHovered</a> ()</td></tr>
+<tr class="separator:a8668c0f9932211edfa97429862886cda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98038f79cf7b6bf2ea2d59514c4b5168"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_manager.html#a98038f79cf7b6bf2ea2d59514c4b5168">writeWidget</a> (<a class="el" href="struct_engine_1_1_serialize_1_1_formatted_serialize_stream.html">Serialize::FormattedSerializeStream</a> &amp;out, const std::unique_ptr&lt; <a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html">WidgetBase</a> &gt; &amp;widget) const</td></tr>
 <tr class="separator:a98038f79cf7b6bf2ea2d59514c4b5168"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -1582,6 +1586,31 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="a8668c0f9932211edfa97429862886cda" name="a8668c0f9932211edfa97429862886cda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8668c0f9932211edfa97429862886cda">&#9670;&#160;</a></span>updateHovered()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Widgets::WidgetManager::updateHovered </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a59174156e2e6ae420e2866d164a70782" name="a59174156e2e6ae420e2866d164a70782"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a59174156e2e6ae420e2866d164a70782">&#9670;&#160;</a></span>readWidget()</h2>
 
@@ -1732,6 +1761,32 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="a9fd7e2ef30e36a5576b5511d80cfb04c" name="a9fd7e2ef30e36a5576b5511d80cfb04c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fd7e2ef30e36a5576b5511d80cfb04c">&#9670;&#160;</a></span>onWidgetHidden()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classvoid.html">void</a> Engine::Widgets::WidgetManager::onWidgetHidden </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_engine_1_1_widgets_1_1_widget_base.html">WidgetBase</a> *&#160;</td>
+          <td class="paramname"><em>w</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Friends And Related Function Documentation</h2>
 <a id="aa3b48b9bfa29633d3679fe756c7e5472" name="aa3b48b9bfa29633d3679fe756c7e5472"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa3b48b9bfa29633d3679fe756c7e5472">&#9670;&#160;</a></span>WidgetBase</h2>
@@ -1762,7 +1817,7 @@ Friends</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Oct 21 2026 15:09:36 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
+Generated on Thu Oct 22 2026 00:55:07 for Madgine - Doxygen Documentation by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5
 </small></address>
 </body>
 </html>
